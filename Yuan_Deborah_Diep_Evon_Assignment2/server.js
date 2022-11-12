@@ -17,12 +17,16 @@ app.use(express.urlencoded({ extended: true }));
 var fs = require("fs");
 var fname = "user_registration_info.json";
 
+var errors = {}; // empty error array
+
 if (fs.existsSync(fname)) {
-	var data = fs.readFileSync(fname, "utf-8");
-	var users = JSON.parse(data);
+	var stats = fs.statSync(fname);
+	data = fs.readFileSync(fname, "utf-8");
+	users = JSON.parse(data);
 	console.log(users);
 } else {
 	console.log("Sorry file " + fname + " does not exist.");
+	users = {};
 }
 
 /* functions */
@@ -79,46 +83,6 @@ app.all("*", function (request, response, next) {
 });*/
 
 loggedin = false;
-
-app.get("/register", function (request, response) {
-	// Give a simple register form
-	str = `
-<body>
-<form action="" method="POST">
-<input type="text" name="username" size="40" placeholder="enter username" ><br />
-<input type="password" name="password" size="40" placeholder="enter password"><br />
-<input type="password" name="repeat_password" size="40" placeholder="enter password again"><br />
-<input type="email" name="email" size="40" placeholder="enter email"><br />
-<input type="submit" value="Submit" id="submit">
-</form>
-</body>
-    `;
-	response.send(str);
-});
-
-app.post("/register", function (request, response) {
-	// process a simple register form
-	let POST = request.body;
-	console.log(POST);
-	let user_name = POST["username"];
-	let user_pass = POST["password"];
-	let user_email = POST["email"];
-	let user_pass2 = POST["repeat_password"];
-
-	if (users[user_name] == undefined) {
-		users[user_name] = {};
-		users[user_name].name = user_name;
-		users[user_name].password = user_pass;
-		users[user_name].email = user_email;
-
-		let data = JSON.stringify(users);
-		fs.writeFileSync(fname, data, "utf-8");
-
-		response.send("Got a registration");
-	} else {
-		response.send("User " + user_name + " already exists!");
-	}
-});
 
 // process purchase request (validate quantities, check quantity available)
 
@@ -218,6 +182,56 @@ app.post("/login", function (request, response) {
 	response.redirect("login.html?error=Username%20Does%20Not%20Exist");
 });
 
+app.post("/register", function (request, response) {
+	// process a simple register form
+	username = request.body.username.toLowerCase();
+
+	// check is username taken
+	if (typeof users[username] != "undefined") {
+		errors["username_taken"] = `Hey! ${username} is already registered!`;
+	}
+	if (request.body.password != request.body.passwordconfirm) {
+		errors["password_mismatch"] = `Repeat password not the same as password!`;
+	}
+	if (request.body.username == "") {
+		errors["no_username"] = `You need to select a username!`;
+	}
+	if (Object.keys(errors).length == 0) {
+		users[username] = {};
+		users[username].password = request.body.password;
+		fs.writeFileSync(filename, JSON.stringify(users));
+		console.log("Saved: " + users);
+		response.send(`${username} has been registered.`);
+	} else {
+		console.log(errors);
+		response.send(errors);
+	}
+});
+
+/*app.post("/register", function (request, response) {
+	// process a simple register form
+	let POST = request.body[`username`];
+	console.log(POST);
+	let user_name = POST["username"];
+	let user_pass = POST["password"];
+	let user_pass2 = POST["passwordconfirm"];
+
+	if (users[user_name] == undefined && user_pass == user_pass2) {
+		users[user_name] = {};
+		users[user_name].name = user_name;
+		users[user_name].password = user_pass;
+
+		let data = JSON.stringify(users);
+		fs.writeFileSync(fname, data, "utf-8");
+
+		response.send("Got a registration");
+		loggedin = true;
+	} else if (user_name != undefined) {
+		response.send("User " + user_name + " already exists!");
+	} else {
+		response.send("Passwords don't match!");
+	}
+});*/
 app.post("/checkstatus", function (request, response) {
 	if (loggedin == true) {
 		response.redirect("account.html");
