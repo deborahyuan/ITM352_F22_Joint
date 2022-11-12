@@ -7,7 +7,7 @@
 
     <script src="../products.json"></script>
     <script src="../user_registration_info.json" type="application/json
-    ">
+    "></script> <!-- loading in user data from user_registration_info.json -->
 
     <title>Document</title>
 </head>
@@ -16,8 +16,9 @@
 
 let params = (new URL(document.location)).searchParams; // pull params from search URL
 
+  splitparams = params.split('*');
   var quantities = []; // declaring empty array 'quantities'
-  params.forEach ( // for each iterates through all the keys
+  splitparams[0].forEach ( // for each iterates through all the keys
     function(value,key)
     {
       quantities.push(value); // pushes the value to quantities array
@@ -26,8 +27,8 @@ let params = (new URL(document.location)).searchParams; // pull params from sear
 
 console.log("Params=" + params); // shows what the params are in the console
 // Check for an error and if so, pop up an alert to the user
-if (params.has("error")) {
-  let err_msg = params.get("error");
+if (splitparams[1].has("error")) {
+  let err_msg = splitparams[1].get("error");
   alert(err_msg);
 }
 

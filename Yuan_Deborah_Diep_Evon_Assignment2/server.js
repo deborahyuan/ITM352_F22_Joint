@@ -87,7 +87,7 @@ loggedin = false;
 // process purchase request (validate quantities, check quantity available)
 
 let validinput = true; // assume that all terms are valid
-let ordered = "";
+global.ordered = "";
 let allblank = false; // assume that it ISN'T all blank
 let instock = true;
 let othererrors = false; //assume that there aren't other errors
@@ -102,7 +102,7 @@ app.post("/purchase", function (request, response) {
 		let model = products[i]["name"];
 		if (qtys == 0) {
 			// assigning no value to certain models to avoid errors in invoice.html
-			ordered += model + "=" + qtys + "&";
+			global.ordered += model + "=" + qtys + "&";
 		} else if (
 			isNonNegativeInteger(qtys) &&
 			Number(qtys) <= products[i].quantity_available
@@ -111,7 +111,7 @@ app.post("/purchase", function (request, response) {
 			products[i].quantity_available -= Number(qtys); // Stock, or quantity_available is subtracted by the order quantity
 			products[i].quantity_sold =
 				Number(products[i].quantity_sold) + Number(qtys); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
-			ordered += model + "=" + qtys + "&"; // appears in invoice.html's URL
+			global.ordered += model + "=" + qtys + "&"; // appears in invoice.html's URL
 		} else if (isNonNegativeInteger(qtys) != true) {
 			// quantity is "Not a Number, Negative Value, or not an Integer"
 			validinput = false;
@@ -169,17 +169,22 @@ app.post("/login", function (request, response) {
 		if (users[inputusername].password == inputpassword) {
 			loggedin = true;
 			response.redirect(
-				"loginsuccess.html?success=User%20" +
+				"loginsuccess.html?" +
+					ordered +
+					"&success=User%20" +
 					inputusername +
-					"%20is%20logged%20in" +
-					ordered
+					"%20is%20logged%20in"
 			);
 		} else {
-			response.redirect("login.html?error=Password%20is%20incorrect!");
+			response.redirect(
+				"login.html?" + ordered + "&error=Password%20is%20incorrect!"
+			);
 		}
 		return;
 	}
-	response.redirect("login.html?error=Username%20Does%20Not%20Exist");
+	response.redirect(
+		"login.html?" + ordered + "&error=Username%20Does%20Not%20Exist"
+	);
 });
 
 app.post("/register", function (request, response) {

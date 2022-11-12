@@ -12,15 +12,18 @@
 		<script>
 			/* allows for us to create a login success alert based off of the results of the server's validataion*/
             let params = (new URL(document.location)).searchParams; // pull params from search URL
+			console.log("Params=" +params);
+			console.log(typeof params);
 
-            var quantities = []; // declaring empty array 'quantities'
-            params.forEach ( // for each iterates through all the keys
-                function(value,key)
-                {
-                quantities.push(value); // pushes the value to quantities array
-                }
-            )
-            
+			var quantities = []; // declaring empty array 'quantities'
+			console.log(params);
+			params.forEach ( // for each iterates through all the keys
+				function(value,key)
+				{
+				quantities.push(value); // pushes the value to quantities array
+				}
+			)
+
 			console.log("Params=" + params); // shows what the params are in the console
 			// Check for an error and if so, pop up an alert to the user
 			if (params.has("success")) {

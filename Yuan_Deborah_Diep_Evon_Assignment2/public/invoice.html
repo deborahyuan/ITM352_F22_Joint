@@ -55,6 +55,7 @@ Desc: This html page produces an invoice for the customer after the quantities o
 
   var quantities = []; // declaring empty array 'quantities'
   let params = (new URL(document.location)).searchParams; // pull params from search URL
+  console.log(params);
   params.forEach ( // for each iterates through all the keys
     function(value,key)
     {
