@@ -227,7 +227,7 @@ app.post("/checkstatus", function (request, response) {
 });
 app.post("/logout", function (request, response) {
 	loggedin = false;
-	response.send("user logged out");
+	response.redirect("logout.html");
 });
 // start server
 app.listen(8080, () => console.log(`listening on port 8080`));
