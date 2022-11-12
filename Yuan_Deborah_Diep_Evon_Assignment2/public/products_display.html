@@ -135,7 +135,8 @@ Desc: This html page pulls data from a separate products file (products.json) an
         <li class="active"><a href="./">Products</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="./login.html"><span class="glyphicon glyphicon-user"></span> Your Account</a></li>
+        <form name='login_status' action="/checkstatus" method="POST">
+        <li><input type="submit" value='Your Account' id="button" ></a></form></li>
         <li><a href="./invoice.html"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
       </ul> 
     </div>
