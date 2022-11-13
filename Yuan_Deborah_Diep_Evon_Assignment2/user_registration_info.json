@@ -1,1 +1,8 @@
-{"dport@hawaii.edu":{"name":"Dan Port","password":"portspassword"},"kazman@hawaii.edu":{"name":"Rick Kazman","password":"kazmanpassword"},"itm352@hawaii.edu":{"name":"ITM 352","password":"grader"},"hi@gmail.com":{"name":"potato","password":"hi"},"zippy@gmail.com":{"name":"zippy@gmail.com","password":"zippy"},"water@gmail.com":{"password":"hi"},"maple@gmail.com":{"password":"hi"},"soy@gmail.com":{"password":"hi"},"waterbottle@gmail.com":{"password":"hi"},"rat@gmail.com":{"password":"hi"},"dying@gmail.com":{"password":"hi"},"candy@gmail.com":{"password":"hi"},"milk@gmail.com":{"password":"hi"},"elloluv@gmail.com":{"password":"hi"},"dog@gmail.com":{"password":"hi"},"jack@gmail.com":{"password":"hi"},"imdying@gmail.com":{"password":"hi"},"hihihi@gmail.com":{"password":"hi"},"hihihihihihi@gmail.com":{"password":"hi"},"helloooo@gmail.com":{"password":"hello"},"bob@gmail.com":{"password":"bob"},"top@gmail.com":{"password":"top"},"bear@gmail.com":{"password":"bear"},"new@gmail.com":{"password":"new"},"lol@gmail.com":{"password":"lol"},"bag@gmail.com":{"password":"bag"},"microphone@gmail.com":{"password":"hi"},"soymilk@gmail.com":{"password":"hi"},"alsdkfjk@gmail.com":{"password":"hi"},"crying@gmail.com":{"password":"hi"},"asdfsadf@gmail.com":{"password":"hi"},"laksjdfkjk@gmail.com":{"password":"hi"},"werwer@gmail.com":{"password":"hi"},"laskjf@gmail.com":{"name":"laskjf@gmail.com","password":"hi"},"blah@gmail.com":{"name":"blah@gmail.com","password":"hi"}}
+{
+	"dport@hawaii.edu": { "name": "Dan Port", "password": "portspassword" },
+	"kazman@hawaii.edu": { "name": "Rick Kazman", "password": "kazmanpassword" },
+	"itm352@hawaii.edu": { "name": "ITM 352", "password": "grader" },
+	"hi@gmail.com": { "name": "potato", "password": "hi" },
+	"zippy@gmail.com": { "name": "zippy@gmail.com", "password": "zippy" },
+	"water@gmail.com": { "password": "hi" }
+}

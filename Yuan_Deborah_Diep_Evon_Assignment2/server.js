@@ -14,10 +14,10 @@ app.use(express.static(__dirname + "/public")); // route all other GET/POST requ
 app.use("/css", express.static(__dirname + "/public")); // ?
 app.use(express.urlencoded({ extended: true }));
 
+// read files
 var fs = require("fs");
 var fname = "user_registration_info.json";
-
-var errors = {}; // empty error array
+var prodname = __dirname + "/products.json";
 
 if (fs.existsSync(fname)) {
 	var stats = fs.statSync(fname);
@@ -29,6 +29,17 @@ if (fs.existsSync(fname)) {
 	users = {};
 }
 
+if (fs.existsSync(prodname)) {
+	var stats = fs.statSync(prodname);
+	proddata = fs.readFileSync(prodname, "utf-8");
+	products = JSON.parse(proddata);
+	console.log(products);
+} else {
+	console.log("Sorry file " + prodname + " does not exist.");
+	products = {};
+}
+
+var errors = {}; // empty error array
 /* functions */
 
 // isNonNegativeInteger tests the input for errors, then returns error messages if any
@@ -49,9 +60,6 @@ function isNonNegativeInteger(queryString, returnErrors = false) {
 		return false;
 	}
 }
-
-// pulling products data from products.json
-var products = require(__dirname + "/products.json");
 
 app.get("/products.json", function (request, response, next) {
 	// if /products.json is being requested, then send back products as a string
@@ -111,6 +119,8 @@ app.post("/purchase", function (request, response) {
 			products[i].quantity_sold =
 				Number(products[i].quantity_sold) + Number(qtys); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
 			ordered += model + "=" + qtys + "&"; // appears in invoice.html's URL
+			let proddata = JSON.stringify(products);
+			fs.writeFileSync(prodname, proddata, "utf-8");
 		} else if (isNonNegativeInteger(qtys) != true) {
 			// quantity is "Not a Number, Negative Value, or not an Integer"
 			validinput = false;
@@ -122,6 +132,15 @@ app.post("/purchase", function (request, response) {
 			othererrors = true;
 		}
 	}
+	/*if (users[user_name] == undefined && user_pass == user_pass2) {
+		if (users[user_name] != user_name) {
+			products[i].quantity_available = user_name;
+			products[i].quantity_sold = user_pass;
+			let data = JSON.stringify(users);
+
+			fs.writeFileSync(fname, data, "utf-8");
+			response.redirect("./invoice.html?" + params.toString());
+		}*/
 
 	if (customerquantities.join("") == 0) {
 		// if the array customerquantities adds up to 0, that means there are no quantities typed in
