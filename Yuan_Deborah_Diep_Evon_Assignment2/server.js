@@ -185,7 +185,36 @@ app.post("/login", function (request, response) {
 	);
 });
 
+// with help from Bobby Roth
+app.get("/register", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	
+	response.send(
+	`
+	<script> 
+	if(${errors == true}) 
+	{
+		alert("Username is taken!");
+		${errors = false};
+	}
+	</script>
+	<form method ="POST" action ="?${params.toString()}">
+	<span id="usernamelabel" name="usernamelabel">Enter an email</span><BR><BR>
+	<input type="text" id ="username" class="username" name="username" placeholder="bob@example.com"</input><BR><BR>
+	<span id="passwordlabel" name="passwordlabel">Enter a password</span><BR><BR>
+	<input type="text" id ="password" class="password" name="password" placeholder="Password"</input><BR><BR>
+	<span id="passwordlabelconfirm" name="passwordlabelconfirm">Repeat password</span><BR><BR>
+	<input type="text" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password"</input><BR><BR>
+
+	<input type="submit" value='Register' id="button"></input>
+	</form>
+	`
+	)
+	errors = false;
+});
+
 app.post("/register", function (request, response) {
+	let params = new URLSearchParams(request.query);
 	// process a simple register form
 	username = request.body.username.toLowerCase();
 	console.log(ordered);
@@ -207,7 +236,7 @@ app.post("/register", function (request, response) {
 		console.log("Saved: " + users);
 		loggedin = true;
 		response.redirect(
-			"registrationsuccess.html?" +
+			"registrationsuccess" +
 				ordered +
 				"&success=User%20" +
 				username +
@@ -217,6 +246,37 @@ app.post("/register", function (request, response) {
 		console.log(errors);
 		response.send(errors);
 	}
+});
+
+app.get ("/registrationsuccess", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	response.send(`
+	<script>
+	let params = (new URL(document.location)).searchParams;
+	console.log("Params=" +params);
+	console.log(typeof params);
+
+	var quantities = []; // declaring empty array 'quantities'
+	console.log(params);
+	params.forEach ( // for each iterates through all the keys
+		function(value,key)
+		{
+		quantities.push(value); // pushes  the value to quantities array
+		}
+	)
+
+	console.log("Params=" + params); // shows what the params are in the console
+	// Check for an error and if so, pop up an alert to the user
+	if (params.has("success")) {
+		let reg_suc = params.get("success");
+		document.write('${reg_suc}');
+	}
+</script>
+
+<form name='invoice' action="/invoice" method="POST">
+<input type="submit" id="myBtn" value='To Invoice' style="font-size:large"></button>
+</form>
+	`)
 });
 
 /*app.post("/register", function (request, response) {
@@ -254,11 +314,11 @@ app.post("/invoice", function (request, response) {
 	response.redirect("invoice.html?" + ordered);
 });
 
-app.post("/invoice2", function (request, response) {
-	let params = new URLSearchParams(request.query);
+/* app.post("/invoice2", function (request, response) {
+ 	let params = new URLSearchParams(request.query);
 	console.log(params.toString());
 	response.redirect("invoice.html?" + params.toString());
-});
+}); */
 
 app.post("/checkstatus", function (request, response) {
 	if (loggedin == true) {
