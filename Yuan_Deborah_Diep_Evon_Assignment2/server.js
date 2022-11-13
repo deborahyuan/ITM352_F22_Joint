@@ -84,15 +84,14 @@ app.all("*", function (request, response, next) {
 
 loggedin = false;
 
-// process purchase request (validate quantities, check quantity available)
-
-let validinput = true; // assume that all terms are valid
 ordered = "";
-let allblank = false; // assume that it ISN'T all blank
-let instock = true;
-let othererrors = false; //assume that there aren't other errors
 
 app.post("/purchase", function (request, response) {
+	// process purchase request (validate quantities, check quantity available)
+	let validinput = true; // assume that all terms are valid
+	let allblank = false; // assume that it ISN'T all blank
+	let instock = true;
+	let othererrors = false; //assume that there aren't other errors
 	// process form by redirecting to the receipt page
 
 	let customerquantities = request.body[`quantitytextbox`];
@@ -188,14 +187,15 @@ app.post("/login", function (request, response) {
 // with help from Bobby Roth
 app.get("/register", function (request, response) {
 	let params = new URLSearchParams(request.query);
-	
+	console.log(params);
+	console.log(params.toString());
 	response.send(
-	`
+		`
 	<script> 
 	if(${errors == true}) 
 	{
 		alert("Username is taken!");
-		${errors = false};
+		${(errors = false)};
 	}
 	</script>
 	<form method ="POST" action ="?${params.toString()}">
@@ -209,116 +209,44 @@ app.get("/register", function (request, response) {
 	<input type="submit" value='Register' id="button"></input>
 	</form>
 	`
-	)
+	);
 	errors = false;
 });
 
 app.post("/register", function (request, response) {
 	let params = new URLSearchParams(request.query);
-	// process a simple register form
-	username = request.body.username.toLowerCase();
-	console.log(ordered);
-	// check is username taken
-	if (typeof users[username] != "undefined") {
-		errors["username_taken"] = `Hey! ${username} is already registered!`;
-	}
-	if (request.body.password != request.body.passwordconfirm) {
-		errors["password_mismatch"] = `Repeat password not the same as password!`;
-	}
-	if (request.body.username == "") {
-		errors["no_username"] = `You need to select a username!`;
-	}
-	if (Object.keys(errors).length == 0) {
-		//
-		users[username] = {};
-		users[username].password = request.body.password;
-		fs.writeFileSync(fname, JSON.stringify(users));
-		console.log("Saved: " + users);
-		loggedin = true;
-		response.redirect(
-			"registrationsuccess" +
-				ordered +
-				"&success=User%20" +
-				username +
-				"%20is%20registered!"
-		);
-	} else {
-		console.log(errors);
-		response.send(errors);
-	}
-});
-
-app.get ("/registrationsuccess", function (request, response) {
-	let params = new URLSearchParams(request.query);
-	response.send(`
-	<script>
-	let params = (new URL(document.location)).searchParams;
-	console.log("Params=" +params);
-	console.log(typeof params);
-
-	var quantities = []; // declaring empty array 'quantities'
 	console.log(params);
-	params.forEach ( // for each iterates through all the keys
-		function(value,key)
-		{
-		quantities.push(value); // pushes  the value to quantities array
-		}
-	)
-
-	console.log("Params=" + params); // shows what the params are in the console
-	// Check for an error and if so, pop up an alert to the user
-	if (params.has("success")) {
-		let reg_suc = params.get("success");
-		document.write('${reg_suc}');
-	}
-</script>
-
-<form name='invoice' action="/invoice" method="POST">
-<input type="submit" id="myBtn" value='To Invoice' style="font-size:large"></button>
-</form>
-	`)
-});
-
-/*app.post("/register", function (request, response) {
-	// process a simple register form
-	let POST = request.body[`username`];
-	console.log(POST);
+	let POST = request.body;
 	let user_name = POST["username"];
 	let user_pass = POST["password"];
 	let user_pass2 = POST["passwordconfirm"];
 
 	if (users[user_name] == undefined && user_pass == user_pass2) {
-		users[user_name] = {};
-		users[user_name].name = user_name;
-		users[user_name].password = user_pass;
+		if (users[user_name] != user_name) {
+			users[user_name] = {};
+			users[user_name].name = user_name;
+			users[user_name].password = user_pass;
+			loggedin = true;
+			let data = JSON.stringify(users);
 
-		let data = JSON.stringify(users);
-		fs.writeFileSync(fname, data, "utf-8");
-
-		response.send("Got a registration");
-		loggedin = true;
-	} else if (user_name != undefined) {
-		response.send("User " + user_name + " already exists!");
+			fs.writeFileSync(fname, data, "utf-8");
+			response.redirect("./invoice.html?" + params.toString());
+		}
 	} else {
-		response.send("Passwords don't match!");
+		response.redirect("./register?" + params.toString());
+		errors = true;
 	}
-});*/
+});
 
 app.post("/startregister", function (request, response) {
 	console.log(ordered);
-	response.redirect("register.html?" + ordered);
+	response.redirect("register?" + ordered);
 });
 
 app.post("/invoice", function (request, response) {
 	console.log(ordered);
 	response.redirect("invoice.html?" + ordered);
 });
-
-/* app.post("/invoice2", function (request, response) {
- 	let params = new URLSearchParams(request.query);
-	console.log(params.toString());
-	response.redirect("invoice.html?" + params.toString());
-}); */
 
 app.post("/checkstatus", function (request, response) {
 	if (loggedin == true) {
