@@ -101,7 +101,6 @@ app.post("/purchase", function (request, response) {
 	let instock = true;
 	let othererrors = false; //assume that there aren't other errors
 	// process form by redirecting to the receipt page
-
 	let customerquantities = request.body[`quantitytextbox`];
 	for (let i in customerquantities) {
 		// Iterate over all text boxes in the form.
@@ -172,7 +171,7 @@ app.post("/purchase", function (request, response) {
 		);
 	} else {
 		// If everything is good, redirect to the invoice page.
-		response.redirect("login.html?" + ordered);
+		response.redirect("login.html?" + params.toString());
 	}
 });
 
