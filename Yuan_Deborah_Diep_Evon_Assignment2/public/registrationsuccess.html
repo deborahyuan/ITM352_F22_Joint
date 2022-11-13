@@ -28,12 +28,12 @@
 			console.log("Params=" + params); // shows what the params are in the console
 			// Check for an error and if so, pop up an alert to the user
 			if (params.has("success")) {
-				let login_suc = params.get("success");
-				document.write(`${login_suc}`);
+				let reg_suc = params.get("success");
+				document.write(`${reg_suc}`);
 			}
 		</script>
 	
-    <form name='invoice' action="/invoice" method="POST">
+    <form name='invoice' action="/invoice2" method="POST">
         <input type="submit" id="myBtn" value='To Invoice' style="font-size:large"></button>
     </form>
 	</body>

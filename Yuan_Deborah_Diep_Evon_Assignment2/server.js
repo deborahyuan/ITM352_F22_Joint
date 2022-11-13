@@ -87,7 +87,7 @@ loggedin = false;
 // process purchase request (validate quantities, check quantity available)
 
 let validinput = true; // assume that all terms are valid
-global.ordered = "";
+ordered = "";
 let allblank = false; // assume that it ISN'T all blank
 let instock = true;
 let othererrors = false; //assume that there aren't other errors
@@ -102,7 +102,7 @@ app.post("/purchase", function (request, response) {
 		let model = products[i]["name"];
 		if (qtys == 0) {
 			// assigning no value to certain models to avoid errors in invoice.html
-			global.ordered += model + "=" + qtys + "&";
+			ordered += model + "=" + qtys + "&";
 		} else if (
 			isNonNegativeInteger(qtys) &&
 			Number(qtys) <= products[i].quantity_available
@@ -111,7 +111,7 @@ app.post("/purchase", function (request, response) {
 			products[i].quantity_available -= Number(qtys); // Stock, or quantity_available is subtracted by the order quantity
 			products[i].quantity_sold =
 				Number(products[i].quantity_sold) + Number(qtys); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
-			global.ordered += model + "=" + qtys + "&"; // appears in invoice.html's URL
+			ordered += model + "=" + qtys + "&"; // appears in invoice.html's URL
 		} else if (isNonNegativeInteger(qtys) != true) {
 			// quantity is "Not a Number, Negative Value, or not an Integer"
 			validinput = false;
@@ -130,32 +130,30 @@ app.post("/purchase", function (request, response) {
 	}
 
 	// If we found an error, redirect back to the order page, if not, proceed to invoice
-	if (loggedin == true) {
-		if (allblank) {
-			// if all boxes are blank, there is an error, pops up alert
-			response.redirect(
-				"products_display.html?error=Invalid%20Quantity,%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
-			);
-		} else if (!validinput) {
-			// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
-			response.redirect(
-				"products_display.html?error=Invalid%20Quantity,%20Please%20Fix%20the%20Errors%20in%20Red%20on%20the%20Order%20Page!"
-			);
-		} else if (!instock) {
-			// Existing stock is less than desired quantity, pops up alert
-			response.redirect(
-				"products_display.html?error=Invalid%20Quantity,%20Requested%20Quantity%20Exceeds%20Stock"
-			);
-		} else if (othererrors) {
-			// textbox has gone missing? or some other error, pops up alert
-			response.redirect(
-				"products_display.html?error=Invalid%20Quantity,%20Unknown%20Error%20has%20occured"
-			);
-		} else {
-			// If everything is good, redirect to the invoice page.
-			response.redirect("invoice.html?" + ordered);
-		}
+
+	if (allblank) {
+		// if all boxes are blank, there is an error, pops up alert
+		console.log(allblank);
+		response.redirect(
+			"products_display.html?error=Invalid%20Quantity,%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
+		);
+	} else if (!validinput) {
+		// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
+		response.redirect(
+			"products_display.html?error=Invalid%20Quantity,%20Please%20Fix%20the%20Errors%20in%20Red%20on%20the%20Order%20Page!"
+		);
+	} else if (!instock) {
+		// Existing stock is less than desired quantity, pops up alert
+		response.redirect(
+			"products_display.html?error=Invalid%20Quantity,%20Requested%20Quantity%20Exceeds%20Stock"
+		);
+	} else if (othererrors) {
+		// textbox has gone missing? or some other error, pops up alert
+		response.redirect(
+			"products_display.html?error=Invalid%20Quantity,%20Unknown%20Error%20has%20occured"
+		);
 	} else {
+		// If everything is good, redirect to the invoice page.
 		response.redirect("login.html?" + ordered);
 	}
 });
@@ -190,7 +188,7 @@ app.post("/login", function (request, response) {
 app.post("/register", function (request, response) {
 	// process a simple register form
 	username = request.body.username.toLowerCase();
-
+	console.log(ordered);
 	// check is username taken
 	if (typeof users[username] != "undefined") {
 		errors["username_taken"] = `Hey! ${username} is already registered!`;
@@ -202,11 +200,19 @@ app.post("/register", function (request, response) {
 		errors["no_username"] = `You need to select a username!`;
 	}
 	if (Object.keys(errors).length == 0) {
+		//
 		users[username] = {};
 		users[username].password = request.body.password;
-		fs.writeFileSync(filename, JSON.stringify(users));
+		fs.writeFileSync(fname, JSON.stringify(users));
 		console.log("Saved: " + users);
-		response.send(`${username} has been registered.`);
+		loggedin = true;
+		response.redirect(
+			"registrationsuccess.html?" +
+				ordered +
+				"&success=User%20" +
+				username +
+				"%20is%20registered!"
+		);
 	} else {
 		console.log(errors);
 		response.send(errors);
@@ -237,6 +243,23 @@ app.post("/register", function (request, response) {
 		response.send("Passwords don't match!");
 	}
 });*/
+
+app.post("/startregister", function (request, response) {
+	console.log(ordered);
+	response.redirect("register.html?" + ordered);
+});
+
+app.post("/invoice", function (request, response) {
+	console.log(ordered);
+	response.redirect("invoice.html?" + ordered);
+});
+
+app.post("/invoice2", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log(params.toString());
+	response.redirect("invoice.html?" + params.toString());
+});
+
 app.post("/checkstatus", function (request, response) {
 	if (loggedin == true) {
 		response.redirect("account.html");
@@ -244,9 +267,12 @@ app.post("/checkstatus", function (request, response) {
 		response.redirect("login.html");
 	}
 });
+
 app.post("/logout", function (request, response) {
 	loggedin = false;
+	ordered = "";
 	response.redirect("logout.html");
 });
+
 // start server
 app.listen(8080, () => console.log(`listening on port 8080`));
