@@ -40,6 +40,7 @@ if (fs.existsSync(prodname)) {
 }
 
 var errors = {}; // empty error array
+
 /* functions */
 
 // isNonNegativeInteger tests the input for errors, then returns error messages if any
@@ -101,10 +102,12 @@ app.post("/purchase", function (request, response) {
 	let instock = true;
 	let othererrors = false; //assume that there aren't other errors
 	// process form by redirecting to the receipt page
-	let customerquantities = request.body[`quantitytextbox`];
+	customerquantities = request.body[`quantitytextbox`];
+	console.log("QUANTITIES=" + customerquantities);
 	for (let i in customerquantities) {
 		// Iterate over all text boxes in the form.
 		qtys = customerquantities[i];
+
 		let model = products[i]["name"];
 		if (qtys == 0) {
 			// assigning no value to certain models to avoid errors in invoice.html
@@ -114,7 +117,6 @@ app.post("/purchase", function (request, response) {
 			Number(qtys) <= products[i].quantity_available
 		) {
 			// if qtys is true, added to ordered string
-
 			ordered += model + "=" + qtys + "&"; // appears in invoice.html's URL
 		} else if (isNonNegativeInteger(qtys) != true) {
 			// quantity is "Not a Number, Negative Value, or not an Integer"
@@ -127,6 +129,8 @@ app.post("/purchase", function (request, response) {
 			othererrors = true;
 		}
 	}
+
+	console.log(customerquantities);
 	/*if (users[user_name] == undefined && user_pass == user_pass2) {
 		if (users[user_name] != user_name) {
 			products[i].quantity_available = user_name;
@@ -147,21 +151,25 @@ app.post("/purchase", function (request, response) {
 	if (allblank) {
 		// if all boxes are blank, there is an error, pops up alert
 		console.log(allblank);
+		ordered = "";
 		response.redirect(
 			"products_display.html?error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
 		);
 	} else if (!validinput) {
 		// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
+		ordered = "";
 		response.redirect(
 			"products_display.html?error=Invalid%20Quantity:%20Please%20Fix%20the%20Errors%20in%20Red%20on%20the%20Order%20Page!"
 		);
 	} else if (!instock) {
 		// Existing stock is less than desired quantity, pops up alert
+		ordered = "";
 		response.redirect(
 			"products_display.html?error=Invalid%20Quantity:%20Requested%20Quantity%20Exceeds%20Stock"
 		);
 	} else if (othererrors) {
 		// textbox has gone missing? or some other error, pops up alert
+		ordered = "";
 		response.redirect(
 			"products_display.html?error=Invalid%20Quantity:%20Unknown%20Error%20has%20occured"
 		);
@@ -302,7 +310,7 @@ app.post("/startregister", function (request, response) {
 
 app.get("/invoice", function (request, response) {
 	let params = new URLSearchParams(request.query);
-	console.log(params.toString);
+	console.log("params=" + params.toString);
 	var quantities = []; // declaring empty array 'quantities'
 	params.forEach(
 		// for each iterates through all the keys
@@ -310,17 +318,19 @@ app.get("/invoice", function (request, response) {
 			quantities.push(value); // pushes the value to quantities array
 		}
 	);
-	console.log(quantities);
+	console.log("quantities=" + quantities);
 	if (loggedin === true) {
 		// modified from stack overflow (https://stackoverflow.com/questions/34909706/how-to-prevent-user-from-accessing-webpage-directly-in-node-js)
-		for (i in products) {
-			adjquantities = quantities[i].replace(",", "");
-			console.log(adjquantities);
-			products[i].quantity_available -= Number(adjquantities); // Stock, or quantity_available is subtracted by the order quantity
-			products[i].quantity_sold =
-				Number(products[i].quantity_sold) + Number(adjquantities); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
-			let proddata = JSON.stringify(products);
-			fs.writeFileSync(prodname, proddata, "utf-8");
+		for (i in quantities) {
+			values = quantities[i];
+			if (values != 0 && isNonNegativeInteger(values)) {
+				console.log("values= " + values);
+				products[i].quantity_available -= Number(values); // Stock, or quantity_available is subtracted by the order quantity
+				products[i].quantity_sold =
+					Number(products[i].quantity_sold) + Number(values); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
+				let proddata = JSON.stringify(products);
+				fs.writeFileSync(prodname, proddata, "utf-8");
+			}
 		}
 		response.redirect("invoice.html?" + params.toString());
 	} else {
