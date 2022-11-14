@@ -41,6 +41,18 @@ if (fs.existsSync(prodname)) {
 
 var errors = {}; // empty error array
 
+/* bcrypt testing CURRENTLY NOT WORKING :()
+import * as bcrypt from 'bcrypt'
+// generateHash('password123');
+function generateHash (typeof password == 'string') {
+	const salt = bcrypt.genSaltSync(12); // range of 10-12 is generally sufficient protection
+	const hash = bcrypt.hashSync(password, salt);// inside ()  is what we are trying to hash, random data
+	return hash;
+
+}
+console.log (generateHash('password123'));
+*/
+
 /* functions */
 
 // isNonNegativeInteger tests the input for errors, then returns error messages if any
