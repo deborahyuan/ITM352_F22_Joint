@@ -1,0 +1,163 @@
+/*  
+Products Style CSS for Assignment1
+Author: Deborah Yuan
+Date: 11/2/22
+Desc: This css stylesheet is used for all 3 html pages under /public. The backbone css was provided in a bootstrap template sourced from w3 schools; it is not shown here, can be found in the head of both index.html and products_display.html. This stylesheet mostly addresses small tweaks and ALL of the css for invoice.html, as that file does not use the bootstrap template.
+*/
+
+
+  /*//////////////////*/
+ /* general text css */
+/*//////////////////*/
+
+h1 {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: bolder;
+}
+
+h2 {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: bolder;
+}
+
+.footertext{
+    padding-bottom: 30px;
+}
+p {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+/* quantity textbox adjustments */
+#quantitytextbox {
+    border-radius: 5px;
+    width: 60px;
+    height: 40px;
+    position: relative;
+}
+
+/* submit buttons on products_display.html and invoice.html */
+#button {
+    background-color: black;
+    border-color:white;
+    border-width: 5px;
+    color: white;
+    width: 300px;
+    height: 40px;
+    margin: 0;
+    position: relative;
+    border-radius: 12px;
+    padding: 2 2 2 2em;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: bolder;
+}
+
+    /*///////////////////////*/
+   /* invoice table styling */
+  /*///////////////////////*/
+
+/* table title "Invoice" */
+.invoiceheader {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* table general design */
+.invoice-table {
+    border-collapse: collapse;
+    margin-left:auto; 
+    margin-right:auto;
+    font-size: 0.9 em;
+    width: 850px;
+    font-family: 'Source Sans Pro', sans-serif;
+    border-radius: 5px 5px 5px 5px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+/* table header row*/
+.invoice-table thead tr {
+    background-color: black;
+    color: white;
+    text-align: left;
+    font-weight: bold;
+}
+
+/* table header and table data cell padding */
+.invoice-table th,
+.invoice-table td {
+    padding: 12px 25px;
+}
+
+/* table row borders */
+.invoice-table tbody tr{
+    border-bottom: 1px solid white;
+
+/* table row alternating background colors */
+}
+.invoice-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+/* table row bottom border line */
+.invoice-table tbody tr:last-of-type,
+.invoice-table tbody tr:nth-last-of-type(7){
+    border-bottom: 2px solid black;
+}
+
+.invoice-table tbody tr:nth-last-of-type(3),
+.invoice-table tbody tr:nth-last-of-type(2) {
+    border-bottom: 3px dashed black;
+}
+
+/* table row highlight light blue when hovered */
+.invoice-table tbody tr:hover {
+    background-color: #a1d3d4;
+}
+
+   /*///////*/
+  /* video */
+ /*///////*/
+
+/* Style the video: 100% width and height to cover the entire window */
+#myVideo {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: 100%;
+    max-height: auto;
+  }
+  
+  /* iPhone text */
+  .content {
+    position: fixed;
+    top: 50px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0);
+    color: #f1f1f1;
+    width: 100%;
+    padding: 20px;
+  }
+  
+  /* Style the button used to enter store */
+  #myBtn {
+    background-color: black;
+    border-color:black;
+    border-width: 3px;
+    color: white;
+    width: 300px;
+    height: 40px;
+    margin: 0;
+    position: relative;
+    border-radius: 12px;
+    padding: 5 5 5 5em;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: bolder;
+    cursor: pointer;
+  }
+  
+  /* button hover glow */
+  #myBtn:hover {
+    box-shadow: 0 0 15px 1px white;
+  }

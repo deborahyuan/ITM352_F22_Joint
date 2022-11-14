@@ -114,12 +114,8 @@ app.post("/purchase", function (request, response) {
 			Number(qtys) <= products[i].quantity_available
 		) {
 			// if qtys is true, added to ordered string
-			products[i].quantity_available -= Number(qtys); // Stock, or quantity_available is subtracted by the order quantity
-			products[i].quantity_sold =
-				Number(products[i].quantity_sold) + Number(qtys); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
+
 			ordered += model + "=" + qtys + "&"; // appears in invoice.html's URL
-			let proddata = JSON.stringify(products);
-			fs.writeFileSync(prodname, proddata, "utf-8");
 		} else if (isNonNegativeInteger(qtys) != true) {
 			// quantity is "Not a Number, Negative Value, or not an Integer"
 			validinput = false;
@@ -171,11 +167,13 @@ app.post("/purchase", function (request, response) {
 		);
 	} else {
 		// If everything is good, redirect to the invoice page.
-		response.redirect("login.html?" + params.toString());
+		response.redirect("login.html?" + ordered);
 	}
 });
 
 app.post("/login", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log(params);
 	// Process login form POST and redirect to logged in page if ok, back to login page if not
 	let inputusername = request.body[`username`].toLowerCase();
 	console.log(inputusername);
@@ -185,20 +183,20 @@ app.post("/login", function (request, response) {
 			loggedin = true;
 			response.redirect(
 				"loginsuccess.html?" +
-					ordered +
+					params.toString() +
 					"&success=User%20" +
 					inputusername +
 					"%20is%20logged%20in"
 			);
 		} else {
 			response.redirect(
-				"login.html?" + ordered + "&error=Password%20is%20incorrect!"
+				"login.html?" + params.toString() + "&error=Password%20is%20incorrect!"
 			);
 		}
 		return;
 	}
 	response.redirect(
-		"login.html?" + ordered + "&error=Username%20Does%20Not%20Exist"
+		"login.html?" + params.toString() + "&error=Username%20Does%20Not%20Exist"
 	);
 });
 
@@ -248,7 +246,7 @@ app.post("/register", function (request, response) {
 			let data = JSON.stringify(users);
 
 			fs.writeFileSync(fname, data, "utf-8");
-			response.redirect("./invoice.html?" + params.toString());
+			response.redirect("./invoice?" + params.toString());
 		}
 	} else {
 		response.redirect("./register?" + params.toString());
@@ -261,9 +259,25 @@ app.post("/startregister", function (request, response) {
 	response.redirect("register?" + ordered);
 });
 
-app.post("/invoice", function (request, response) {
-	console.log(ordered);
-	response.redirect("invoice.html?" + ordered);
+app.get("/invoice", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log(params.toString);
+	var quantities = []; // declaring empty array 'quantities'
+	params.forEach(
+		// for each iterates through all the keys
+		function (value, key) {
+			quantities.push(value); // pushes the value to quantities array
+		}
+	);
+	console.log(quantities);
+	for (i in products) {
+		products[i].quantity_available -= Number(quantities[i]); // Stock, or quantity_available is subtracted by the order quantity
+		products[i].quantity_sold =
+			Number(products[i].quantity_sold) + Number(quantities[i]); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
+		let proddata = JSON.stringify(products);
+		fs.writeFileSync(prodname, proddata, "utf-8");
+	}
+	response.redirect("invoice.html?" + params.toString());
 });
 
 app.post("/checkstatus", function (request, response) {

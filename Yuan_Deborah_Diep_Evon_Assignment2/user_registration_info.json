@@ -1,8 +1,1 @@
-{
-	"dport@hawaii.edu": { "name": "Dan Port", "password": "portspassword" },
-	"kazman@hawaii.edu": { "name": "Rick Kazman", "password": "kazmanpassword" },
-	"itm352@hawaii.edu": { "name": "ITM 352", "password": "grader" },
-	"hi@gmail.com": { "name": "potato", "password": "hi" },
-	"zippy@gmail.com": { "name": "zippy@gmail.com", "password": "zippy" },
-	"water@gmail.com": { "password": "hi" }
-}
+{"dport@hawaii.edu":{"name":"Dan Port","password":"portspassword"},"kazman@hawaii.edu":{"name":"Rick Kazman","password":"kazmanpassword"},"itm352@hawaii.edu":{"name":"ITM 352","password":"grader"},"hi@gmail.com":{"name":"potato","password":"hi"},"zippy@gmail.com":{"name":"zippy@gmail.com","password":"zippy"},"water@gmail.com":{"password":"hi"},"lfjas@gmail.com":{"name":"lfjas@gmail.com","password":"hi"},"hiii@gmail.com":{"name":"hiii@gmail.com","password":"hi"},"lkajkl@gmail.com":{"name":"lkajkl@gmail.com","password":"hi"},"hahahhahah@gmail.co":{"name":"hahahhahah@gmail.co","password":"hi"},"flkajsdkf@gmail.com":{"name":"flkajsdkf@gmail.com","password":"hi"},"asdflkjasdli@gmail.com":{"name":"asdflkjasdli@gmail.com","password":"hi"},"alsdkfjlkasd@gmail.com":{"name":"alsdkfjlkasd@gmail.com","password":"hi"},"asdf,kjaslkdfjlkasd@gmail.com":{"name":"asdf,kjaslkdfjlkasd@gmail.com","password":"hi"}}

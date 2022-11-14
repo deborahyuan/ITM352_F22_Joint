@@ -1,0 +1,8 @@
+{
+	"dport@hawaii.edu": { "name": "Dan Port", "password": "portspassword" },
+	"kazman@hawaii.edu": { "name": "Rick Kazman", "password": "kazmanpassword" },
+	"itm352@hawaii.edu": { "name": "ITM 352", "password": "grader" },
+	"hi@gmail.com": { "name": "potato", "password": "hi" },
+	"zippy@gmail.com": { "name": "Zippy McZip", "password": "zippy" },
+	"potatochip@gmail.com": { "name": "Dee", "password": "hi" }
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<!-- 
+Index for Assignment1
+Author: Deborah Yuan
+Date: 11/2/22
+Desc: This html page serves as a landing page for a user visiting the site. It features a navigation bar at the top, alongside a looping video of the iPhone 14 Pro, taken from Apple's website. There is a button labeled 'enter', which the user can click -- this leads to the products display page. 
+-->
+
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Smart Phone Store</title>
+
+  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <!-- google fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+
+   <!-- my own stylesheet (products-style.css) -->
+  <link href="products-style.css" rel="stylesheet">
+  <script src="../products.json"></script> <!-- loading in product data from products.json -->
+  <script src="../user_registration_info.json" type="application/json
+  "></script> <!-- loading in user data from user_registration_info.json -->
+  <style>
+    /* Remove the navbar's default rounded borders and increase the bottom margin */
+    .navbar {
+      margin-bottom: 50px;
+      border-radius: 0;
+    }
+
+    /* Remove the jumbotron's default bottom margin */
+    .jumbotron {
+      margin-bottom: 0;
+    }
+
+    /* Add a gray background color and some padding to the footer */
+    footer {
+      background-color: rgba(0, 0, 0, 0);
+    }
+  </style>
+</head>
+
+ <!-- navigation bar from w3 schools -->
+  <nav class="navbar navbar-inverse">  
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">
+           <!-- corner navbar Apple icon -->
+          <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+      </div>
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="./">Home</a></li>
+        </ul>
+        <ul class="nav navbar-nav">
+          <!-- clicking this 'tab' leads to products display -->
+          <li ><a href="./products_display.html">Products</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <form name='login_status' action="/checkstatus" method="POST">
+          <li><input type="submit" value='Your Account' id="button" ></a></form></li>
+          <li><a href="./invoice.html"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
+        </ul> 
+      </div>
+    </div>
+  </nav>
+<main>
+
+<!-- The video, pulled from the iPhone 14 Pro page on apple.com, learned about setting a video as a background from w3 schools -->
+<video autoplay muted loop id="myVideo">
+  <source src="https://www.apple.com/105/media/us/iphone-14-pro/2022/a3e991f3-071e-454c-b714-1b2319bb97a8/anim/hero/medium_2x.mp4#t=5" type="video/mp4">
+</video>
+
+
+<!-- Store description -->
+<div class="content">
+  <h1>iPhone Store</h1><BR>
+
+<!-- Button that leads to products display -->
+<form action="/products_display.html">
+    <input type="submit" id="myBtn" value='Enter' style="font-size:large"></button>
+</form>
+</div>
+
+</main>
+
+<footer class="container-fluid text-center"> <!-- footer -->
+
+</footer>
+  
+</body>
+  
+</html>
+  
