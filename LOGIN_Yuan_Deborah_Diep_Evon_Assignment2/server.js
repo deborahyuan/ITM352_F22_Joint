@@ -7,6 +7,7 @@ Desc: This server, server.js, provides validation for the data submitted by the 
 
 const { getRandomValues } = require("crypto");
 var express = require("express");
+/*var bcrypt = require("bcrypt"); // for bcrypt */
 var app = express();
 var path = require("path");
 
@@ -16,8 +17,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // read files
 var fs = require("fs");
+const e = require("express");
 var fname = "user_registration_info.json";
 var prodname = __dirname + "/products.json";
+var actname = __dirname + "/active_users.json";
 
 if (fs.existsSync(fname)) {
 	var stats = fs.statSync(fname);
@@ -34,13 +37,34 @@ if (fs.existsSync(prodname)) {
 	proddata = fs.readFileSync(prodname, "utf-8");
 	products = JSON.parse(proddata);
 	console.log(products);
+	console.log("LENGTH" + products.length);
 } else {
 	console.log("Sorry file " + prodname + " does not exist.");
 	products = {};
 }
 
+if (fs.existsSync(actname)) {
+	var stats = fs.statSync(actname);
+	actdata = fs.readFileSync(actname, "utf-8");
+	actusers = JSON.parse(actdata);
+	console.log(actusers);
+} else {
+	console.log("Sorry file " + actname + " does not exist.");
+	actusers = {};
+}
+
 var errors = {}; // empty error array
 
+/* BCRYPT
+var hash = bcrypt.hashSync("my password");
+console.log(hash);
+
+bcrypt.compareSync("my password", hash); // true
+console.log(bcrypt.compareSync("my password", hash)); // true
+
+bcrypt.compareSync("not my password", hash); // false
+console.log(bcrypt.compareSync("not my password", hash)); // true
+*/
 /* bcrypt testing CURRENTLY NOT WORKING :()
 import * as bcrypt from 'bcrypt'
 // generateHash('password123');
@@ -89,20 +113,6 @@ app.all("*", function (request, response, next) {
 
 // THIS IS FOR LOGIN AND REGISTER
 
-/*app.get("/login", function (request, response) {
-	// Give a simple login form
-	str = `
-<body>
-<form action="" method="POST">
-<input type="text" name="username" size="40" placeholder="enter username" ><br />
-<input type="password" name="password" size="40" placeholder="enter password"><br />
-<input type="submit" value="Submit" id="submit">
-</form>
-</body>
-    `;
-	response.send(str);
-});*/
-
 loggedin = false;
 
 ordered = "";
@@ -150,7 +160,7 @@ app.post("/purchase", function (request, response) {
 			let data = JSON.stringify(users);
 
 			fs.writeFileSync(fname, data, "utf-8");
-			response.redirect("./invoice.html?" + params.toString());
+			response.redirect("./invoice?" + params.toString());
 		}*/
 
 	if (customerquantities.join("") == 0) {
@@ -242,10 +252,17 @@ app.post("/login", function (request, response) {
 	let inputusername = request.body[`username`].toLowerCase();
 	console.log(inputusername);
 	let inputpassword = request.body[`password`];
+	let currentuser = inputusername;
 	if (typeof users[inputusername] != "undefined") {
+		//
 		if (users[inputusername].password == inputpassword) {
-			loggedin = true;
-			response.redirect("invoice?" + params.toString());
+			actusers[inputusername] = {};
+			actusers[inputusername] = users[inputusername];
+			actusers[inputusername].loginstatus = true;
+			userstatus = "currentuser=" + currentuser + "&";
+			let actdata = JSON.stringify(actusers);
+			fs.writeFileSync(actname, actdata, "utf-8");
+			response.redirect("loginsuccess?" + userstatus + params.toString());
 		} else {
 			response.redirect(
 				"login?" + params.toString() + "&error=Password%20is%20incorrect!"
@@ -258,7 +275,153 @@ app.post("/login", function (request, response) {
 	);
 });
 
-// with help from Bobby Roth
+// page if Login is successful
+app.get("/loginsuccess", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	if (params.has("currentuser")) {
+		currentuser = params.get("currentuser");
+	}
+	console.log(currentuser);
+	console.log(params);
+	console.log(params.toString());
+	if (Object.keys(actusers).length == 1) {
+		// grammar fixer
+		str =
+			"There is currently " +
+			Object.keys(actusers).length +
+			" person logged in.";
+	} else {
+		str =
+			"There are currently " +
+			Object.keys(actusers).length +
+			" people logged in.";
+	}
+	loggedin = true;
+	response.send(
+		`
+	<p> ${currentuser}, you have logged in successfully. ${str}
+	<p> You were last logged in DATE AND TIME. Welcome back!<p>
+	<form name='editaccount' action='?${params.toString()}' method="POST">
+	<input type="submit" value='Edit Account Information' id="button"></input>
+	</form>
+	<form name='gotoinvoice' action='invoice?${params.toString()}' method="GET">
+	<input type="submit" value='Go To Invoice' id="button"></input>
+	</form>`
+	);
+});
+
+app.post("/loginsuccess", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	response.redirect("editaccount?" + params.toString());
+});
+
+// page to Edit Account
+
+app.get("/editaccount", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	if (params.has("currentuser")) {
+		currentuser = params.get("currentuser");
+	}
+	console.log(currentuser);
+	response.send(`
+	<body>
+		<form name='editaccount' action="?${params.toString()}" method="POST">
+			<span id="accountpageinstruction" name="accountpageinstruction">Hi ${currentuser}, edit your account information here:</span>
+			<p>Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
+			<span id="editfullnamelabel" name="editfullnamelabel">Enter your current full name in the first textbox, then your new full name in the second textbox</span><BR><BR>
+			<input type="text" id ="currentfullname" class="currentfullname" name="currentfullname" placeholder="Enter Current Full Name"</input><BR><BR>
+			<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name"</input><BR><BR>
+			<span id="editusernamelabel" name="editusernamelabel">Enter your current email in the first textbox, then your new email in the second textbox</span><BR><BR>
+			<input type="text" id ="currentusername" class="currentusername" name="currentusername" placeholder="Enter Current Email"</input><BR><BR>
+			<input type="text" id ="newusername" class="newusername" name="newusername" placeholder="Enter New Email"</input><BR><BR>
+			<span id="editpasswordlabel" name="editpasswordlabel">Enter your current password in the first textbox, then your new password in the second textbox</span><BR><BR>
+			<input type="text" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password"</input><BR><BR>
+			<input type="text" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password"</input><BR><BR>
+			<span id="passwordconfirmlabel" name="passwordconfirmlabel">Confirm your new password by typing it again</span><BR><BR>
+			<input type="text" id ="newpasswordconfirm" class="newpasswordconfirm" name="newpasswordconfirm" placeholder="Enter New Password Again"</input><BR><BR>
+	</body>
+	<footer class="container-fluid text-center">
+		<!-- footer -->
+		<input type="submit" value='Submit Changes' id="button"></input>
+	</form>`);
+});
+
+app.post("/editaccount", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	if (params.has("currentuser")) {
+		currentuser = params.get("currentuser");
+	}
+	console.log(params);
+	POST = request.body;
+	curr_full_name = POST["currentfullname"];
+	console.log(curr_full_name);
+	new_full_name = POST["newfullname"];
+	console.log(new_full_name);
+	curr_user_name = POST["currentusername"]; // USERNAME IS THE EMAIL
+	new_user_name = POST["newusername"];
+	curr_pass = POST["currentpassword"];
+	new_pass = POST["newpassword"];
+	new_pass_2 = POST["newpasswordconfirm"];
+	currentuserreqedit = false; // does the current username/email require editing the params?
+
+	// if the current username/email exists
+	if (new_full_name == "") {
+		console.log("New Full Name is blank"); // status
+	} else if (actusers[currentuser].name != curr_full_name) {
+		console.log("Current Full Name is incorrect"); // status
+	} else {
+		// if new full name box isn't empty
+		actusers[currentuser].name = new_full_name; // set new full name to current full name
+	}
+
+	// if the new password isn't blank and matches
+	if (new_pass == "") {
+		console.log("New Password is blank"); // status
+		// if password isn't blank
+	} else if (actusers[currentuser].password != curr_pass) {
+		console.log("Current Password is incorrect"); // status
+	} else if (new_pass != new_pass_2) {
+		console.log("New Password Doesn't match"); // status
+	} else {
+		actusers[currentuser].password = new_pass; // set current password to new password
+	}
+
+	if (new_user_name == "") {
+		//pulls email/username value from params if the customer doesn't plan on changing their email/username
+		// if new username box is empty
+		console.log("New Email is blank");
+	} else {
+		// if the new email/username box has a value in it, meaning the customer wants to change their username/email
+
+		if (actusers[currentuser] != curr_user_name) {
+			console.log("Username error: Current Email is incorrect");
+		} else if (users[new_user_name] != undefined) {
+			// if other accounts are using the desired email
+			console.log("Username error: the username is already taken!"); // status if email is in use
+		} else {
+		}
+
+		actusers[new_user_name] = actusers[currentuser];
+		delete actusers[currentuser];
+		return actusers;
+		console.log("tempfile" + tempfile);
+		actusers[new_user_name] = tempfile;
+		console.log("actusers[new_user_name]" + actusers[new_user_name]);
+		actusers[currentuser] = actusers[new_user_name];
+		console.log("currentuser" + currentuser);
+		currentuserreqedit = true;
+
+		actusers[new_user_name].loginstatus = true;
+		users[currentuser] = actusers[new_user_name];
+
+		response.redirect("loginsuccess?" + params.toString());
+	}
+});
+
+// with help from Bobby Roth :]
 app.get("/register", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
@@ -347,14 +510,6 @@ app.get("/invoice", function (request, response) {
 		response.redirect("invoice.html?" + params.toString());
 	} else {
 		response.redirect("products_display.html");
-	}
-});
-
-app.post("/checkstatus", function (request, response) {
-	if (loggedin == true) {
-		response.redirect("account.html");
-	} else {
-		response.redirect("login.html");
 	}
 });
 
