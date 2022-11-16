@@ -1,7 +1,7 @@
 /* 
-Server for Assignment1
-Author: Deborah Yuan
-Date: 11/2/22
+Server for Assignment2
+Author: Deborah Yuan & Evon Diep
+Date: 11/16/22
 Desc: This server, server.js, provides validation for the data submitted by the form on products display, responding with the appropriate response depending on whether the quantities inputted are valid or invalid. In case of valid quantities, the user will be sent to the login. With invalid quantities, the user will be sent an error.
 */
 
@@ -21,6 +21,7 @@ const e = require("express");
 var fname = "user_registration_info.json";
 var prodname = __dirname + "/products.json";
 var actname = __dirname + "/active_users.json";
+var tempname = __dirname + "/tempfile.json";
 
 if (fs.existsSync(fname)) {
 	var stats = fs.statSync(fname);
@@ -51,6 +52,16 @@ if (fs.existsSync(actname)) {
 } else {
 	console.log("Sorry file " + actname + " does not exist.");
 	actusers = {};
+}
+
+if (fs.existsSync(tempname)) {
+	var stats = fs.statSync(tempname);
+	tempdata = fs.readFileSync(tempname, "utf-8");
+	tfiles = JSON.parse(tempdata);
+	console.log(tfiles);
+} else {
+	console.log("Sorry file " + fname + " does not exist.");
+	users = {};
 }
 
 var errors = {}; // empty error array
@@ -257,6 +268,7 @@ app.post("/login", function (request, response) {
 			let actdata = JSON.stringify(actusers);
 			fs.writeFileSync(fname, data, "utf-8");
 			fs.writeFileSync(actname, actdata, "utf-8");
+			console.log("hi");
 			response.redirect("loginsuccess?" + params.toString() + "&" + userstatus);
 		} else {
 			response.redirect(
@@ -273,49 +285,47 @@ app.post("/login", function (request, response) {
 // page if Login is successful
 app.get("/loginsuccess", function (request, response) {
 	let params = new URLSearchParams(request.query);
-	console.log(params);
+	console.log(params.toString());
 	if (params.has("currentuser")) {
 		currentuser = params.get("currentuser");
 	}
-	console.log(currentuser);
-	console.log(params);
-	console.log(params.toString());
 
-	loggedin = true;
-	/*actusers["usernamechange"] = {};*/
+	console.log("CHECK THIS" + params.toString());
 
-	let actdata = JSON.stringify(actusers);
-	fs.writeFileSync(actname, actdata, "utf-8");
-	if (Object.keys(actusers).length == 2) {
+	tfiles['loginsuccesstemp'] = {}; // writing temp files to solve issue of restarting server
+	tfiles['loginsuccesstemp'].currentuser = currentuser;
+	tfiles['loginsuccesstemp'].stringparams = params.toString();
+
+	let tempdata = JSON.stringify(tfiles);
+	fs.writeFileSync(tempname, tempdata, "utf-8");
+
+if (Object.keys(actusers).length == 2) {
 		// grammar fixer
 		str =
 			"There is currently " +
-			(Object.keys(actusers).length - 1) +
+			Number(Object.keys(actusers).length - 1) +
 			" person logged in.";
 	} else {
 		str =
 			"There are currently " +
-			(Object.keys(actusers).length - 1) +
+			Number(Object.keys(actusers).length - 1) +
 			" people logged in.";
 	}
-	console.log("CHECK THIS" + params.toString());
 	response.send(
 		`
-	<p> ${currentuser}, you have logged in successfully. ${str}
+	<p> ${tfiles['loginsuccesstemp'].currentuser}, you have logged in successfully. ${str}
 	<p> You were last logged in DATE AND TIME. Welcome back!<p>
-	<form name='editaccount' action='?${params.toString()}' method="POST">
+	<form name='editaccount' action='?${tfiles['loginsuccesstemp'].stringparams}' method="POST">
 	<input type="submit" value='Edit Account Information' id="button"></input>
 	</form>
-	<form name='gotoinvoice' action='invoice?${params.toString()}' method="POST">
+	<form name='gotoinvoice' action='invoice?${tfiles['loginsuccesstemp'].stringparams}' method="POST">
 	<input type="submit" value='Go To Invoice' id="button"></input>
 	</form>`
 	);
 });
 
 app.post("/loginsuccess", function (request, response) {
-	let params = new URLSearchParams(request.query);
-	console.log(params);
-	response.redirect("editaccount?" + params.toString());
+	response.redirect("editaccount?" + tfiles['loginsuccesstemp'].stringparams);
 });
 
 // page to Edit Account
@@ -331,7 +341,7 @@ app.get("/editaccount", function (request, response) {
 	actusers[currentuser].newparams = params.toString();
 	response.send(`
 	<body>
-		<form name='editaccount' action="?${actusers[currentuser].newparams}" method="POST">
+		<form name='editaccount' action="?${params.toString()}" method="POST">
 			<span id="accountpageinstruction" name="accountpageinstruction">Hi ${currentuser}, edit your account information here:</span>
 			<p>Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
 			<span id="editfullnamelabel" name="editfullnamelabel">Enter your current full name in the first textbox, then your new full name in the second textbox</span><BR><BR>
@@ -352,18 +362,13 @@ app.get("/editaccount", function (request, response) {
 	</form>`);
 });
 
-app.post("/editaccount", function (request, response) {
-	/*let params = new URLSearchParams(request.query);
-	if (params.has("currentuser")) {
+app.post("/editaccount", function (request, response) { // POST for editing the account information
+	let params = new URLSearchParams(request.query); // grab params from url
+	if (params.has("currentuser")) { // identify current user get get it
 		currentuser = params.get("currentuser");
 	}
-	console.log("CURR USER PARAM" + currentuser);
-	console.log("EDITACCPARAM" + params);*/
 
-	params = actusers[currentuser].newparams;
-	currentusertemp = params.split("currentuser=");
-	currentuser = currentusertemp[2];
-	console.log("CURRENTUSER" + currentuser);
+	console.log("EDITACCPARAM" + params);
 
 	POST = request.body;
 	curr_full_name = POST["currentfullname"];
@@ -374,7 +379,7 @@ app.post("/editaccount", function (request, response) {
 	new_pass = POST["newpassword"];
 	new_pass_2 = POST["newpasswordconfirm"];
 
-	actusers["usernamechange"] = {};
+	actusers["usernamechange"] = {}; // stores some information if the user decides to change their username/email
 
 	// if the current username/email exists
 	if (new_full_name == "") {
@@ -432,18 +437,18 @@ app.post("/editaccount", function (request, response) {
 			fs.writeFileSync(fname, data, "utf-8");
 			fs.writeFileSync(actname, actdata, "utf-8");
 		} else {
-			actusers[new_user_name] = {};
-			actusers[new_user_name].name = actusers[currentuser].name;
-			actusers[new_user_name].password = actusers[currentuser].password;
-			actusers[new_user_name].loginstatus = actusers[currentuser].loginstatus;
-			actusers[new_user_name].amtlogin = actusers[currentuser].amtlogin;
+			actusers[new_user_name] = {}; // makes empty object for the user's new account
+			actusers[new_user_name].name = actusers[currentuser].name; // copies over current name
+			actusers[new_user_name].password = actusers[currentuser].password; // copies over current password
+			actusers[new_user_name].loginstatus = actusers[currentuser].loginstatus; // copies over current login status
+			actusers[new_user_name].amtlogin = actusers[currentuser].amtlogin; // copies over the amount of times logged in
 
-			actusers["usernamechange"].formerusername = currentuser;
-			actusers["usernamechange"].currentusername = new_user_name;
-			paramsstring = params.toString();
-			paramcutqty = Number("currentuser=".length + currentuser.length + 2);
-			console.log("CUTQUTY" + paramcutqty);
-			removedcurruserfromparams = paramsstring.slice(-paramcutqty);
+			actusers["usernamechange"].formerusername = currentuser; // stores info on the now OLD username
+			actusers["usernamechange"].currentusername = new_user_name; // stores info on what the NEW username is
+			paramsstring = params.toString(); // turns the current params into a string
+			paramcutqty = Number("currentuser=".length + currentuser.length + 2); // calculates how long the OLD username is (in the query string)
+			console.log("CUTQUTY" + paramcutqty); // console.log to check length
+			removedcurruserfromparams = paramsstring.slice(0,-paramcutqty); // sets the remaining params left to a new variable
 			console.log(removedcurruserfromparams);
 			actusers["usernamechange"].newparams =
 				removedcurruserfromparams.toString() + "&currentuser=" + new_user_name;
@@ -572,8 +577,25 @@ app.post("/invoice", function (request, response) {
 	}
 });
 
-app.post("/logout", function (request, response) {
-	if (params.has("currentuser")) {
+app.post("/goodbye", function (request, response) {
+	let params = new URLSearchParams(request.query); // grab params from url
+	if (params.has("currentuser")) { // identify current user get get it
+		currentuser = params.get("currentuser");
+	}
+	response.send(`
+	<p>Thank you ${currentuser} for your purchase<p>
+	<p>Click the button below to log out</p>
+
+<footer class="container-fluid text-center">
+<!-- footer -->
+<form action="logout?${params.toString()}" method="GET">
+<input type="submit" value='Log Out' id="button"></input>
+</form>`)
+});
+
+app.get("/logout", function (request, response) {
+	let params = new URLSearchParams(request.query); // grab params from url
+	if (params.has("currentuser")) { // identify current user get get it
 		currentuser = params.get("currentuser");
 	}
 	ordered = "";
@@ -586,7 +608,7 @@ app.post("/logout", function (request, response) {
 
 	fs.writeFileSync(fname, data, "utf-8");
 	fs.writeFileSync(actname, actdata, "utf-8");
-	response.redirect("logout.html");
+	response.redirect("index.html");
 });
 
 // start server
