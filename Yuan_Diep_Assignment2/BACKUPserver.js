@@ -474,162 +474,61 @@ app.post("/editaccount", function (request, response) {
 	newparams = actusers["usernamechange"].newparams;
 	response.redirect("loginsuccess?" + newparams);
 });
-// Code inspired by Assignment 2 Code Examples
+
+// with help from Bobby Roth :]
 app.get("/register", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
 	console.log(params.toString());
-
 	response.send(
 		`
-    <form method ="POST" action ="?${params.toString()}">
-	<b>${
-		typeof regErrors["empty_boxes"] != "undefined"
-			? regErrors["empty_boxes"]
-			: ""
-	}</b><BR>
-    <span id="fullnamelabel" name="fullnamelabel">Enter your full name</span><BR>
-    <input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name"</input><BR>
-	<b>${
-		typeof regErrors["bad_userlength"] != "undefined"
-			? regErrors["bad_userlength"]
-			: ""
-	}<BR>
-	${
-		typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
-	}</b><BR>
+	<script> 
+	if(${errors == true}) 
+	{
+		alert("Username is taken!");
+		${(errors = false)};
+	}
+	</script>
+	<form method ="POST" action ="?${params.toString()}">
+	<span id="fullnamelabel" name="fullnamelabel">Enter your full name</span><BR><BR>
+	<input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name"</input><BR><BR>
+	<span id="usernamelabel" name="usernamelabel">Enter an email</span><BR><BR>
+	<input type="text" id ="username" class="username" name="username" placeholder="bob@example.com"</input><BR><BR>
+	<span id="passwordlabel" name="passwordlabel">Enter a password</span><BR><BR>
+	<input type="text" id ="password" class="password" name="password" placeholder="Password"</input><BR><BR>
+	<span id="passwordlabelconfirm" name="passwordlabelconfirm">Repeat password</span><BR><BR>
+	<input type="text" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password"</input><BR><BR>
 
-    <span id="usernamelabel" name="usernamelabel">Enter an email</span><BR>
-    <input type="text" id ="username" class="username" name="username" placeholder="bob@example.com"</input><BR>
-	<b>${
-		typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
-	}<BR>
-	${
-		typeof regErrors["username_taken"] != "undefined"
-			? regErrors["username_taken"]
-			: ""
-	}</b><BR>
-
-    <span id="passwordlabel" name="passwordlabel">Enter a password</span><BR>
-    <input type="text" id ="password" class="password" name="password" placeholder="Password"</input><BR>
-	<b>${
-		typeof regErrors["bad_passlength"] != "undefined"
-			? regErrors["bad_passlength"]
-			: ""
-	}<BR>
-	${
-		typeof regErrors["contains_space"] != "undefined"
-			? regErrors["contains_space"]
-			: ""
-	}</b><BR>
-
-    <span id="passwordlabelconfirm" name="passwordlabelconfirm">Repeat password</span><BR>
-    <input type="text" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password"</input><BR>
-	<b>${
-		typeof regErrors["password_mismatch"] != "undefined"
-			? regErrors["password_mismatch"]
-			: ""
-	}</b><BR>
-    <input type="submit" value='Register' id="submitbutton" name="submitbutton" onclick="changeValue();"></input>
-    </form>
-    `
+	<input type="submit" value='Register' id="button"></input>
+	</form>
+	`
 	);
-	// errors = false;
+	errors = false;
 });
 
 app.post("/register", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
-	// let POST = request.body;
-	// let user_name = POST["username"];
+	let POST = request.body;
+	let user_name = POST["username"];
+	let user_fullname = POST["fullname"];
+	let user_pass = POST["password"];
+	let user_pass2 = POST["passwordconfirm"];
 
-	regErrors = {}; // sets regErrors to empty
+	if (users[user_name] == undefined && user_pass == user_pass2) {
+		if (users[user_name] != user_name) {
+			users[user_name] = {};
+			users[user_name].name = user_fullname;
+			users[user_name].password = user_pass;
+			loggedin = true;
+			let data = JSON.stringify(users);
 
-	fullname = request.body.fullname;
-	user_name = request.body.username.toLowerCase();
-	password = request.body.password;
-	pass_repeat = request.body.passwordconfirm;
-
-	username = request.body.username.toLowerCase();
-
-	// check for empty textboxes
-	if (
-		request.body.fullname == "" ||
-		request.body.username == "" ||
-		request.body.password == "" ||
-		request.body.passwordconfirm == ""
-	) {
-		regErrors["empty_boxes"] = `All textboxes must be filled.`;
-	}
-
-	// FULL NAME VALIDATION
-	// checks to see if full name entered is between 2 and 30 characters
-	if (request.body.fullname.length < 2 || request.body.fullname.length > 30) {
-		regErrors["bad_userlength"] = `Name must be between 2 and 30 characters.`;
-	}
-
-	// check to see if full name only contains letters
-	if (/^[A-Za-z_ -]+$/.test(request.body.fullname) == false) {
-		regErrors["bad_user"] = `Name must only contain letters.`;
-	}
-
-	// EMAIL VALIDATION
-	// check if email is taken
-	if (typeof users[user_name] != "undefined") {
-		regErrors["username_taken"] = `Sorry, ${username} is already registered!`;
-	}
-	// checks if email follows X@Y.Z format
-	if (
-		/^[a-zA-Z0-9._]+@[a-zA-Z0-9.]+(?:\.[a-zA-Z0-9-]+)*$/.test(
-			request.body.username
-		) == false
-	) {
-		regErrors["bad_email"] = `Please enter a valid email.`;
-	}
-
-	// PASSWORD VALIDATION
-	// if password is not in between 10 and 16 characters
-	if (request.body.password.length < 10 || request.body.password.length > 16) {
-		regErrors[
-			"bad_passlength"
-		] = `Password must be between 10 and 16 characters.`;
-	}
-
-	// checks if password box is empty; NOT implemented in app.get rn
-	if (request.body.password == "") {
-		regErrors["pass_space"] = `Please enter a valid password.`;
-	}
-
-	// checks if password contains spaces; allows all characters but not
-	if (
-		/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*$/.test(request.body.password) == false
-	) {
-		regErrors["contains_space"] = `Passwords should not contain spaces.`;
-	}
-
-	// checks if the two passwords match
-	if (request.body.password != request.body.passwordconfirm) {
-		regErrors["password_mismatch"] = `Passwords must match!`;
-	}
-
-	if (Object.keys(regErrors).length == 0) {
-		users[user_name] = {};
-		users[user_name].username = request.body.username;
-		users[user_name].fullname = request.body.fullname;
-		users[user_name].password = request.body.password;
-		users[user_name].loginstatus = true;
-		users[user_name].amtlogin = 1;
-
-		let data = JSON.stringify(users);
-		let actdata = JSON.stringify(actusers);
-
-		fs.writeFileSync(fname, data, "utf-8");
-		fs.writeFileSync(actname, actdata, "utf-8");
-
-		response.redirect("./loginsuccess?" + params.toString());
+			fs.writeFileSync(fname, data, "utf-8");
+			response.redirect("invoice?" + params.toString());
+		}
 	} else {
-		response.redirect("./register?" + params.toString());
-		console.log("errors=" + regErrors);
+		response.redirect("?" + params.toString());
+		errors = true;
 	}
 });
 
