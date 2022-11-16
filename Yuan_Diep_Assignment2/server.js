@@ -124,8 +124,6 @@ app.all("*", function (request, response, next) {
 
 // THIS IS FOR LOGIN AND REGISTER
 
-loggedin = false;
-
 ordered = "";
 
 app.post("/purchase", function (request, response) {
@@ -208,6 +206,7 @@ app.get("/login", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
 	console.log(params.toString());
+	ordered = "";
 	response.send(`
 	<script>
 	let params = (new URL(document.location)).searchParams; // pull params from search URL
@@ -409,6 +408,7 @@ app.post("/editaccount", function (request, response) {
 		// if new username box is empty
 		console.log("New Email is blank");
 		users[currentuser] = actusers[currentuser];
+		actusers["usernamechange"].newparams = params;
 
 		let data = JSON.stringify(users);
 		let actdata = JSON.stringify(actusers);
