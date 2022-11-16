@@ -1,12 +1,1 @@
-{
-	"dport@hawaii.edu": { "name": "Dan Port", "password": "portspassword" },
-	"kazman@hawaii.edu": { "name": "Rick Kazman", "password": "kazmanpassword" },
-	"itm352@hawaii.edu": { "name": "ITM 352", "password": "grader" },
-	"hi@gmail.com": { "name": "potato", "password": "hi" },
-	"potatochip@gmail.com": { "name": "Dee", "password": "hi" },
-	"zippy@gmail.com": {
-		"name": "zippy",
-		"password": "hihi",
-		"loginstatus": true
-	}
-}
+{"kazman@hawaii.edu":{"name":"Rick Kazman","password":"kazmanpassword"},"itm352@hawaii.edu":{"name":"ITM 352","password":"grader"},"lol@gmail.com":{"name":"Dee","password":"hi","loginstatus":true,"amtlogin":11},"blah@gmail.com":{"name":"h","password":"h","loginstatus":true,"amtlogin":9},"chicken@gmail.com":{"name":"potato","password":"hi","loginstatus":true,"amtlogin":12},"dport@hawaii.edu":{"name":"Dan Port","password":"potato","loginstatus":true,"amtlogin":6}}

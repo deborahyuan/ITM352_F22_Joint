@@ -257,7 +257,6 @@ app.post("/login", function (request, response) {
 			let actdata = JSON.stringify(actusers);
 			fs.writeFileSync(fname, data, "utf-8");
 			fs.writeFileSync(actname, actdata, "utf-8");
-			console.log("hi");
 			response.redirect("loginsuccess?" + params.toString() + "&" + userstatus);
 		} else {
 			response.redirect(
@@ -282,16 +281,21 @@ app.get("/loginsuccess", function (request, response) {
 	console.log(params);
 	console.log(params.toString());
 
+	loggedin = true;
+	/*actusers["usernamechange"] = {};*/
+
+	let actdata = JSON.stringify(actusers);
+	fs.writeFileSync(actname, actdata, "utf-8");
 	if (Object.keys(actusers).length == 2) {
 		// grammar fixer
 		str =
 			"There is currently " +
-			Number(Object.keys(actusers).length - 1) +
+			(Object.keys(actusers).length - 1) +
 			" person logged in.";
 	} else {
 		str =
 			"There are currently " +
-			Number(Object.keys(actusers).length - 1) +
+			(Object.keys(actusers).length - 1) +
 			" people logged in.";
 	}
 	console.log("CHECK THIS" + params.toString());
@@ -299,7 +303,7 @@ app.get("/loginsuccess", function (request, response) {
 		`
 	<p> ${currentuser}, you have logged in successfully. ${str}
 	<p> You were last logged in DATE AND TIME. Welcome back!<p>
-	<form name='editaccount' action='loginsuccess?${params.toString()}' method="GET">
+	<form name='editaccount' action='?${params.toString()}' method="POST">
 	<input type="submit" value='Edit Account Information' id="button"></input>
 	</form>
 	<form name='gotoinvoice' action='invoice?${params.toString()}' method="POST">
@@ -327,7 +331,7 @@ app.get("/editaccount", function (request, response) {
 	actusers[currentuser].newparams = params.toString();
 	response.send(`
 	<body>
-		<form name='editaccount' action="?${params.toString()}" method="POST">
+		<form name='editaccount' action="?${actusers[currentuser].newparams}" method="POST">
 			<span id="accountpageinstruction" name="accountpageinstruction">Hi ${currentuser}, edit your account information here:</span>
 			<p>Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
 			<span id="editfullnamelabel" name="editfullnamelabel">Enter your current full name in the first textbox, then your new full name in the second textbox</span><BR><BR>
@@ -349,12 +353,17 @@ app.get("/editaccount", function (request, response) {
 });
 
 app.post("/editaccount", function (request, response) {
-	let params = new URLSearchParams(request.query);
+	/*let params = new URLSearchParams(request.query);
 	if (params.has("currentuser")) {
 		currentuser = params.get("currentuser");
 	}
+	console.log("CURR USER PARAM" + currentuser);
+	console.log("EDITACCPARAM" + params);*/
 
-	console.log("EDITACCPARAM" + params);
+	params = actusers[currentuser].newparams;
+	currentusertemp = params.split("currentuser=");
+	currentuser = currentusertemp[2];
+	console.log("CURRENTUSER" + currentuser);
 
 	POST = request.body;
 	curr_full_name = POST["currentfullname"];

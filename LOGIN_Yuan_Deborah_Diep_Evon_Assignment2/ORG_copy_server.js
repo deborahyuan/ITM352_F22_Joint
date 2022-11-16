@@ -257,7 +257,6 @@ app.post("/login", function (request, response) {
 			let actdata = JSON.stringify(actusers);
 			fs.writeFileSync(fname, data, "utf-8");
 			fs.writeFileSync(actname, actdata, "utf-8");
-			console.log("hi");
 			response.redirect("loginsuccess?" + params.toString() + "&" + userstatus);
 		} else {
 			response.redirect(
@@ -282,6 +281,10 @@ app.get("/loginsuccess", function (request, response) {
 	console.log(params);
 	console.log(params.toString());
 
+	/*actusers["usernamechange"] = {};
+	let actdata = JSON.stringify(actusers);
+	fs.writeFileSync(actname, actdata, "utf-8");*/
+
 	if (Object.keys(actusers).length == 2) {
 		// grammar fixer
 		str =
@@ -299,7 +302,7 @@ app.get("/loginsuccess", function (request, response) {
 		`
 	<p> ${currentuser}, you have logged in successfully. ${str}
 	<p> You were last logged in DATE AND TIME. Welcome back!<p>
-	<form name='editaccount' action='loginsuccess?${params.toString()}' method="GET">
+	<form name='editaccount' action='?${params.toString()}' method="POST">
 	<input type="submit" value='Edit Account Information' id="button"></input>
 	</form>
 	<form name='gotoinvoice' action='invoice?${params.toString()}' method="POST">
