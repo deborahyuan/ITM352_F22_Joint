@@ -658,7 +658,7 @@ app.post("/invoice", function (request, response) {
 		}
 	);
 	console.log("quantities=" + quantities);
-	if (true == true) {
+	if (actusers[currentuser].loginstatus == true) {
 		// modified from stack overflow (https://stackoverflow.com/questions/34909706/how-to-prevent-user-from-accessing-webpage-directly-in-node-js)
 		for (i in quantities) {
 			values = quantities[i];
@@ -705,11 +705,14 @@ app.get("/logout", function (request, response) {
 	users[currentuser].loginstatus = actusers[currentuser].loginstatus;
 	delete actusers[currentuser];
 
+	tfiles["loginsuccesstemp"] = {}; // delete tfiles
+
 	let data = JSON.stringify(users);
 	let actdata = JSON.stringify(actusers);
-
+	let tempdata = JSON.stringify(tfiles);
 	fs.writeFileSync(fname, data, "utf-8");
 	fs.writeFileSync(actname, actdata, "utf-8");
+	fs.writeFileSync(tempname, tempdata, "utf-8");
 	response.redirect("index.html");
 });
 

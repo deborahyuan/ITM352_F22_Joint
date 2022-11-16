@@ -66,7 +66,6 @@ Desc: This html page produces an invoice for the customer after the quantities o
       quantities.push(value); // pushes the value to quantities array
     }
   )
-  quantities.pop(); // learned from https://stackoverflow.com/questions/19544452/remove-last-item-from-array
   console.log("Qs"+quantities);
 
 // generate_item_rows used to write out rows in the table:
@@ -76,7 +75,6 @@ Desc: This html page produces an invoice for the customer after the quantities o
         continue;
       } else {
       let extended_price = quantities[i] * products[i].price
-      console.log(products[i].price);
       // toFixed added to $ values to preserve cents
       document.write(`
     <tr>
@@ -88,7 +86,6 @@ Desc: This html page produces an invoice for the customer after the quantities o
     </tr>
       `);
       subtotal += extended_price
-      console.log(products[i].price);
     }
     }
   }
@@ -113,7 +110,7 @@ Desc: This html page produces an invoice for the customer after the quantities o
         // Compute subtotal
         var subtotal = 0;
 
-        generate_item_rows(quantities); // call the function that produces table rows
+       
 
         // Compute tax
         var tax_rate = 0.0475;
@@ -134,7 +131,7 @@ Desc: This html page produces an invoice for the customer after the quantities o
         // Compute grand total
         var total = tax + subtotal + shipping;
 
- 
+  generate_item_rows(quantities); // call the function that produces table rows
       </script>
       <!-- table formatting, with some inline css -->
       <tr>
