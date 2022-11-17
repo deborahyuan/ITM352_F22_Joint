@@ -64,7 +64,7 @@ if (fs.existsSync(tempname)) {
 	users = {};
 }
 
-var errors = {}; // empty error array
+var regErrors = {}; // empty error array
 
 /* BCRYPT
 var hash = bcrypt.hashSync("my password");
@@ -89,6 +89,30 @@ console.log (generateHash('password123'));
 */
 
 /* functions */
+
+// date function
+function getCurrentDate() {
+	// assistance from Bobby Roth
+	var date = new Date(); // pulls new (current) date
+	hours = date.getHours();
+	time = hours < 12 ? "AM" : "PM";
+	hours = ((hours + 11) % 12) + 1;
+	minutes = date.getMinutes();
+	minutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+	new_date =
+		date.getMonth() +
+		1 +
+		"/" +
+		date.getDate() +
+		"/" +
+		date.getFullYear() +
+		" " +
+		hours +
+		":" +
+		minutes +
+		time;
+	return new_date;
+}
 
 // isNonNegativeInteger tests the input for errors, then returns error messages if any
 function isNonNegativeInteger(queryString, returnErrors = false) {
@@ -230,7 +254,9 @@ app.get("/login", function (request, response) {
 	}
 	</script>
 	<body>
-		<form name='login' action="?${params.toString()}" method="POST">
+		<form name='login' action="?${
+			params.toString().split("error")[0]
+		}" method="POST"> <!-- make sure to remove the error message -->
 		
 			<span id="usernamelabel" name="usernamelabel">Enter a username</span><BR><BR>
 			<input type="text" id ="username" class="username" name="username" placeholder="Username"</input><BR><BR>
@@ -242,7 +268,9 @@ app.get("/login", function (request, response) {
 		<!-- footer -->
 		<input type="submit" value='Login' id="button"></input>
 	</form>
-	<form name='login' action='/startregister' method="POST">
+	<form name='login' action='/startregister?${
+		params.toString().split("error")[0]
+	}' method="POST">
 	<input type="submit" value='New User? Click Here' id="button"></input>
 	</form>`);
 });
@@ -260,8 +288,10 @@ app.post("/login", function (request, response) {
 		if (users[inputusername].password == inputpassword) {
 			users[inputusername].amtlogin += Number(1);
 			actusers[inputusername] = {};
+			users[inputusername].loginstatus = true;
+			users[inputusername].lasttimelog = actusers[inputusername].currtimelog;
+			users[inputusername].currtimelog = getCurrentDate();
 			actusers[inputusername] = users[inputusername];
-			actusers[inputusername].loginstatus = true;
 			userstatus = "currentuser=" + currentuser + "&";
 			let data = JSON.stringify(users);
 			let actdata = JSON.stringify(actusers);
@@ -312,12 +342,20 @@ app.get("/loginsuccess", function (request, response) {
 	}
 	response.send(
 		`
-	<p> ${tfiles["loginsuccesstemp"].currentuser}, you have logged in successfully. ${str}
-	<p> You were last logged in DATE AND TIME. Welcome back!<p>
-	<form name='editaccount' action='?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
+	<p> ${
+		tfiles["loginsuccesstemp"].currentuser
+	}, you have logged in successfully. ${str}
+	<p> You were last logged in ${
+		actusers[tfiles["loginsuccesstemp"].currentuser].lasttimelog
+	}. Welcome back!<p>
+	<form name='editaccount' action='?${
+		tfiles["loginsuccesstemp"].stringparams
+	}' method="POST">
 	<input type="submit" value='Edit Account Information' id="button"></input>
 	</form>
-	<form name='gotoinvoice' action='invoice?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
+	<form name='gotoinvoice' action='invoice?${
+		tfiles["loginsuccesstemp"].stringparams
+	}' method="POST">
 	<input type="submit" value='Go To Invoice' id="button"></input>
 	</form>`
 	);
@@ -548,6 +586,7 @@ app.post("/register", function (request, response) {
 	fullname = request.body.fullname;
 	user_name = request.body.username.toLowerCase();
 	password = request.body.password;
+	currentuser = user_name;
 	pass_repeat = request.body.passwordconfirm;
 
 	username = request.body.username.toLowerCase();
@@ -618,7 +657,11 @@ app.post("/register", function (request, response) {
 		users[user_name].fullname = request.body.fullname;
 		users[user_name].password = request.body.password;
 		users[user_name].loginstatus = true;
+		users[user_name].lasttimelog = 0;
+		users[user_name].currtimelog = getCurrentDate();
 		users[user_name].amtlogin = 1;
+		actusers[user_name] = {};
+		actusers[user_name] = users[user_name];
 
 		let data = JSON.stringify(users);
 		let actdata = JSON.stringify(actusers);
@@ -626,7 +669,9 @@ app.post("/register", function (request, response) {
 		fs.writeFileSync(fname, data, "utf-8");
 		fs.writeFileSync(actname, actdata, "utf-8");
 
-		response.redirect("./loginsuccess?" + params.toString());
+		response.redirect(
+			"./loginsuccess?" + params.toString() + "&currentuser=" + currentuser
+		);
 	} else {
 		response.redirect("./register?" + params.toString());
 		console.log("errors=" + regErrors);
@@ -634,8 +679,8 @@ app.post("/register", function (request, response) {
 });
 
 app.post("/startregister", function (request, response) {
-	console.log(ordered);
-	response.redirect("register?" + ordered);
+	let params = new URLSearchParams(request.query);
+	response.redirect("register?" + params.toString());
 });
 
 app.post("/invoice", function (request, response) {

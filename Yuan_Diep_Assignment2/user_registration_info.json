@@ -1,1 +1,17 @@
-{"itm352@hawaii.edu":{"name":"ITM 352","password":"grader","amtlogin":0,"loginstatus":""},"dyuan@hawaii.edu":{"name":"Deborah Yuan","password":"hello!!","loginstatus":true,"amtlogin":10}}
+{
+	"itm352@hawaii.edu": {
+		"name": "ITM 352",
+		"password": "grader",
+		"loginstatus": "",
+		"lasttimelog": "11/16/2022 3:30PM",
+		"currtimelog": "11/16/2022 3:32PM",
+		"amtlogin": 0
+	},
+	"dyuan@hawaii.edu": {
+		"name": "Deborah Yuan",
+		"password": "hello!!",
+		"loginstatus": false,
+		"currtimelog": "11/16/2022 3:54PM",
+		"amtlogin": 0
+	}
+}
