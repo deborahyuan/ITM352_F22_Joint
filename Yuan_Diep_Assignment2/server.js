@@ -286,6 +286,7 @@ app.post("/login", function (request, response) {
 	if (typeof users[inputusername] != "undefined") {
 		//
 		if (users[inputusername].password == inputpassword) {
+			// NEED TO IMPLEMENT STICKY FORMS FOR USERNAME
 			users[inputusername].amtlogin += Number(1);
 			actusers[inputusername] = {};
 			users[inputusername].loginstatus = true;
@@ -307,7 +308,7 @@ app.post("/login", function (request, response) {
 		return;
 	}
 	response.redirect(
-		"login?" + params.toString() + "&error=Username%20Does%20Not%20Exist"
+		"login?" + params.toString() + "&error=Username%20Does%20Not%20Exist" // MAKE ERRORS APPEAR UNDER TEXTBOX LIKE /REGISTER
 	);
 });
 
@@ -456,7 +457,7 @@ app.post("/editaccount", function (request, response) {
 	} else {
 		// if the new email/username box has a value in it, meaning the customer wants to change their username/email
 		if (currentuser != curr_user_name) {
-			console.log("Username error: Current Email is incorrect");
+			console.log("Username error: Current Email is incorrect"); // HERE
 			actusers["usernamechange"].newparams = params;
 			users[currentuser] = actusers[currentuser];
 
@@ -467,7 +468,7 @@ app.post("/editaccount", function (request, response) {
 			fs.writeFileSync(actname, actdata, "utf-8");
 		} else if (users[new_user_name] != undefined) {
 			// if other accounts are using the desired email
-			console.log("Username error: the Email is already taken!"); // status if email is in use
+			console.log("Username error: the Email is already taken!"); // HERE status if email is in use
 			actusers["usernamechange"].newparams = params;
 			users[currentuser] = actusers[currentuser];
 			let data = JSON.stringify(users);
@@ -520,7 +521,23 @@ app.get("/register", function (request, response) {
 
 	response.send(
 		`
-    <form method ="POST" action ="?${params.toString()}">
+		<script>
+		window.onload = function() {
+		let params = (new URL(document.location)).searchParams;
+
+		if (params.has('fullname')) {
+			var fullname = params.get('fullname');
+			document.getElementById('fullname').value = fullname;
+			document.getElementById("submitbutton").outerHTML = '<input type="submit" value="Continue" id="button" name="button"></input>'
+		}
+
+		if (params.has('email')) {
+				var email = params.get('email');
+				document.getElementById('username').value = email;
+		}
+	};
+		</script>
+    <form method ="POST" action ="?${params.toString().split("fullname")[0]}">
 	<b>${
 		typeof regErrors["empty_boxes"] != "undefined"
 			? regErrors["empty_boxes"]
@@ -673,7 +690,14 @@ app.post("/register", function (request, response) {
 			"./loginsuccess?" + params.toString() + "&currentuser=" + currentuser
 		);
 	} else {
-		response.redirect("./register?" + params.toString());
+		response.redirect(
+			"./register?" +
+				params.toString() +
+				"&fullname=" +
+				request.body.fullname +
+				"&email=" +
+				request.body.username
+		); // keeps name and email input in URL to make form sticky
 		console.log("errors=" + regErrors);
 	}
 });

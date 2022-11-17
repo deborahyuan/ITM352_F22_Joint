@@ -1,17 +1,1 @@
-{
-	"itm352@hawaii.edu": {
-		"name": "ITM 352",
-		"password": "grader",
-		"loginstatus": "",
-		"lasttimelog": "11/16/2022 3:30PM",
-		"currtimelog": "11/16/2022 3:32PM",
-		"amtlogin": 0
-	},
-	"dyuan@hawaii.edu": {
-		"name": "Deborah Yuan",
-		"password": "hello!!",
-		"loginstatus": false,
-		"currtimelog": "11/16/2022 3:54PM",
-		"amtlogin": 0
-	}
-}
+{"itm352@hawaii.edu":{"name":"ITM 352","password":"grader","loginstatus":"","lasttimelog":"11/16/2022 3:30PM","currtimelog":"11/16/2022 3:32PM","amtlogin":0},"dyuan@hawaii.edu":{"name":"Deborah Yuan","password":"hello!!","loginstatus":false,"currtimelog":"11/16/2022 3:54PM","amtlogin":0},"hellloooooo@gmail.com":{"username":"hellloooooo@gmail.com","fullname":"Hi","password":"hellohellohello","loginstatus":true,"lasttimelog":0,"currtimelog":"11/16/2022 4:59PM","amtlogin":1},"hellooooooo@gmail.com":{"username":"hellooooooo@gmail.com","fullname":"Hi","password":"hellohellohello","loginstatus":true,"lasttimelog":0,"currtimelog":"11/16/2022 5:03PM","amtlogin":1},"hihihihi@gmail.com":{"username":"hihihihi@gmail.com","fullname":"Candy","password":"hellohellohello","loginstatus":false,"lasttimelog":0,"currtimelog":"11/16/2022 5:05PM","amtlogin":1}}
