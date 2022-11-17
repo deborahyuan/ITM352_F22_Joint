@@ -272,7 +272,7 @@ app.get("/login", function (request, response) {
 	<h1 style="font-size: 4em; color:white">Login</h1>
 	<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Log In</p>
 	<form name='login' action="?${
-		params.toString().split("error")[0]
+		params.toString().split("currentfullname")[0]
 	}" method="POST"> <!-- make sure to remove the error message -->
 		<BR>
 		<span id="usernamelabel" name="usernamelabel" style="color: white;"><B>Enter a username</B></span><BR><BR>
@@ -283,7 +283,7 @@ app.get("/login", function (request, response) {
 	<input type="submit" value='Login        ' id="button" style="width:20%;"></input>
 </form><BR>
 <form name='login' action='/startregister?${
-		params.toString().split("error")[0]
+		params.toString().split("currentfullname")[0]
 	}' method="POST">
 <input type="submit" value='New User? Click Here     ' id="button" style="width:20%;"></input></form>
 <BR>
