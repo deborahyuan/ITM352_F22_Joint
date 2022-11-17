@@ -38,7 +38,10 @@ Desc: This html page pulls data from a separate products file (products.json) an
 
     /* Remove the jumbotron's default bottom margin */
     .jumbotron {
+      margin-top: 0;
       margin-bottom: 0;
+      position: relative;
+
     }
 
     /* Add a gray background color and some padding to the footer */
@@ -108,13 +111,6 @@ Desc: This html page pulls data from a separate products file (products.json) an
 
 </script>
 
-<!-- jumbotron from w3 schools -->
-<div class="jumbotron">
-  <div class="container text-center">
-    <h1>iPhone</h1>
-    <p>Models for Sale</p>
-  </div>
-</div>
 
 <nav class="navbar navbar-inverse">
   <!-- navigation bar from w3 schools -->
@@ -136,14 +132,15 @@ Desc: This html page pulls data from a separate products file (products.json) an
       <ul class="nav navbar-nav">
         <li class="active"><a href="./">Products</a></li>
       </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <form name='login_status' action="/checkstatus" method="POST">
-        <li><input type="submit" value='Your Account' id="button" ></a></form></li>
-        <li><a href="./invoice.html"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
-      </ul> 
     </div>
   </div>
 </nav>
+
+
+  <div class="container text-center" style="padding-bottom: 50px;">
+    <h1 style="font-size: 6em;">iPhone</h1>
+    <p style="font-size: 2em;">Models for Sale</p>
+  </div>
 
 <!-- formatting provided by w3 schools -->
 <form name='quantity_form' action="/purchase" method="POST">
@@ -186,7 +183,7 @@ Desc: This html page pulls data from a separate products file (products.json) an
     <!-- footer -->
     <input type="submit" value='Purchase' id="button"></input>
 </form>
-<h3 class="footertext">
+<h3 style="padding: 10px;">
   <B>Apple Online Store</B>
 </h3>
 

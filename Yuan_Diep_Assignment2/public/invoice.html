@@ -94,7 +94,7 @@ Desc: This html page produces an invoice for the customer after the quantities o
 
   </script>
 
-<h1 class="invoiceheader" style="text-align: center;">Invoice</h1>
+<h1 class="invoiceheader" style="text-align: center;"><script>document.write(`${currentuser}'s Invoice`)</script></h1>
   <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
     <tbody>
       <thead>

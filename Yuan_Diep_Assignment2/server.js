@@ -209,6 +209,41 @@ app.get("/login", function (request, response) {
 	console.log(params.toString());
 	ordered = "";
 	response.send(`
+	<!-- 
+		Login/Registration Success for Assignment2
+		Author: Deborah Yuan & Evon Diep
+		Date: 11/16/22
+		Desc: This html page serves as a landing page for a user visiting the site. It features a navigation bar at the top, alongside a looping video of the iPhone 14 Pro, taken from Apple's website. There is a button labeled 'enter', which the user can click -- this leads to the products display page. 
+		-->
+		
+		<head>
+		  <meta charset="utf-8">
+		
+		  <meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		  <title>Smart Phone Store</title>
+		
+		  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+		  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+		
+		  <!-- google fonts -->
+		  <link rel="preconnect" href="https://fonts.googleapis.com">
+		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+		
+		   <!-- my own stylesheet (products-style.css) -->
+		  <link href="products-style.css" rel="stylesheet">
+		  <style>
+
+
+		  </style>
+		</head>
+	<html>
+	
+
+
 	<script>
 	let params = (new URL(document.location)).searchParams; // pull params from search URL
 
@@ -222,7 +257,6 @@ app.get("/login", function (request, response) {
 		}
 	  )
 	
-
 	console.log("Params=" + params); // shows what the params are in the console
 	// Check for an error and if so, pop up an alert to the user
 	if (params.has("error")) {
@@ -230,26 +264,35 @@ app.get("/login", function (request, response) {
 	  alert(err_msg);
 	}
 	</script>
-	<body>
-		<form name='login' action="?${
-			params.toString().split("error")[0]
-		}" method="POST"> <!-- make sure to remove the error message -->
-		
-			<span id="usernamelabel" name="usernamelabel">Enter a username</span><BR><BR>
-			<input type="text" id ="username" class="username" name="username" placeholder="Username"</input><BR><BR>
-			<span id="passwordlabel" name="passwordlabel">Enter a password</span><BR><BR>
-			<input type="text" id ="password" class="userpasswordname" name="password" placeholder="Password"</input><BR><BR>
-		
-	</body>
-	<footer class="container-fluid text-center">
-		<!-- footer -->
-		<input type="submit" value='Login' id="button"></input>
-	</form>
-	<form name='login' action='/startregister?${
+	<body style="background-color: black;">
+	<div class="container text-center" style="padding-top: 30px;">
+	<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment2_images/applergbgif.gif" alt="" style="max-width: 20%;" ></a>
+	</div>
+	<div class="container text-center" style="padding-bottom: 50px; padding-top: 0px;">
+	<h1 style="font-size: 4em; color:white">Login</h1>
+	<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Log In</p>
+	<form name='login' action="?${
+		params.toString().split("error")[0]
+	}" method="POST"> <!-- make sure to remove the error message -->
+		<BR>
+		<span id="usernamelabel" name="usernamelabel" style="color: white;"><B>Enter a username</B></span><BR><BR>
+		<input type="text" id ="username" class="username" name="username" placeholder="Username" style="border-radius: 5px;"></input><BR><BR>
+		<span id="passwordlabel" name="passwordlabel" style="color: white;"><B>Enter a password</B></span><BR><BR>
+		<input type="password" id ="password" class="userpasswordname" name="password" placeholder="Password" style="border-radius: 5px;"></input><BR><BR>
+	<BR>
+	<input type="submit" value='Login        ' id="button" style="width:20%;"></input>
+</form><BR>
+<form name='login' action='/startregister?${
 		params.toString().split("error")[0]
 	}' method="POST">
-	<input type="submit" value='New User? Click Here' id="button"></input>
-	</form>`);
+<input type="submit" value='New User? Click Here     ' id="button" style="width:20%;"></input></form>
+<BR>
+<form name='returntoproddisplay' action='/products_display.html' method="GET">
+<input type="submit" value='Return to Products     ' id="button" style="width:20%;"></input></form>
+</body>
+  	</div>
+		
+	</html>`);
 });
 
 app.post("/login", function (request, response) {
@@ -341,18 +384,111 @@ app.get("/loginsuccess", function (request, response) {
 		str3 =
 			"You were last logged in on " +
 			actusers[tfiles["loginsuccesstemp"].currentuser].lasttimelog +
-			". Welcome back!";
+			". <B>Welcome back!<B>";
 	}
 	response.send(
 		`
-	<p> ${tfiles["loginsuccesstemp"].currentuser}, you have logged in successfully. ${str}
-	<p> ${str2} ${str3}<p>
+		<!-- 
+		Login/Registration Success for Assignment2
+		Author: Deborah Yuan & Evon Diep
+		Date: 11/16/22
+		Desc: This html page serves as a landing page for a user visiting the site. It features a navigation bar at the top, alongside a looping video of the iPhone 14 Pro, taken from Apple's website. There is a button labeled 'enter', which the user can click -- this leads to the products display page. 
+		-->
+		
+		<head>
+		  <meta charset="utf-8">
+		
+		  <meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		  <title>Smart Phone Store</title>
+		
+		  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+		  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+		
+		  <!-- google fonts -->
+		  <link rel="preconnect" href="https://fonts.googleapis.com">
+		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+		
+		   <!-- my own stylesheet (products-style.css) -->
+		  <link href="products-style.css" rel="stylesheet">
+		  <style>
+			/* Remove the navbar's default rounded borders and increase the bottom margin */
+			.navbar {
+			  margin-bottom: 50px;
+			  border-radius: 0;
+			}
+		
+			/* Remove the jumbotron's default bottom margin */
+			.jumbotron {
+			  margin-bottom: 0;
+			}
+		
+			/* Add a gray background color and some padding to the footer */
+			footer {
+			  background-color: rgba(0, 0, 0, 0);
+			}
+		  </style>
+		</head>
+		
+		 <!-- navigation bar from w3 schools -->
+		  <nav class="navbar navbar-inverse">  
+			<div class="container-fluid">
+			  <div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+				  <span class="icon-bar"></span>
+				  <span class="icon-bar"></span>
+				  <span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">
+				   <!-- corner navbar Apple icon -->
+				  <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+			  </div>
+			  <div class="collapse navbar-collapse" id="myNavbar">
+				<ul class="nav navbar-nav">
+				  <li class="active"><a href="./">Home</a></li>
+				</ul>
+				<ul class="nav navbar-nav">
+				  <!-- clicking this 'tab' leads to products display -->
+				  <li ><a href="./products_display.html">Products</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+				<div class="collapse navbar-collapse" id="myNavbar">
+				<ul class="nav navbar-nav">
+				<li><form action="?${tfiles["loginsuccesstemp"].stringparams}" method="POST" style="position: absolute; top: 14px; right: 70px; width: 100px">
+				<a href="javascript:;" onclick="parentNode.submit();" style="text-decoration: none; color: grey;"><span class="glyphicon glyphicon-user"></span> Edit Account</a>
+				<input type="hidden" name="mess" value='Edit Account'>
+				</form></li>
+				</ul>
+				<ul class="nav navbar-nav">
+				<li><form action="invoice?${tfiles["loginsuccesstemp"].stringparams}" method="POST" style="position: absolute; top: 14px; right: -50px; width: 100px">
+				<a href="javascript:;" onclick="parentNode.submit();" style="text-decoration: none; color: grey;"><span class="glyphicon glyphicon-shopping-cart"></span> Invoice</a>
+				<input type="hidden" name="mess" value='Invoice'>
+				</form></li>
+				</ul>
+				</ul> 
+			  </div>
+			</div>
+		  </nav>
+	
+		  <div class="container text-center" style="padding-bottom: 50px;">
+		  <h1 style="font-size: 6em;"> ${tfiles["loginsuccesstemp"].currentuser},</h1>
+		  <p style="font-size: 2em;">you have logged in successfully</p>
+		</div>
+
+		<div class="container text-center" style="padding-bottom: 50px;">
+		<p style="font-size: 2em;">${str}<BR>${str2}<BR>${str3}</p>
+	  </div>
+	  <div class="container text-center" style="padding-bottom: 50px;">
 	<form name='editaccount' action='?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
-	<input type="submit" value='Edit Account Information' id="button"></input>
+	<input type="submit" value='Edit Account Information    ' id="button"></input>
 	</form>
 	<form name='gotoinvoice' action='invoice?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
-	<input type="submit" value='Go To Invoice' id="button"></input>
-	</form>`
+	<input type="submit" value='Go To Invoice   ' id="button"></input>
+	</form>
+	</div>`
 	);
 });
 
@@ -371,26 +507,92 @@ app.get("/editaccount", function (request, response) {
 	console.log("CURR USER PARAM" + currentuser);
 	console.log("EDITACCPARAM" + params);
 	response.send(`
+	<!-- 
+		Login/Registration Success for Assignment2
+		Author: Deborah Yuan & Evon Diep
+		Date: 11/16/22
+		Desc: This html page serves as a landing page for a user visiting the site. It features a navigation bar at the top, alongside a looping video of the iPhone 14 Pro, taken from Apple's website. There is a button labeled 'enter', which the user can click -- this leads to the products display page. 
+		-->
+		
+		<head>
+		  <meta charset="utf-8">
+		
+		  <meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		  <title>Smart Phone Store</title>
+		
+		  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+		  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+		
+		  <!-- google fonts -->
+		  <link rel="preconnect" href="https://fonts.googleapis.com">
+		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+		
+		   <!-- my own stylesheet (products-style.css) -->
+		  <link href="products-style.css" rel="stylesheet">
+		  <style>
+			/* Remove the navbar's default rounded borders and increase the bottom margin */
+			.navbar {
+			  margin-bottom: 50px;
+			  border-radius: 0;
+			}
+		
+			/* Remove the jumbotron's default bottom margin */
+			.jumbotron {
+			  margin-bottom: 0;
+			}
+		
+			/* Add a gray background color and some padding to the footer */
+			footer {
+			  background-color: rgba(0, 0, 0, 0);
+			}
+		  </style>
+		</head>
+		
+		 <!-- navigation bar from w3 schools -->
+		  <nav class="navbar navbar-inverse">  
+			<div class="container-fluid">
+			  <div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+				  <span class="icon-bar"></span>
+				  <span class="icon-bar"></span>
+				  <span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">
+				   <!-- corner navbar Apple icon -->
+				  <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+			  </div>
+			 
+			</div>
+		  </nav>
 	<body>
+	<div class="container text-center" style="padding-bottom: 50px;">
 		<form name='editaccount' action="?${params.toString()}" method="POST">
-			<span id="accountpageinstruction" name="accountpageinstruction">Hi ${currentuser}, edit your account information here:</span>
-			<p>Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
-			<span id="editfullnamelabel" name="editfullnamelabel">Enter your current full name in the first textbox, then your new full name in the second textbox</span><BR><BR>
-			<input type="text" id ="currentfullname" class="currentfullname" name="currentfullname" placeholder="Enter Current Full Name"</input><BR><BR>
-			<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name"</input><BR><BR>
-			<span id="editusernamelabel" name="editusernamelabel">Enter your current email in the first textbox, then your new email in the second textbox</span><BR><BR>
-			<input type="text" id ="currentusername" class="currentusername" name="currentusername" placeholder="Enter Current Email"</input><BR><BR>
-			<input type="text" id ="newusername" class="newusername" name="newusername" placeholder="Enter New Email"</input><BR><BR>
-			<span id="editpasswordlabel" name="editpasswordlabel">Enter your current password in the first textbox, then your new password in the second textbox</span><BR><BR>
-			<input type="text" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password"</input><BR><BR>
-			<input type="text" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password"</input><BR><BR>
-			<span id="passwordconfirmlabel" name="passwordconfirmlabel">Confirm your new password by typing it again</span><BR><BR>
-			<input type="text" id ="newpasswordconfirm" class="newpasswordconfirm" name="newpasswordconfirm" placeholder="Enter New Password Again"</input><BR><BR>
+			<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">${currentuser},</h1></span><BR>
+			<p style="font-size: 2em;">Edit your account information here:</p>
+			<p style="font-size: 1.5em;"> Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
+			<span id="editfullnamelabel" name="editfullnamelabel"><p style="font-size: 1em;"><B>Enter your current full name in the first textbox, <BR>then your new full name in the second textbox</B></p></span>
+			<input type="text" id ="currentfullname" class="currentfullname" name="currentfullname" placeholder="Enter Current Full Name" style="border-radius: 5px;"></input><BR><BR>
+			<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name" style="border-radius: 5px;"></input><BR><BR>
+			<span id="editusernamelabel" name="editusernamelabel"><p style="font-size: 1em;"><B>Enter your current email in the first textbox, <BR>then your new email in the second textbox</B></p></span>
+			<input type="text" id ="currentusername" class="currentusername" name="currentusername" placeholder="Enter Current Email" style="border-radius: 5px;"></input><BR><BR>
+			<input type="text" id ="newusername" class="newusername" name="newusername" placeholder="Enter New Email" style="border-radius: 5px;"></input><BR><BR>
+			<span id="editpasswordlabel" name="editpasswordlabel"><p style="font-size: 1em;"><B>Enter your current password in the first textbox, <BR>then your new password in the second textbox</B></p></span>
+			<input type="text" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password" style="border-radius: 5px;"></input><BR><BR>
+			<input type="text" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password" style="border-radius: 5px;"></input><BR><BR>
+			<span id="passwordconfirmlabel" name="passwordconfirmlabel"><p style="font-size: 1em;"><B>Confirm your new password by typing it again</B></p></span>
+			<input type="text" id ="newpasswordconfirm" class="newpasswordconfirm" name="newpasswordconfirm" placeholder="Enter New Password Again" style="border-radius: 5px;"></input><BR><BR>			
+			<input type="submit" value='Submit Changes       ' id="button" width="100%"></input><BR><BR>
+			<form name='returntologinsuccess' action="loginsuccess?${params.toString()}" method="GET">
+<input type="submit" value='Return to Previous Page     ' id="button" style="width:30%;"></input></form>
+			</div>
+
+	</form>
 	</body>
-	<footer class="container-fluid text-center">
-		<!-- footer -->
-		<input type="submit" value='Submit Changes' id="button"></input>
-	</form>`);
+	`);
 });
 
 app.post("/editaccount", function (request, response) {
@@ -515,6 +717,38 @@ app.get("/register", function (request, response) {
 
 	response.send(
 		`
+		<!-- 
+		Login/Registration Success for Assignment2
+		Author: Deborah Yuan & Evon Diep
+		Date: 11/16/22
+		Desc: This html page serves as a landing page for a user visiting the site. It features a navigation bar at the top, alongside a looping video of the iPhone 14 Pro, taken from Apple's website. There is a button labeled 'enter', which the user can click -- this leads to the products display page. 
+		-->
+		
+		<head>
+		  <meta charset="utf-8">
+		
+		  <meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		  <title>Smart Phone Store</title>
+		
+		  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+		  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+		
+		  <!-- google fonts -->
+		  <link rel="preconnect" href="https://fonts.googleapis.com">
+		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+		
+		   <!-- my own stylesheet (products-style.css) -->
+		  <link href="products-style.css" rel="stylesheet">
+		  <style>
+
+
+		  </style>
+		</head>
+	<html>
 		<script>
 		window.onload = function() {
 		let params = (new URL(document.location)).searchParams;
@@ -531,14 +765,22 @@ app.get("/register", function (request, response) {
 		}
 	};
 		</script>
+		<body style="background-color: black;">
+		<div class="container text-center" style="padding-top: 30px;">
+		<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment2_images/applergbgif.gif" alt="" style="max-width: 20%;" ></a>
+		</div>
+		<div class="container text-center" style="padding-bottom: 50px; padding-top: 0px;">
+		<h1 style="font-size: 4em; color:white">Register</h1>
+		<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Register</p>
+
     <form method ="POST" action ="?${params.toString().split("fullname")[0]}">
 	<b>${
 		typeof regErrors["empty_boxes"] != "undefined"
 			? regErrors["empty_boxes"]
 			: ""
 	}</b><BR>
-    <span id="fullnamelabel" name="fullnamelabel">Enter your full name</span><BR>
-    <input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name"</input><BR>
+    <span id="fullnamelabel" name="fullnamelabel" style="color: white;"><B>Enter your full name</B></span><BR>
+    <input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name" style="border-radius: 5px;"></input><BR>
 	<b>${
 		typeof regErrors["bad_userlength"] != "undefined"
 			? regErrors["bad_userlength"]
@@ -548,8 +790,8 @@ app.get("/register", function (request, response) {
 		typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
 	}</b><BR>
 
-    <span id="usernamelabel" name="usernamelabel">Enter an email</span><BR>
-    <input type="text" id ="username" class="username" name="username" placeholder="bob@example.com"</input><BR>
+    <span id="usernamelabel" name="usernamelabel" style="color: white;"><B>Enter an email</B></span><BR>
+    <input type="text" id ="username" class="username" name="username" placeholder="example@example.com" style="border-radius: 5px;"></input><BR>
 	<b>${
 		typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
 	}<BR>
@@ -559,8 +801,8 @@ app.get("/register", function (request, response) {
 			: ""
 	}</b><BR>
 
-    <span id="passwordlabel" name="passwordlabel">Enter a password</span><BR>
-    <input type="text" id ="password" class="password" name="password" placeholder="Password"</input><BR>
+    <span id="passwordlabel" name="passwordlabel" style="color: white;"><B>Enter a password</B></span><BR>
+    <input type="text" id ="password" class="password" name="password" placeholder="Password" style="border-radius: 5px;"></input><BR>
 	<b>${
 		typeof regErrors["bad_passlength"] != "undefined"
 			? regErrors["bad_passlength"]
@@ -572,14 +814,15 @@ app.get("/register", function (request, response) {
 			: ""
 	}</b><BR>
 
-    <span id="passwordlabelconfirm" name="passwordlabelconfirm">Repeat password</span><BR>
-    <input type="text" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password"</input><BR>
+    <span id="passwordlabelconfirm" name="passwordlabelconfirm" style="color: white;"><B>Repeat password</B></span><BR>
+    <input type="text" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password" style="border-radius: 5px;"></input><BR>
 	<b>${
 		typeof regErrors["password_mismatch"] != "undefined"
 			? regErrors["password_mismatch"]
 			: ""
 	}</b><BR>
-    <input type="submit" value='Register' id="submitbutton" name="submitbutton" onclick="changeValue();"></input>
+	<BR>
+    <input type="submit" value='Register        ' id="button" name="submitbutton" onclick="changeValue(); style="width:20%;"></input>
     </form>
     `
 	);
@@ -747,14 +990,89 @@ app.post("/goodbye", function (request, response) {
 		currentuser = params.get("currentuser");
 	}
 	response.send(`
-	<p>Thank you ${currentuser} for your purchase<p>
-	<p>Click the button below to log out</p>
+	<!-- 
+	Goodbye Page for Assignment2
+	Author: Deborah Yuan & Evon Diep
+	Date: 11/16/22
+	Desc: This html page serves as a goodbye page for a user visiting the site. It features a navigation bar at the top. There is a button labeled 'logout', which the user can click -- this leads to the login page. 
+	-->
+	
+	<head>
+	  <meta charset="utf-8">
+	
+	  <meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	  <title>Smart Phone Store</title>
+	
+	  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+	  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	
+	  <!-- google fonts -->
+	  <link rel="preconnect" href="https://fonts.googleapis.com">
+	  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+	
+	   <!-- my own stylesheet (products-style.css) -->
+	  <link href="products-style.css" rel="stylesheet">
+	  <style>
+		/* Remove the navbar's default rounded borders and increase the bottom margin */
+		.navbar {
+		  margin-bottom: 50px;
+		  border-radius: 0;
+		}
+	
+		/* Remove the jumbotron's default bottom margin */
+		.jumbotron {
+		  margin-bottom: 0;
+		}
+	
+		/* Add a gray background color and some padding to the footer */
+		footer {
+		  background-color: rgba(0, 0, 0, 0);
+		}
+	  </style>
+	</head>
+	
+	 <!-- navigation bar from w3 schools -->
+	  <nav class="navbar navbar-inverse">  
+		<div class="container-fluid">
+		  <div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">
+			   <!-- corner navbar Apple icon -->
+			  <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+		  </div>
+		  <div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav">
+			  <li class="active"><a href="./">Home</a></li>
+			</ul>
+			<ul class="nav navbar-nav">
+			  <!-- clicking this 'tab' leads to products display -->
+			  <li ><a href="./products_display.html">Products</a></li>
+			</ul>
+		  </div>
+		</div>
+	  </nav>
 
-<footer class="container-fluid text-center">
-<!-- footer -->
-<form action="logout?${params.toString()}" method="GET">
+	  <div class="container text-center" style="padding-bottom: 50px;">
+	  <p style="font-size: 2em;">Thank you</p>
+	  <h1 style="font-size: 6em;"> ${currentuser}</h1><BR>
+	  <p style="font-size: 2em;">for your purchase</p>
+	  <BR><BR>
+	  <p style="font-size: 2em;"><B>Click the button below to log out<B></p><BR>
+	  <form action="logout?${params.toString()}" method="GET">
 <input type="submit" value='Log Out' id="button"></input>
-</form>`);
+</form>
+	</div>
+
+
+`);
 });
 
 app.get("/logout", function (request, response) {
@@ -776,7 +1094,7 @@ app.get("/logout", function (request, response) {
 	fs.writeFileSync(fname, data, "utf-8");
 	fs.writeFileSync(actname, actdata, "utf-8");
 	fs.writeFileSync(tempname, tempdata, "utf-8");
-	response.redirect("index.html");
+	response.redirect("/login");
 });
 
 // start server
