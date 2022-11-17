@@ -5,9 +5,7 @@ Date: 11/16/22
 Desc: This server, server.js, provides validation for the data submitted by the form on products display, responding with the appropriate response depending on whether the quantities inputted are valid or invalid. In case of valid quantities, the user will be sent to the login. With invalid quantities, the user will be sent an error.
 */
 
-const { getRandomValues } = require("crypto");
 var express = require("express");
-/*var bcrypt = require("bcrypt"); // for bcrypt */
 var app = express();
 var path = require("path");
 
@@ -66,39 +64,17 @@ if (fs.existsSync(tempname)) {
 
 var regErrors = {}; // empty error array
 
-/* BCRYPT
-var hash = bcrypt.hashSync("my password");
-console.log(hash);
-
-bcrypt.compareSync("my password", hash); // true
-console.log(bcrypt.compareSync("my password", hash)); // true
-
-bcrypt.compareSync("not my password", hash); // false
-console.log(bcrypt.compareSync("not my password", hash)); // true
-*/
-/* bcrypt testing CURRENTLY NOT WORKING :()
-import * as bcrypt from 'bcrypt'
-// generateHash('password123');
-function generateHash (typeof password == 'string') {
-	const salt = bcrypt.genSaltSync(12); // range of 10-12 is generally sufficient protection
-	const hash = bcrypt.hashSync(password, salt);// inside ()  is what we are trying to hash, random data
-	return hash;
-
-}
-console.log (generateHash('password123'));
-*/
-
-/* functions */
+/* FUNCTIONS */
 
 // date function
 function getCurrentDate() {
-	// assistance from Bobby Roth
+	// PART OF IR4: OBTAINING TIME OF USER LOGIN
 	var date = new Date(); // pulls new (current) date
-	hours = date.getHours();
-	time = hours < 12 ? "AM" : "PM";
-	hours = ((hours + 11) % 12) + 1;
-	minutes = date.getMinutes();
-	minutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+	hours = date.getHours(); // variable for hours
+	time = hours < 12 ? "AM" : "PM"; // variable for time, which sets AM or PM according to whether or not hours is less than 12
+	hours = ((hours + 11) % 12) + 1; // uses % to check remainder for hours to convert from 24 hr clock to 12 hr clock
+	minutes = date.getMinutes(); // variable for minutes
+	minutes = minutes < 10 ? `0${minutes}` : `${minutes}`; // adds 0 in front of the minutes value if it is less than 10
 	new_date =
 		date.getMonth() +
 		1 +
@@ -110,11 +86,11 @@ function getCurrentDate() {
 		hours +
 		":" +
 		minutes +
-		time;
-	return new_date;
+		time; // creates a variable called new_date, which combines month, day, year, hours, minutes, then AM/PM
+	return new_date; // calling on the function returns the current date + time
 }
 
-// isNonNegativeInteger tests the input for errors, then returns error messages if any
+// isNonNegativeInteger tests the input for errors, then returns error messages if any, REUSED FROM ASSIGNMENT 1
 function isNonNegativeInteger(queryString, returnErrors = false) {
 	errors = []; // assume no errors at first
 	if (Number(queryString) != queryString) {
@@ -125,6 +101,7 @@ function isNonNegativeInteger(queryString, returnErrors = false) {
 	}
 
 	if (returnErrors) {
+		// if there are errors, return errors
 		return errors;
 	} else if (errors.length == 0) {
 		return true;
@@ -148,13 +125,14 @@ app.all("*", function (request, response, next) {
 
 // THIS IS FOR LOGIN AND REGISTER
 
-ordered = "";
+ordered = ""; // have a variable called ordered with no value, purchased quantities will initially be in here
 
 app.post("/purchase", function (request, response) {
+	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1
 	// process purchase request (validate quantities, check quantity available)
 	let validinput = true; // assume that all terms are valid
 	let allblank = false; // assume that it ISN'T all blank
-	let instock = true;
+	let instock = true; // if it is in stock
 	let othererrors = false; //assume that there aren't other errors
 	// process form by redirecting to the receipt page
 	customerquantities = request.body[`quantitytextbox`];
@@ -185,8 +163,6 @@ app.post("/purchase", function (request, response) {
 			othererrors = true;
 		}
 	}
-
-	console.log(customerquantities);
 
 	if (customerquantities.join("") == 0) {
 		// if the array customerquantities adds up to 0, that means there are no quantities typed in
@@ -226,6 +202,7 @@ app.post("/purchase", function (request, response) {
 	}
 });
 
+// login
 app.get("/login", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
@@ -290,7 +267,7 @@ app.post("/login", function (request, response) {
 			users[inputusername].amtlogin += Number(1);
 			actusers[inputusername] = {};
 			users[inputusername].loginstatus = true;
-			users[inputusername].lasttimelog = actusers[inputusername].currtimelog;
+			users[inputusername].lasttimelog = users[inputusername].currtimelog;
 			users[inputusername].currtimelog = getCurrentDate();
 			actusers[inputusername] = users[inputusername];
 			userstatus = "currentuser=" + currentuser + "&";
@@ -341,22 +318,39 @@ app.get("/loginsuccess", function (request, response) {
 			Number(Object.keys(actusers).length - 1) +
 			" people logged in.";
 	}
+
+	if (actusers[tfiles["loginsuccesstemp"].currentuser].amtlogin == 1) {
+		// grammar fixer
+		str2 =
+			"You've logged in a total of " +
+			actusers[tfiles["loginsuccesstemp"].currentuser].amtlogin +
+			" time.";
+	} else {
+		str2 =
+			"You've logged in a total of " +
+			actusers[tfiles["loginsuccesstemp"].currentuser].amtlogin +
+			" times.";
+	}
+
+	if (
+		actusers[tfiles["loginsuccesstemp"].currentuser].lasttimelog == 0 ||
+		actusers[tfiles["loginsuccesstemp"].currentuser].lasttimelog == undefined
+	) {
+		str3 = "This is the first time you've logged in.";
+	} else {
+		str3 =
+			"You were last logged in on " +
+			actusers[tfiles["loginsuccesstemp"].currentuser].lasttimelog +
+			". Welcome back!";
+	}
 	response.send(
 		`
-	<p> ${
-		tfiles["loginsuccesstemp"].currentuser
-	}, you have logged in successfully. ${str}
-	<p> You were last logged in ${
-		actusers[tfiles["loginsuccesstemp"].currentuser].lasttimelog
-	}. Welcome back!<p>
-	<form name='editaccount' action='?${
-		tfiles["loginsuccesstemp"].stringparams
-	}' method="POST">
+	<p> ${tfiles["loginsuccesstemp"].currentuser}, you have logged in successfully. ${str}
+	<p> ${str2} ${str3}<p>
+	<form name='editaccount' action='?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
 	<input type="submit" value='Edit Account Information' id="button"></input>
 	</form>
-	<form name='gotoinvoice' action='invoice?${
-		tfiles["loginsuccesstemp"].stringparams
-	}' method="POST">
+	<form name='gotoinvoice' action='invoice?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
 	<input type="submit" value='Go To Invoice' id="button"></input>
 	</form>`
 	);
@@ -771,7 +765,7 @@ app.get("/logout", function (request, response) {
 	}
 	ordered = "";
 	actusers[currentuser].loginstatus = false;
-	users[currentuser].loginstatus = actusers[currentuser].loginstatus;
+	users[currentuser] = actusers[currentuser];
 	delete actusers[currentuser];
 
 	tfiles["loginsuccesstemp"] = {}; // delete tfiles
