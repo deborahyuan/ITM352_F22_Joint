@@ -9,7 +9,15 @@
 	},
 	"dyuan@hawaii.edu": {
 		"fullname": "Deborah Yuan",
-		"password": "hello!!",
+		"password": "heyhihello1@",
+		"loginstatus": false,
+		"lasttimelog": "11/16/2022 6:15PM",
+		"currtimelog": "11/16/2022 11:37PM",
+		"amtlogin": 2
+	},
+	"evond@hawaii.edu": {
+		"fullname": "Deborah Yuan",
+		"password": "heyhihello1@",
 		"loginstatus": false,
 		"lasttimelog": "11/16/2022 6:15PM",
 		"currtimelog": "11/16/2022 11:37PM",

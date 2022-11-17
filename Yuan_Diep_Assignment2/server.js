@@ -877,12 +877,12 @@ app.get("/register", function (request, response) {
 		<h1 style="font-size: 4em; color:white">Register</h1>
 		<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Register</p>
 
-    <form method ="POST" action ="?${params.toString().split("fullname")[0]}">
-	<b>${
-		typeof regErrors["empty_boxes"] != "undefined"
-			? regErrors["empty_boxes"]
-			: ""
-	}</b><BR>
+		<form method ="POST" action ="?${params.toString().split("fullname")[0]}">
+		<b>${
+			typeof regErrors["empty_boxes"] != "undefined"
+				? regErrors["empty_boxes"]
+				: ""
+		}</b><BR>
     <span id="fullnamelabel" name="fullnamelabel" style="color: white;"><B>Enter your full name</B></span><BR>
     <input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name" style="border-radius: 5px;"></input><BR>
 	<b>${
@@ -907,6 +907,9 @@ app.get("/register", function (request, response) {
 
     <span id="passwordlabel" name="passwordlabel" style="color: white;"><B>Enter a password</B></span><BR>
     <input type="text" id ="password" class="password" name="password" placeholder="Password" style="border-radius: 5px;"></input><BR>
+	<b>${
+		typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
+	}</b><BR>
 	<b>${
 		typeof regErrors["bad_passlength"] != "undefined"
 			? regErrors["bad_passlength"]
@@ -937,11 +940,8 @@ app.get("/register", function (request, response) {
 app.post("/register", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
-	// let POST = request.body;
-	// let user_name = POST["username"];
 
-	regErrors = {}; // sets regErrors to empty
-
+	regErrors = {}; // sets regErrors to empty so errors don't show up when page reloads
 	fullname = request.body.fullname;
 	user_name = request.body.username.toLowerCase();
 	password = request.body.password;
@@ -949,7 +949,6 @@ app.post("/register", function (request, response) {
 	pass_repeat = request.body.passwordconfirm;
 
 	username = request.body.username.toLowerCase();
-
 	// check for empty textboxes
 	if (
 		request.body.fullname == "" ||
@@ -968,6 +967,7 @@ app.post("/register", function (request, response) {
 
 	// check to see if full name only contains letters
 	if (/^[A-Za-z_ -]+$/.test(request.body.fullname) == false) {
+		// regEx retrieved from stack overflow
 		regErrors["bad_user"] = `Name must only contain letters.`;
 	}
 
@@ -979,6 +979,7 @@ app.post("/register", function (request, response) {
 	// checks if email follows X@Y.Z format
 	if (
 		/^[a-zA-Z0-9._]+@[a-zA-Z0-9.]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+			// // regEx retrieved from stack overflow
 			request.body.username
 		) == false
 	) {
@@ -986,22 +987,26 @@ app.post("/register", function (request, response) {
 	}
 
 	// PASSWORD VALIDATION
-	// if password is not in between 10 and 16 characters
+	// EC IR2 password must contain at least one special character and one number; regEx retrieved from stack overflow
+	if (
+		/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]/.test(
+			request.body.password
+		) == false
+	) {
+		regErrors[
+			"bad_pass"
+		] = `Password must contain at least one special character and one number.`;
+	}
+
+	// checks if password is not in between 10 and 16 characters
 	if (request.body.password.length < 10 || request.body.password.length > 16) {
 		regErrors[
 			"bad_passlength"
 		] = `Password must be between 10 and 16 characters.`;
 	}
 
-	// checks if password box is empty; NOT implemented in app.get rn
-	if (request.body.password == "") {
-		regErrors["pass_space"] = `Please enter a valid password.`;
-	}
-
-	// checks if password contains spaces; allows all characters but not
-	if (
-		/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*$/.test(request.body.password) == false
-	) {
+	// checks if password contains spaces; regEx retrieved from stack overflow
+	if (/^\S*$/.test(request.body.password) == false) {
 		regErrors["contains_space"] = `Passwords should not contain spaces.`;
 	}
 
@@ -1009,9 +1014,9 @@ app.post("/register", function (request, response) {
 	if (request.body.password != request.body.passwordconfirm) {
 		regErrors["password_mismatch"] = `Passwords must match!`;
 	}
-
 	if (Object.keys(regErrors).length == 0) {
 		users[user_name] = {};
+		users[user_name].username = request.body.username;
 		users[user_name].fullname = request.body.fullname;
 		users[user_name].password = request.body.password;
 		users[user_name].loginstatus = true;
