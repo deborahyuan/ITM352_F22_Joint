@@ -496,8 +496,8 @@ app.post("/loginsuccess", function (request, response) {
 	response.redirect("editaccount?" + tfiles["loginsuccesstemp"].stringparams);
 });
 
+// Code modified from Assignment 2 Example Codes
 // page to Edit Account
-
 app.get("/editaccount", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log("EDITACCPARAM" + params);
@@ -551,7 +551,25 @@ app.get("/editaccount", function (request, response) {
 			}
 		  </style>
 		</head>
-		
+		<script>
+		window.onload = function() {
+		let params = (new URL(document.location)).searchParams;
+	
+		if (params.has('currentuser')) {
+			var currentfullname = params.get('currentfullname');
+			document.getElementById('currentfullname').value = currentfullname;
+	
+			var newfullname = params.get('newfullname');
+			document.getElementById('newfullname').value = newfullname;
+	
+			var currentusername = params.get('currentusername');
+			document.getElementById('currentusername').value = currentusername;
+	
+			var newusername = params.get('newusername');
+			document.getElementById('newusername').value = newusername;
+		}
+	};    
+	</script>
 		 <!-- navigation bar from w3 schools -->
 		  <nav class="navbar navbar-inverse">  
 			<div class="container-fluid">
@@ -576,15 +594,62 @@ app.get("/editaccount", function (request, response) {
 			<p style="font-size: 1.5em;"> Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
 			<span id="editfullnamelabel" name="editfullnamelabel"><p style="font-size: 1em;"><B>Enter your current full name in the first textbox, <BR>then your new full name in the second textbox</B></p></span>
 			<input type="text" id ="currentfullname" class="currentfullname" name="currentfullname" placeholder="Enter Current Full Name" style="border-radius: 5px;"></input><BR><BR>
-			<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name" style="border-radius: 5px;"></input><BR><BR>
+			<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name" style="border-radius: 5px;"></input>
+			<BR>
+			<b>${
+				typeof regErrors["wrong_name"] != "undefined"
+					? regErrors["wrong_name"]
+					: ""
+			}</b><BR>
+            <b>${
+							typeof regErrors["bad_userlength"] != "undefined"
+								? regErrors["bad_userlength"]
+								: ""
+						}</b><BR>
+            <b>${
+							typeof regErrors["bad_user"] != "undefined"
+								? regErrors["bad_user"]
+								: ""
+						}</b><BR>
+
 			<span id="editusernamelabel" name="editusernamelabel"><p style="font-size: 1em;"><B>Enter your current email in the first textbox, <BR>then your new email in the second textbox</B></p></span>
 			<input type="text" id ="currentusername" class="currentusername" name="currentusername" placeholder="Enter Current Email" style="border-radius: 5px;"></input><BR><BR>
 			<input type="text" id ="newusername" class="newusername" name="newusername" placeholder="Enter New Email" style="border-radius: 5px;"></input><BR><BR>
+			<b>${
+				typeof regErrors["taken_email"] != "undefined"
+					? regErrors["taken_email"]
+					: ""
+			}</b><BR>
+
 			<span id="editpasswordlabel" name="editpasswordlabel"><p style="font-size: 1em;"><B>Enter your current password in the first textbox, <BR>then your new password in the second textbox</B></p></span>
-			<input type="text" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password" style="border-radius: 5px;"></input><BR><BR>
-			<input type="text" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password" style="border-radius: 5px;"></input><BR><BR>
+			<input type="password" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password" style="border-radius: 5px;"></input><BR><BR>
+			<input type="password" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password" style="border-radius: 5px;"></input><BR><BR>
+			<b>${
+				typeof regErrors["wrong_pass"] != "undefined"
+					? regErrors["wrong_pass"]
+					: ""
+			}</b><BR>
+			<b>${
+				typeof regErrors["bad_passlength"] != "undefined"
+					? regErrors["bad_passlength"]
+					: ""
+			}</b><BR>
 			<span id="passwordconfirmlabel" name="passwordconfirmlabel"><p style="font-size: 1em;"><B>Confirm your new password by typing it again</B></p></span>
-			<input type="text" id ="newpasswordconfirm" class="newpasswordconfirm" name="newpasswordconfirm" placeholder="Enter New Password Again" style="border-radius: 5px;"></input><BR><BR>			
+			<input type="password" id ="newpasswordconfirm" class="newpasswordconfirm" name="newpasswordconfirm" placeholder="Enter New Password Again" style="border-radius: 5px;"></input><BR><BR>
+			<b>${
+				typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
+			}</b><BR>
+			<b>${
+				typeof regErrors["nomatch_pass"] != "undefined"
+					? regErrors["nomatch_pass"]
+					: ""
+			}</b><BR>
+			<b>${
+				typeof regErrors["contains_space"] != "undefined"
+					? regErrors["contains_space"]
+					: ""
+			}</b>
+			
 			<input type="submit" value='Submit Changes       ' id="button" width="100%"></input><BR><BR>
 			<form name='returntologinsuccess' action="loginsuccess?${params.toString()}" method="GET">
 <input type="submit" value='Return to Previous Page     ' id="button" style="width:30%;"></input></form>
@@ -595,6 +660,7 @@ app.get("/editaccount", function (request, response) {
 	`);
 });
 
+// Code inspired by Assignment 2 Code Examples
 app.post("/editaccount", function (request, response) {
 	// POST for editing the account information
 	let params = new URLSearchParams(request.query); // grab params from url
@@ -602,6 +668,7 @@ app.post("/editaccount", function (request, response) {
 		// identify current user get get it
 		currentuser = params.get("currentuser");
 	}
+	regErrors = {}; // reset errors array
 
 	console.log("EDITACCPARAM" + params);
 
@@ -613,17 +680,26 @@ app.post("/editaccount", function (request, response) {
 	curr_pass = POST["currentpassword"];
 	new_pass = POST["newpassword"];
 	new_pass_2 = POST["newpasswordconfirm"];
+	changetonew = false;
 
 	actusers["usernamechange"] = {}; // stores some information if the user decides to change their username/email
 
 	// if the current username/email exists
 	if (new_full_name == "") {
 		console.log("New Full Name is blank"); // status
-	} else if (actusers[currentuser].name != curr_full_name) {
+	} else if (actusers[currentuser].fullname != curr_full_name) {
 		console.log("Current Full Name is incorrect"); // status
+		console.log(
+			"new: " + actusers[currentuser].fullname + "current " + curr_full_name
+		);
+		regErrors["wrong_name"] = `Current Full Name is incorrect!`;
+	} else if (new_full_name.length < 2 || new_full_name.length > 30) {
+		regErrors["bad_userlength"] = `Name must be between 2 and 30 characters.`; // checks to see if full name entered is between 2 and 30 characters
+	} else if (/^[A-Za-z_ -]+$/.test(new_full_name) == false) {
+		regErrors["bad_user"] = `Name must only contain letters.`;
 	} else {
 		// if new full name box isn't empty
-		actusers[currentuser].name = new_full_name; // set new full name to current full name
+		actusers[currentuser].fullname = new_full_name; // set new full name to current full name
 	}
 
 	// if the new password isn't blank and matches
@@ -632,8 +708,24 @@ app.post("/editaccount", function (request, response) {
 		// if password isn't blank
 	} else if (actusers[currentuser].password != curr_pass) {
 		console.log("Current Password is incorrect"); // status
+		regErrors["wrong_pass"] = `Current Password is incorrect!`;
 	} else if (new_pass != new_pass_2) {
 		console.log("New Password Doesn't match"); // status
+		regErrors["nomatch_pass"] = `New password does not match!`;
+	} else if (
+		/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]/.test(
+			request.body.password
+		) == false
+	) {
+		regErrors[
+			"bad_pass"
+		] = `Password must contain at least one special character and one number.`;
+	} else if (new_pass.length < 10 || new_pass.length > 16) {
+		regErrors[
+			"bad_passlength"
+		] = `Password must be between 10 and 16 characters.`;
+	} else if (/^\S*$/.test(new_pass) == false) {
+		regErrors["contains_space"] = `Passwords should not contain spaces.`;
 	} else {
 		actusers[currentuser].password = new_pass; // set current password to new password
 	}
@@ -643,41 +735,27 @@ app.post("/editaccount", function (request, response) {
 		// if new username box is empty
 		console.log("New Email is blank");
 		users[currentuser] = actusers[currentuser];
-		actusers["usernamechange"].newparams = params;
-
-		let data = JSON.stringify(users);
-		let actdata = JSON.stringify(actusers);
-
-		fs.writeFileSync(fname, data, "utf-8");
-		fs.writeFileSync(actname, actdata, "utf-8");
 	} else {
 		// if the new email/username box has a value in it, meaning the customer wants to change their username/email
 		if (currentuser != curr_user_name) {
-			console.log("Username error: Current Email is incorrect"); // HERE
-			actusers["usernamechange"].newparams = params;
+			console.log("Username error: Current Email is incorrect");
+			regErrors["wrong_email"] = `Username error: Current Email is incorrect`;
+
 			users[currentuser] = actusers[currentuser];
-
-			let data = JSON.stringify(users);
-			let actdata = JSON.stringify(actusers);
-
-			fs.writeFileSync(fname, data, "utf-8");
-			fs.writeFileSync(actname, actdata, "utf-8");
 		} else if (users[new_user_name] != undefined) {
 			// if other accounts are using the desired email
-			console.log("Username error: the Email is already taken!"); // HERE status if email is in use
-			actusers["usernamechange"].newparams = params;
-			users[currentuser] = actusers[currentuser];
-			let data = JSON.stringify(users);
-			let actdata = JSON.stringify(actusers);
+			console.log("Username error: the Email is already taken!"); // status if email is in use
+			regErrors["taken_email"] = `Username error: the Email is already taken!`;
 
-			fs.writeFileSync(fname, data, "utf-8");
-			fs.writeFileSync(actname, actdata, "utf-8");
+			users[currentuser] = actusers[currentuser];
 		} else {
 			actusers[new_user_name] = {}; // makes empty object for the user's new account
-			actusers[new_user_name].name = actusers[currentuser].name; // copies over current name
 			actusers[new_user_name].password = actusers[currentuser].password; // copies over current password
 			actusers[new_user_name].loginstatus = actusers[currentuser].loginstatus; // copies over current login status
 			actusers[new_user_name].amtlogin = actusers[currentuser].amtlogin; // copies over the amount of times logged in
+			actusers[new_user_name].fullname = actusers[currentuser].fullname; // copies over user's full name
+			actusers[new_user_name].lasttimelog = actusers[currentuser].lasttimelog; // copies over user's last time logging in
+			actusers[new_user_name].currtimelog = actusers[currentuser].currtimelog; // copies over user's last time logging in
 
 			actusers["usernamechange"].formerusername = currentuser; // stores info on the now OLD username
 			actusers["usernamechange"].currentusername = new_user_name; // stores info on what the NEW username is
@@ -686,29 +764,55 @@ app.post("/editaccount", function (request, response) {
 			console.log("CUTQUTY" + paramcutqty); // console.log to check length
 			removedcurruserfromparams = paramsstring.slice(0, -paramcutqty); // sets the remaining params left to a new variable
 			console.log(removedcurruserfromparams);
-			actusers["usernamechange"].newparams =
-				removedcurruserfromparams.toString() + "&currentuser=" + new_user_name;
+			changetonew = true; // set to true means that new params will be made
 			console.log(removedcurruserfromparams);
 			delete actusers[currentuser];
 
 			users[new_user_name] = {};
-			users[new_user_name].name = actusers[new_user_name].name;
+			users[new_user_name].fullname = actusers[new_user_name].fullname;
 			users[new_user_name].password = actusers[new_user_name].password;
 			users[new_user_name].loginstatus = actusers[new_user_name].loginstatus;
 			users[new_user_name].amtlogin = actusers[new_user_name].amtlogin;
 
 			delete users[currentuser];
-
-			let data = JSON.stringify(users);
-			let actdata = JSON.stringify(actusers);
-
-			fs.writeFileSync(fname, data, "utf-8");
-			fs.writeFileSync(actname, actdata, "utf-8");
 		}
 	}
-	newparams = actusers["usernamechange"].newparams;
-	response.redirect("loginsuccess?" + newparams);
+
+	if (changetonew == true) {
+		// true = new params will be made
+		actusers["usernamechange"].newparams =
+			removedcurruserfromparams.toString() + "&currentuser=" + new_user_name;
+	} else {
+		// else use the old params that are stored
+		actusers["usernamechange"].newparams = params;
+	}
+
+	newparams = actusers["usernamechange"].newparams; //stores it in a variable
+
+	if (Object.keys(regErrors).length == 0) {
+		let data = JSON.stringify(users);
+		let actdata = JSON.stringify(actusers);
+
+		fs.writeFileSync(fname, data, "utf-8");
+		fs.writeFileSync(actname, actdata, "utf-8");
+
+		response.redirect("loginsuccess?" + newparams);
+	} else {
+		response.redirect(
+			"./editaccount?" +
+				params.toString() +
+				"&currentfullname=" +
+				curr_full_name +
+				"&newfullname=" +
+				new_full_name +
+				"&currentusername=" +
+				curr_user_name +
+				"&newusername=" +
+				new_user_name
+		); // puts
+	}
 });
+
 // Code inspired by Assignment 2 Code Examples
 app.get("/register", function (request, response) {
 	let params = new URLSearchParams(request.query);
@@ -829,6 +933,7 @@ app.get("/register", function (request, response) {
 	// errors = false;
 });
 
+// Code inspired by Assignment 2 Code Examples
 app.post("/register", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
@@ -907,7 +1012,6 @@ app.post("/register", function (request, response) {
 
 	if (Object.keys(regErrors).length == 0) {
 		users[user_name] = {};
-		users[user_name].username = request.body.username;
 		users[user_name].fullname = request.body.fullname;
 		users[user_name].password = request.body.password;
 		users[user_name].loginstatus = true;
@@ -944,6 +1048,10 @@ app.post("/startregister", function (request, response) {
 	response.redirect("register?" + params.toString());
 });
 
+app.get("/invoice", function (request, response) {
+	response.redirect("products_display.html");
+});
+
 app.post("/invoice", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
@@ -964,7 +1072,7 @@ app.post("/invoice", function (request, response) {
 		}
 	);
 	console.log("quantities=" + quantities);
-	if (actusers[currentuser].loginstatus == true) {
+	if (currentuser != undefined) {
 		// modified from stack overflow (https://stackoverflow.com/questions/34909706/how-to-prevent-user-from-accessing-webpage-directly-in-node-js)
 		for (i in quantities) {
 			values = quantities[i];
