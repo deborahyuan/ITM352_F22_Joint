@@ -3,24 +3,24 @@
 		"fullname": "ITM 352",
 		"password": "grader",
 		"loginstatus": false,
-		"lasttimelog": "11/16/2022 3:32PM",
-		"currtimelog": "11/16/2022 6:15PM",
-		"amtlogin": 0
-	},
-	"dyuan@hawaii.edu": {
-		"fullname": "Deborah Yuan",
-		"password": "heyhihello1@",
-		"loginstatus": false,
-		"lasttimelog": "11/16/2022 6:15PM",
-		"currtimelog": "11/16/2022 11:37PM",
-		"amtlogin": 2
+		"lasttimelog": "11/17/2022 12:11AM",
+		"currtimelog": "11/17/2022 12:11AM",
+		"amtlogin": 3
 	},
 	"evond@hawaii.edu": {
-		"fullname": "Deborah Yuan",
+		"fullname": "Evon Diep",
 		"password": "heyhihello1@",
 		"loginstatus": false,
 		"lasttimelog": "11/16/2022 6:15PM",
 		"currtimelog": "11/16/2022 11:37PM",
 		"amtlogin": 2
+	},
+	"dyuan@hawaii.edu.com": {
+		"password": "heyhihello1@",
+		"loginstatus": false,
+		"amtlogin": 8,
+		"fullname": "Deborah L Yuan",
+		"lasttimelog": "11/17/2022 12:16AM",
+		"currtimelog": "11/17/2022 12:19AM"
 	}
 }

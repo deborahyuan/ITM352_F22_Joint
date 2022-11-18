@@ -35,12 +35,12 @@ p {
 }
 
 /* submit buttons on products_display.html and invoice.html */
-#button {
+.button {
 	background-color: black;
 	border-color: white;
 	border-width: 5px;
 	color: white;
-	width: 300px;
+	width: 200px;
 	height: 40px;
 	margin: 0;
 	position: relative;

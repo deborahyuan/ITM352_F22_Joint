@@ -235,16 +235,11 @@ app.get("/login", function (request, response) {
 		
 		   <!-- my own stylesheet (products-style.css) -->
 		  <link href="products-style.css" rel="stylesheet">
-		  <style>
-
-
-		  </style>
 		</head>
 	<html>
-	
-
 
 	<script>
+
 	let params = (new URL(document.location)).searchParams; // pull params from search URL
 
 	/* allows for us to create an error alert based off of the results of the server's validataion*/
@@ -272,7 +267,7 @@ app.get("/login", function (request, response) {
 	<h1 style="font-size: 4em; color:white">Login</h1>
 	<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Log In</p>
 	<form name='login' action="?${
-		params.toString().split("currentfullname")[0]
+		params.toString().split("error")[0]
 	}" method="POST"> <!-- make sure to remove the error message -->
 		<BR>
 		<span id="usernamelabel" name="usernamelabel" style="color: white;"><B>Enter a username</B></span><BR><BR>
@@ -280,15 +275,15 @@ app.get("/login", function (request, response) {
 		<span id="passwordlabel" name="passwordlabel" style="color: white;"><B>Enter a password</B></span><BR><BR>
 		<input type="password" id ="password" class="userpasswordname" name="password" placeholder="Password" style="border-radius: 5px;"></input><BR><BR>
 	<BR>
-	<input type="submit" value='Login        ' id="button" style="width:20%;"></input>
+	<input type="submit" value='Login        ' id="button1" style="min-width:20%" class="button"></input>
 </form><BR>
 <form name='login' action='/startregister?${
-		params.toString().split("currentfullname")[0]
+		params.toString().split("error")[0]
 	}' method="POST">
-<input type="submit" value='New User? Click Here     ' id="button" style="width:20%;"></input></form>
+<input type="submit" value='New User? Click Here     ' id="button2" style="min-width:20%;" class="button"></input></form>
 <BR>
 <form name='returntoproddisplay' action='/products_display.html' method="GET">
-<input type="submit" value='Return to Products     ' id="button" style="width:20%;"></input></form>
+<input type="submit" value='Return to Products     ' id="button3" style="min-width:20%;" class="button"></input></form>
 </body>
   	</div>
 		
@@ -304,9 +299,7 @@ app.post("/login", function (request, response) {
 	let inputpassword = request.body[`password`];
 	let currentuser = inputusername;
 	if (typeof users[inputusername] != "undefined") {
-		//
 		if (users[inputusername].password == inputpassword) {
-			// NEED TO IMPLEMENT STICKY FORMS FOR USERNAME
 			users[inputusername].amtlogin += Number(1);
 			actusers[inputusername] = {};
 			users[inputusername].loginstatus = true;
@@ -483,10 +476,10 @@ app.get("/loginsuccess", function (request, response) {
 	  </div>
 	  <div class="container text-center" style="padding-bottom: 50px;">
 	<form name='editaccount' action='?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
-	<input type="submit" value='Edit Account Information    ' id="button"></input>
+	<input type="submit" value='Edit Account Information    ' id="button"; class="button"></input>
 	</form>
 	<form name='gotoinvoice' action='invoice?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
-	<input type="submit" value='Go To Invoice   ' id="button"></input>
+	<input type="submit" value='Go To Invoice   ' id="button2"; class="button" ></input>
 	</form>
 	</div>`
 	);
@@ -588,7 +581,9 @@ app.get("/editaccount", function (request, response) {
 		  </nav>
 	<body>
 	<div class="container text-center" style="padding-bottom: 50px;">
-		<form name='editaccount' action="?${params.toString()}" method="POST">
+		<form name='editaccount' action="?${
+			params.toString().split("currentfullname")[0]
+		}" method="POST">
 			<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">${currentuser},</h1></span><BR>
 			<p style="font-size: 2em;">Edit your account information here:</p>
 			<p style="font-size: 1.5em;"> Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
@@ -620,7 +615,11 @@ app.get("/editaccount", function (request, response) {
 					? regErrors["taken_email"]
 					: ""
 			}</b><BR>
-
+			<b>${
+				typeof regErrors["wrong_email"] != "undefined"
+					? regErrors["wrong_email"]
+					: ""
+			}</b><BR>
 			<span id="editpasswordlabel" name="editpasswordlabel"><p style="font-size: 1em;"><B>Enter your current password in the first textbox, <BR>then your new password in the second textbox</B></p></span>
 			<input type="password" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password" style="border-radius: 5px;"></input><BR><BR>
 			<input type="password" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password" style="border-radius: 5px;"></input><BR><BR>
@@ -650,9 +649,11 @@ app.get("/editaccount", function (request, response) {
 					: ""
 			}</b>
 			
-			<input type="submit" value='Submit Changes       ' id="button" width="100%"></input><BR><BR>
-			<form name='returntologinsuccess' action="loginsuccess?${params.toString()}" method="GET">
-<input type="submit" value='Return to Previous Page     ' id="button" style="width:30%;"></input></form>
+			<input type="submit" value='Submit Changes       ' id="button; class="button"" width="100%"></input><BR><BR>
+			<form name='returntologinsuccess' action="loginsuccess?${
+				params.toString().split("currentfullname")[0]
+			}" method="GET">
+<input type="submit" value='Return to Previous Page     ' id="button2"; class="button" style="width:30%;"></input></form>
 			</div>
 
 	</form>
@@ -809,7 +810,7 @@ app.post("/editaccount", function (request, response) {
 				curr_user_name +
 				"&newusername=" +
 				new_user_name
-		); // puts
+		); // puts the textbox input into search params to make forms sticky
 	}
 });
 
@@ -860,7 +861,7 @@ app.get("/register", function (request, response) {
 		if (params.has('fullname')) {
 			var fullname = params.get('fullname');
 			document.getElementById('fullname').value = fullname;
-			document.getElementById("submitbutton").outerHTML = '<input type="submit" value="Continue" id="button" name="button"></input>'
+			document.getElementById("submitbutton").outerHTML = '<input type="submit" value="Continue" id="button" name="button" class="button"></input>'
 		}
 
 		if (params.has('email')) {
@@ -929,7 +930,7 @@ app.get("/register", function (request, response) {
 			: ""
 	}</b><BR>
 	<BR>
-    <input type="submit" value='Register        ' id="button" name="submitbutton" onclick="changeValue(); style="width:20%;"></input>
+    <input type="submit" value='Register        ' id="button" class="button" name="submitbutton" onclick="changeValue(); style="width:20%;"></input>
     </form>
     `
 	);
@@ -1077,7 +1078,7 @@ app.post("/invoice", function (request, response) {
 		}
 	);
 	console.log("quantities=" + quantities);
-	if (currentuser != undefined) {
+	if (typeof currentuser != "undefined") {
 		// modified from stack overflow (https://stackoverflow.com/questions/34909706/how-to-prevent-user-from-accessing-webpage-directly-in-node-js)
 		for (i in quantities) {
 			values = quantities[i];
@@ -1180,7 +1181,7 @@ app.post("/goodbye", function (request, response) {
 	  <BR><BR>
 	  <p style="font-size: 2em;"><B>Click the button below to log out<B></p><BR>
 	  <form action="logout?${params.toString()}" method="GET">
-<input type="submit" value='Log Out' id="button"></input>
+<input type="submit" value='Log Out' id="button" class="button"></input>
 </form>
 	</div>
 

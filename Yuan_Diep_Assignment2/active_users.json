@@ -1,1 +1,7 @@
-{ "usernamechange": { "newparams": {} } }
+{
+	"usernamechange": {
+		"formerusername": "cindy@gmail.com",
+		"currentusername": "cindy@hawaii.edu",
+		"newparams": "iPhone+14+Pro=&iPhone+14+Pro+Max=8&iPhone+14=&iPhone+14+Plus=&iPhone+13=&iPhone+13+Mini=&&currentuser=cindy@hawaii.edu"
+	}
+}
