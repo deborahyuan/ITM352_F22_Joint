@@ -274,35 +274,35 @@ app.get("/login", function (request, response) {
 	<h1 style="font-size: 4em; color:white">Login</h1>
 	<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Log In</p>
 	<form name='login' action="?${
-		params.toString().split("currentfullname")[0]
+		params.toString().split("username")[0]
 	}" method="POST"> <!-- make sure to remove the error message -->
 	<BR>
-	<span id="usernamelabel" name="usernamelabel" style="color: white;"><B>Enter a username</B></span><BR><BR>
-	<input type="text" id ="username" class="username" name="username" placeholder="Username" style="border-radius: 5px;"></input><BR>
-	<b>${
+	<span id="usernamelabel" name="usernamelabel" style="color: white;"><p style="font-family: 'Source Sans Pro', sans-serif;"><B>Enter a username</B></p></span>
+	<input type="text" id ="username" class="username" name="username" placeholder="Username" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif" ></input><BR>
+	<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
 		typeof loginError["nonexistuser"] != "undefined"
 			? loginError["nonexistuser"]
 			: ""
-	}</b><BR>
+	}</b></p><BR><BR>
 
-	<span id="passwordlabel" name="passwordlabel" style="color: white;"><B>Enter a password</B></span><BR><BR>
-	<input type="password" id ="password" class="userpasswordname" name="password" placeholder="Password" style="border-radius: 5px;"></input><BR>
-	<b>${
+	<span id="passwordlabel" name="passwordlabel" style="color: white;"><p style="font-family: 'Source Sans Pro', sans-serif;"><B>Enter a password</B></p></span>
+	<input type="password" id ="password" class="userpasswordname" name="password" placeholder="Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
+	<p style="color:#c4c4ff; "><b>${
 		typeof loginError["badloginpass"] != "undefined"
 			? loginError["badloginpass"]
 			: ""
-	}</b><BR>
+	}</b></p><BR>
 
 <BR>
-<input type="submit" value='Login        ' id="button" style="width:20%;" class="button"></input>
+<input type="submit" value='Login        ' id="button" style="min-width:20%;" class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input>
 </form><BR>
 <form name='login' action='/startregister?${
 		params.toString().split("currentfullname")[0]
 	}' method="POST">
-<input type="submit" value='New User? Click Here     ' id="button" style="width:20%;"  class="button"></input></form>
+<input type="submit" value='New User? Click Here     ' id="button" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input></form>
 <BR>
 <form name='returntoproddisplay' action='/products_display.html' method="GET">
-<input type="submit" value='Return to Products     ' id="button" style="width:20%;"  class="button"></input></form>
+<input type="submit" value='Return to Products     ' id="button" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input></form>
 </body>
   </div>
 	
@@ -605,9 +605,18 @@ app.get("/editaccount", function (request, response) {
 	</nav>
 
 <body>
+<script>
+let params = (new URL(document.location)).searchParams; // pull params from search URL
+console.log(params);
+if (params.has("currentuser")) {
+	  currentuser = params.get("currentuser");
+  }
+</script>
 <div class="container text-center" style="padding-bottom: 50px;">
 
-<form name='editaccount' action="?${params.toString()}" method="POST">
+<form name='editaccount' action="?${
+		params.toString().split("currentfullname")[0]
+	}" method="POST">
 
 	<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">Hi ${currentuser},</h1></span><BR>
 	<p style="font-size: 2em;">Edit your account information here:</p>
@@ -682,11 +691,11 @@ app.get("/editaccount", function (request, response) {
 			: ""
 	}</b>
 			
-			<input type="submit" value='Submit Changes       ' id="button; class="button"" width="100%"></input><BR><BR>
+			<input type="submit" value='Submit Changes       ' id="button"; class="button" style="min-width:30%"></input><BR><BR>
 			<form name='returntologinsuccess' action="loginsuccess?${
 				params.toString().split("currentfullname")[0]
 			}" method="GET">
-<input type="submit" value='Return to Previous Page     ' id="button2"; class="button" style="width:30%;"></input></form>
+<input type="submit" value='Return to Previous Page     ' id="button2"; class="button" style="min-width:30%;"></input></form>
 			</div>
 
 	</form>
