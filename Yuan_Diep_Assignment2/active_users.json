@@ -1,15 +1,11 @@
 {
-	"usernamechange": {
-		"formerusername": "dyuan@gmail.com",
-		"currentusername": "sdfasdf",
-		"newparams": "iPhone+14+Pro=2&iPhone+14+Pro+Max=&iPhone+14=&iPhone+14+Plus=&iPhone+13=&iPhone+13+Mini=&&currentuser=sdfasdf"
-	},
+	"usernamechange": { "newparams": {} },
 	"dyuan@gmail.com": {
+		"fullname": "Deborah L Yuan",
 		"password": "heyhihello1@",
 		"loginstatus": true,
-		"amtlogin": 17,
-		"fullname": "Deborah L Yuan",
-		"lasttimelog": "11/18/2022 12:40AM",
-		"currtimelog": "11/18/2022 12:57AM"
+		"amtlogin": 21,
+		"lasttimelog": "11/18/2022 1:51AM",
+		"currtimelog": "11/18/2022 2:02AM"
 	}
 }

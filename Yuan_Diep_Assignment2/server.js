@@ -299,10 +299,10 @@ app.get("/login", function (request, response) {
 <form name='login' action='/startregister?${
 		params.toString().split("currentfullname")[0]
 	}' method="POST">
-<input type="submit" value='New User? Click Here     ' id="button" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input></form>
+<input type="submit" value='New User? Click Here     ' id="button2" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input></form>
 <BR>
 <form name='returntoproddisplay' action='/products_display.html' method="GET">
-<input type="submit" value='Return to Products     ' id="button" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input></form>
+<input type="submit" value='Return to Products     ' id="button3" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input></form>
 </body>
   </div>
 	
@@ -614,9 +614,9 @@ if (params.has("currentuser")) {
 </script>
 <div class="container text-center" style="padding-bottom: 50px;">
 
-<form name='editaccount' action="?${
+<form name='editaccount' action='?${
 		params.toString().split("currentfullname")[0]
-	}" method="POST">
+	}' method="POST">
 
 	<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">Hi ${currentuser},</h1></span><BR>
 	<p style="font-size: 2em;">Edit your account information here:</p>
@@ -658,7 +658,10 @@ if (params.has("currentuser")) {
 			? regErrors["wrong_email"]
 			: ""
 	}</b><BR>
-	
+	<b>${
+		typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
+	}</b><BR>
+
 
 	<span id="editpasswordlabel" name="editpasswordlabel"><p style="font-size: 1em;"><B>Enter your current password in the first textbox,  <BR>then your new password in the second textbox</B></p></span>
 
@@ -691,14 +694,14 @@ if (params.has("currentuser")) {
 			: ""
 	}</b>
 			
-			<input type="submit" value='Submit Changes       ' id="button"; class="button" style="min-width:30%"></input><BR><BR>
-			<form name='returntologinsuccess' action="loginsuccess?${
-				params.toString().split("currentfullname")[0]
-			}" method="GET">
-<input type="submit" value='Return to Previous Page     ' id="button2"; class="button" style="min-width:30%;"></input></form>
+<input type="submit" value='Submit Changes       ' id="button"; class="button" style="min-width:30%"></input></form><BR><BR>
+<!-- <form name='returntologinsuccess' action="loginsuccess?${
+		params.toString().split("currentfullname")[0]
+	}" method="GET">
+<input type="submit" value='Return to Previous Page     ' id="button2"; class="button" style="min-width:30%;"></input></form>-->
 			</div>
 
-	</form>
+
 	</body>
 	`);
 });
@@ -785,13 +788,26 @@ app.post("/editaccount", function (request, response) {
 			regErrors["wrong_email"] = `Username error: Current Email is incorrect`;
 
 			users[currentuser] = actusers[currentuser];
-		} else if (users[new_user_name] != undefined) {
+		}
+		if (users[new_user_name] != undefined) {
 			// if other accounts are using the desired email
 			console.log("Username error: the Email is already taken!"); // status if email is in use
 			regErrors["taken_email"] = `Username error: the Email is already taken!`;
 
 			users[currentuser] = actusers[currentuser];
-		} else {
+		}
+
+		if (
+			/^[a-zA-Z0-9._]+@[a-zA-Z0-9.]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+				request.body.username
+			) == false
+		) {
+			{
+				regErrors["bad_email"] = `Please enter a valid email.`;
+			}
+		}
+
+		if (Object.keys(regErrors).length == 0) {
 			actusers[new_user_name] = {}; // makes empty object for the user's new account
 			actusers[new_user_name].password = actusers[currentuser].password; // copies over current password
 			actusers[new_user_name].loginstatus = actusers[currentuser].loginstatus; // copies over current login status
@@ -816,6 +832,8 @@ app.post("/editaccount", function (request, response) {
 			users[new_user_name].password = actusers[new_user_name].password;
 			users[new_user_name].loginstatus = actusers[new_user_name].loginstatus;
 			users[new_user_name].amtlogin = actusers[new_user_name].amtlogin;
+			userse[new_user_name].lasttimelog = actusers[new_user_name].lasttimelog;
+			userse[new_user_name].currtimelog = actusers[new_user_name].currtimelog;
 
 			delete users[currentuser];
 		}
