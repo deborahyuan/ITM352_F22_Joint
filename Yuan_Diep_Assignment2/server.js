@@ -202,6 +202,8 @@ app.post("/purchase", function (request, response) {
 	}
 });
 
+loginError = {}; // object for login error messages
+
 // login
 app.get("/login", function (request, response) {
 	let params = new URLSearchParams(request.query);
@@ -210,9 +212,9 @@ app.get("/login", function (request, response) {
 	ordered = "";
 	response.send(`
 	<!-- 
-		Login/Registration Success for Assignment2
+		Login Page for Assignment2
 		Author: Deborah Yuan & Evon Diep
-		Date: 11/16/22
+		Date: 11/17/22
 		Desc: This html page serves as a landing page for a user visiting the site. It features a navigation bar at the top, alongside a looping video of the iPhone 14 Pro, taken from Apple's website. There is a button labeled 'enter', which the user can click -- this leads to the products display page. 
 		-->
 		
@@ -253,12 +255,17 @@ app.get("/login", function (request, response) {
 	  )
 	
 	console.log("Params=" + params); // shows what the params are in the console
-	// Check for an error and if so, pop up an alert to the user
-	if (params.has("error")) {
-	  let err_msg = params.get("error");
-	  alert(err_msg);
-	}
+
+	window.onload = function() {
+		let params = (new URL(document.location)).searchParams;
+	
+		if (params.has('username')) {
+			var stickyUser = params.get('username');
+			document.getElementById('username').value = stickyUser;
+		}
+	};	
 	</script>
+
 	<body style="background-color: black;">
 	<div class="container text-center" style="padding-top: 30px;">
 	<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment2_images/applergbgif.gif" alt="" style="max-width: 20%;" ></a>
@@ -267,27 +274,39 @@ app.get("/login", function (request, response) {
 	<h1 style="font-size: 4em; color:white">Login</h1>
 	<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Log In</p>
 	<form name='login' action="?${
-		params.toString().split("error")[0]
+		params.toString().split("currentfullname")[0]
 	}" method="POST"> <!-- make sure to remove the error message -->
-		<BR>
-		<span id="usernamelabel" name="usernamelabel" style="color: white;"><B>Enter a username</B></span><BR><BR>
-		<input type="text" id ="username" class="username" name="username" placeholder="Username" style="border-radius: 5px;"></input><BR><BR>
-		<span id="passwordlabel" name="passwordlabel" style="color: white;"><B>Enter a password</B></span><BR><BR>
-		<input type="password" id ="password" class="userpasswordname" name="password" placeholder="Password" style="border-radius: 5px;"></input><BR><BR>
 	<BR>
-	<input type="submit" value='Login        ' id="button1" style="min-width:20%" class="button"></input>
+	<span id="usernamelabel" name="usernamelabel" style="color: white;"><B>Enter a username</B></span><BR><BR>
+	<input type="text" id ="username" class="username" name="username" placeholder="Username" style="border-radius: 5px;"></input><BR>
+	<b>${
+		typeof loginError["nonexistuser"] != "undefined"
+			? loginError["nonexistuser"]
+			: ""
+	}</b><BR>
+
+	<span id="passwordlabel" name="passwordlabel" style="color: white;"><B>Enter a password</B></span><BR><BR>
+	<input type="password" id ="password" class="userpasswordname" name="password" placeholder="Password" style="border-radius: 5px;"></input><BR>
+	<b>${
+		typeof loginError["badloginpass"] != "undefined"
+			? loginError["badloginpass"]
+			: ""
+	}</b><BR>
+
+<BR>
+<input type="submit" value='Login        ' id="button" style="width:20%;" class="button"></input>
 </form><BR>
 <form name='login' action='/startregister?${
-		params.toString().split("error")[0]
+		params.toString().split("currentfullname")[0]
 	}' method="POST">
-<input type="submit" value='New User? Click Here     ' id="button2" style="min-width:20%;" class="button"></input></form>
+<input type="submit" value='New User? Click Here     ' id="button" style="width:20%;"  class="button"></input></form>
 <BR>
 <form name='returntoproddisplay' action='/products_display.html' method="GET">
-<input type="submit" value='Return to Products     ' id="button3" style="min-width:20%;" class="button"></input></form>
+<input type="submit" value='Return to Products     ' id="button" style="width:20%;"  class="button"></input></form>
 </body>
-  	</div>
-		
-	</html>`);
+  </div>
+	
+</html>`);
 });
 
 app.post("/login", function (request, response) {
@@ -298,8 +317,11 @@ app.post("/login", function (request, response) {
 	console.log(inputusername);
 	let inputpassword = request.body[`password`];
 	let currentuser = inputusername;
+	loginError = {}; // resets to no errors
 	if (typeof users[inputusername] != "undefined") {
+		//
 		if (users[inputusername].password == inputpassword) {
+			// NEED TO IMPLEMENT STICKY FORMS FOR USERNAME
 			users[inputusername].amtlogin += Number(1);
 			actusers[inputusername] = {};
 			users[inputusername].loginstatus = true;
@@ -315,14 +337,16 @@ app.post("/login", function (request, response) {
 			response.redirect("loginsuccess?" + params.toString() + "&" + userstatus);
 		} else {
 			response.redirect(
-				"login?" + params.toString() + "&error=Password%20is%20incorrect!"
+				"login?" + params.toString() + "&username=" + inputusername
 			);
+			loginError["badloginpass"] = `Password is incorrect!`;
 		}
 		return;
 	}
 	response.redirect(
-		"login?" + params.toString() + "&error=Username%20Does%20Not%20Exist" // MAKE ERRORS APPEAR UNDER TEXTBOX LIKE /REGISTER
+		"login?" + params.toString() + "&username=" + inputusername // puts input into params to make it sticky
 	);
+	loginError["nonexistuser"] = `Username does not exist`;
 });
 
 // page if Login is successful
@@ -546,108 +570,117 @@ app.get("/editaccount", function (request, response) {
 		</head>
 		<script>
 		window.onload = function() {
-		let params = (new URL(document.location)).searchParams;
-	
-		if (params.has('currentuser')) {
-			var currentfullname = params.get('currentfullname');
-			document.getElementById('currentfullname').value = currentfullname;
-	
-			var newfullname = params.get('newfullname');
-			document.getElementById('newfullname').value = newfullname;
-	
-			var currentusername = params.get('currentusername');
-			document.getElementById('currentusername').value = currentusername;
-	
-			var newusername = params.get('newusername');
-			document.getElementById('newusername').value = newusername;
-		}
-	};    
+			let params = (new URL(document.location)).searchParams;
+		
+			if (params.has('currentuser')) {
+				var currentfullname = params.get('currentfullname');
+				document.getElementById('currentfullname').value = currentfullname;
+		
+				var newfullname = params.get('newfullname');
+				document.getElementById('newfullname').value = newfullname;
+		
+				var currentusername = params.get('currentusername');
+				document.getElementById('currentusername').value = currentusername;
+		
+				var newusername = params.get('newusername');
+				document.getElementById('newusername').value = newusername;
+			}
+		};
 	</script>
-		 <!-- navigation bar from w3 schools -->
-		  <nav class="navbar navbar-inverse">  
-			<div class="container-fluid">
-			  <div class="navbar-header">
-				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-				  <span class="icon-bar"></span>
-				  <span class="icon-bar"></span>
-				  <span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#">
-				   <!-- corner navbar Apple icon -->
-				  <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
-			  </div>
-			 
-			</div>
-		  </nav>
-	<body>
-	<div class="container text-center" style="padding-bottom: 50px;">
-		<form name='editaccount' action="?${
-			params.toString().split("currentfullname")[0]
-		}" method="POST">
-			<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">${currentuser},</h1></span><BR>
-			<p style="font-size: 2em;">Edit your account information here:</p>
-			<p style="font-size: 1.5em;"> Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
-			<span id="editfullnamelabel" name="editfullnamelabel"><p style="font-size: 1em;"><B>Enter your current full name in the first textbox, <BR>then your new full name in the second textbox</B></p></span>
-			<input type="text" id ="currentfullname" class="currentfullname" name="currentfullname" placeholder="Enter Current Full Name" style="border-radius: 5px;"></input><BR><BR>
-			<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name" style="border-radius: 5px;"></input>
-			<BR>
-			<b>${
-				typeof regErrors["wrong_name"] != "undefined"
-					? regErrors["wrong_name"]
-					: ""
-			}</b><BR>
-            <b>${
-							typeof regErrors["bad_userlength"] != "undefined"
-								? regErrors["bad_userlength"]
-								: ""
-						}</b><BR>
-            <b>${
-							typeof regErrors["bad_user"] != "undefined"
-								? regErrors["bad_user"]
-								: ""
-						}</b><BR>
+	<!-- navigation bar from w3 schools -->
+	<nav class="navbar navbar-inverse">  
+	  <div class="container-fluid">
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="#">
+			 <!-- corner navbar Apple icon -->
+			<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+		</div>
+	   
+	  </div>
+	</nav>
 
-			<span id="editusernamelabel" name="editusernamelabel"><p style="font-size: 1em;"><B>Enter your current email in the first textbox, <BR>then your new email in the second textbox</B></p></span>
-			<input type="text" id ="currentusername" class="currentusername" name="currentusername" placeholder="Enter Current Email" style="border-radius: 5px;"></input><BR><BR>
-			<input type="text" id ="newusername" class="newusername" name="newusername" placeholder="Enter New Email" style="border-radius: 5px;"></input><BR><BR>
-			<b>${
-				typeof regErrors["taken_email"] != "undefined"
-					? regErrors["taken_email"]
-					: ""
-			}</b><BR>
-			<b>${
-				typeof regErrors["wrong_email"] != "undefined"
-					? regErrors["wrong_email"]
-					: ""
-			}</b><BR>
-			<span id="editpasswordlabel" name="editpasswordlabel"><p style="font-size: 1em;"><B>Enter your current password in the first textbox, <BR>then your new password in the second textbox</B></p></span>
-			<input type="password" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password" style="border-radius: 5px;"></input><BR><BR>
-			<input type="password" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password" style="border-radius: 5px;"></input><BR><BR>
-			<b>${
-				typeof regErrors["wrong_pass"] != "undefined"
-					? regErrors["wrong_pass"]
-					: ""
-			}</b><BR>
-			<b>${
-				typeof regErrors["bad_passlength"] != "undefined"
-					? regErrors["bad_passlength"]
-					: ""
-			}</b><BR>
-			<span id="passwordconfirmlabel" name="passwordconfirmlabel"><p style="font-size: 1em;"><B>Confirm your new password by typing it again</B></p></span>
-			<input type="password" id ="newpasswordconfirm" class="newpasswordconfirm" name="newpasswordconfirm" placeholder="Enter New Password Again" style="border-radius: 5px;"></input><BR><BR>
-			<b>${
-				typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
-			}</b><BR>
-			<b>${
-				typeof regErrors["nomatch_pass"] != "undefined"
-					? regErrors["nomatch_pass"]
-					: ""
-			}</b><BR>
-			<b>${
-				typeof regErrors["contains_space"] != "undefined"
-					? regErrors["contains_space"]
-					: ""
-			}</b>
+<body>
+<div class="container text-center" style="padding-bottom: 50px;">
+
+<form name='editaccount' action="?${params.toString()}" method="POST">
+
+	<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">Hi ${currentuser},</h1></span><BR>
+	<p style="font-size: 2em;">Edit your account information here:</p>
+	<p style="font-size: 1.5em;">Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
+
+	<span id="editfullnamelabel" name="editfullnamelabel"><p style="font-size: 1em;"><B>Enter your current full name in the first textbox,  <BR>then your new full name in the second textbox</B></p></span>
+
+	<input type="text" id ="currentfullname" class="currentfullname" name="currentfullname" placeholder="Enter Current Full Name" style="border-radius: 5px;"></input><BR><BR>
+
+	<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name" style="border-radius: 5px;"></input>
+	<BR>
+
+	<b>${
+		typeof regErrors["wrong_name"] != "undefined" ? regErrors["wrong_name"] : ""
+	}</b><BR>
+	<b>${
+		typeof regErrors["bad_userlength"] != "undefined"
+			? regErrors["bad_userlength"]
+			: ""
+	}</b><BR>
+	<b>${
+		typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
+	}</b><BR>
+
+			
+	<span id="editusernamelabel" name="editusernamelabel"><p style="font-size: 1em;"><B>Enter your current email in the first textbox,  <BR>then your new email in the second textbox</B></p></span>
+
+	<input type="text" id ="currentusername" class="currentusername" name="currentusername" placeholder="Enter Current Email"  style="border-radius: 5px;"></input><BR><BR>
+
+	<input type="text" id ="newusername" class="newusername" name="newusername" placeholder="Enter New Email" style="border-radius: 5px;"></input><BR><BR>
+
+	<b>${
+		typeof regErrors["taken_email"] != "undefined"
+			? regErrors["taken_email"]
+			: ""
+	}</b><BR>
+	<b>${
+		typeof regErrors["wrong_email"] != "undefined"
+			? regErrors["wrong_email"]
+			: ""
+	}</b><BR>
+	
+
+	<span id="editpasswordlabel" name="editpasswordlabel"><p style="font-size: 1em;"><B>Enter your current password in the first textbox,  <BR>then your new password in the second textbox</B></p></span>
+
+	<input type="password" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password" style="border-radius: 5px;"></input><BR><BR>
+
+	<input type="password" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password" style="border-radius: 5px;"></input><BR><BR>
+
+	<b>${
+		typeof regErrors["wrong_pass"] != "undefined" ? regErrors["wrong_pass"] : ""
+	}</b><BR>
+	<b>${
+		typeof regErrors["bad_passlength"] != "undefined"
+			? regErrors["bad_passlength"]
+			: ""
+	}</b><BR>
+
+	<span id="passwordconfirmlabel" name="passwordconfirmlabel"><p style="font-size: 1em;"><B>Confirm your new password by typing it again</B></p></span>
+	<input type="password" id ="newpasswordconfirm" class="newpasswordconfirm" name="newpasswordconfirm" placeholder="Enter New Password Again" style="border-radius: 5px;"></input><BR><BR>
+	<b>${
+		typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
+	}</b><BR>
+	<b>${
+		typeof regErrors["nomatch_pass"] != "undefined"
+			? regErrors["nomatch_pass"]
+			: ""
+	}</b><BR>
+	<b>${
+		typeof regErrors["contains_space"] != "undefined"
+			? regErrors["contains_space"]
+			: ""
+	}</b>
 			
 			<input type="submit" value='Submit Changes       ' id="button; class="button"" width="100%"></input><BR><BR>
 			<form name='returntologinsuccess' action="loginsuccess?${
@@ -823,7 +856,7 @@ app.get("/register", function (request, response) {
 	response.send(
 		`
 		<!-- 
-		Login/Registration Success for Assignment2
+		Registration Page for Assignment2
 		Author: Deborah Yuan & Evon Diep
 		Date: 11/16/22
 		Desc: This html page serves as a landing page for a user visiting the site. It features a navigation bar at the top, alongside a looping video of the iPhone 14 Pro, taken from Apple's website. There is a button labeled 'enter', which the user can click -- this leads to the products display page. 
@@ -856,19 +889,20 @@ app.get("/register", function (request, response) {
 	<html>
 		<script>
 		window.onload = function() {
-		let params = (new URL(document.location)).searchParams;
-
-		if (params.has('fullname')) {
-			var fullname = params.get('fullname');
-			document.getElementById('fullname').value = fullname;
-			document.getElementById("submitbutton").outerHTML = '<input type="submit" value="Continue" id="button" name="button" class="button"></input>'
-		}
-
-		if (params.has('email')) {
-				var email = params.get('email');
-				document.getElementById('username').value = email;
-		}
-	};
+			let params = (new URL(document.location)).searchParams;
+	
+			if (params.has('fullname')) {
+				var fullname = params.get('fullname');
+				document.getElementById('fullname').value = fullname;
+				document.getElementById("submitbutton").outerHTML = '<input type="submit" value="Continue" id="button" name="button"></input>'
+			}
+	
+			if (params.has('email')) {
+					var email = params.get('email');
+					document.getElementById('username').value = email;
+			}
+		};
+	
 		</script>
 		<body style="background-color: black;">
 		<div class="container text-center" style="padding-top: 30px;">
@@ -884,57 +918,58 @@ app.get("/register", function (request, response) {
 				? regErrors["empty_boxes"]
 				: ""
 		}</b><BR>
-    <span id="fullnamelabel" name="fullnamelabel" style="color: white;"><B>Enter your full name</B></span><BR>
-    <input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name" style="border-radius: 5px;"></input><BR>
-	<b>${
-		typeof regErrors["bad_userlength"] != "undefined"
-			? regErrors["bad_userlength"]
-			: ""
-	}<BR>
-	${
-		typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
-	}</b><BR>
-
-    <span id="usernamelabel" name="usernamelabel" style="color: white;"><B>Enter an email</B></span><BR>
-    <input type="text" id ="username" class="username" name="username" placeholder="example@example.com" style="border-radius: 5px;"></input><BR>
-	<b>${
-		typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
-	}<BR>
-	${
-		typeof regErrors["username_taken"] != "undefined"
-			? regErrors["username_taken"]
-			: ""
-	}</b><BR>
-
-    <span id="passwordlabel" name="passwordlabel" style="color: white;"><B>Enter a password</B></span><BR>
-    <input type="text" id ="password" class="password" name="password" placeholder="Password" style="border-radius: 5px;"></input><BR>
-	<b>${
-		typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
-	}</b><BR>
-	<b>${
-		typeof regErrors["bad_passlength"] != "undefined"
-			? regErrors["bad_passlength"]
-			: ""
-	}<BR>
-	${
-		typeof regErrors["contains_space"] != "undefined"
-			? regErrors["contains_space"]
-			: ""
-	}</b><BR>
-
-    <span id="passwordlabelconfirm" name="passwordlabelconfirm" style="color: white;"><B>Repeat password</B></span><BR>
-    <input type="text" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password" style="border-radius: 5px;"></input><BR>
-	<b>${
-		typeof regErrors["password_mismatch"] != "undefined"
-			? regErrors["password_mismatch"]
-			: ""
-	}</b><BR>
+			
+		<span id="fullnamelabel" name="fullnamelabel" style="color: white;"><B>Enter your full name</B></span><BR>
+		<input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name" style="border-radius: 5px;"></input><BR>
+		<b>${
+			typeof regErrors["bad_userlength"] != "undefined"
+				? regErrors["bad_userlength"]
+				: ""
+		}<BR>
+		${
+			typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
+		}</b><BR>
+	
+		<span id="usernamelabel" name="usernamelabel" style="color: white;"><B>Enter an email</B></span><BR>
+		<input type="text" id ="username" class="username" name="username" placeholder="bob@example.com" style="border-radius: 5px;"></input><BR>
+		<b>${
+			typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
+		}<BR>
+		${
+			typeof regErrors["username_taken"] != "undefined"
+				? regErrors["username_taken"]
+				: ""
+		}</b><BR>
+	
+		<span id="passwordlabel" name="passwordlabel" style="color: white;"><B>Enter a password</B></span><BR>
+		<input type="text" id ="password" class="password" name="password" placeholder="Password" style="border-radius: 5px;"></input><BR>
+		<b>${
+			typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
+		}</b><BR>
+		<b>${
+			typeof regErrors["bad_passlength"] != "undefined"
+				? regErrors["bad_passlength"]
+				: ""
+		}<BR>
+		${
+			typeof regErrors["contains_space"] != "undefined"
+				? regErrors["contains_space"]
+				: ""
+		}</b><BR>
+			
+	
+		<span id="passwordlabelconfirm" name="passwordlabelconfirm" style="color: white;"><B>Repeat password</B></span><BR>
+		<input type="text" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password" style="border-radius: 5px;"></input><BR>
+		<b>${
+			typeof regErrors["password_mismatch"] != "undefined"
+				? regErrors["password_mismatch"]
+				: ""
+		}</b><BR>
 	<BR>
     <input type="submit" value='Register        ' id="button" class="button" name="submitbutton" onclick="changeValue(); style="width:20%;"></input>
     </form>
     `
 	);
-	// errors = false;
 });
 
 // Code inspired by Assignment 2 Code Examples
