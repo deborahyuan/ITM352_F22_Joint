@@ -98,6 +98,7 @@ function isNonNegativeInteger(queryString, returnErrors = false) {
 		errors.push("Not a number!"); // Check if string is a number value
 	} else {
 		if (queryString < 0) errors.push("a Negative value!"); // Check if it is non-negative
+		if (queryString == -0) errors.push("no -0 allowed!");
 		if (parseInt(queryString) != queryString) errors.push("Not an integer!"); // Check that it is an integer
 	}
 
@@ -244,7 +245,7 @@ app.get("/login", function (request, response) {
 
 	<script>
 
-	let params = (new URL(document.location)).searchParams; // pull params from search URL
+	let params = new URLSearchParams(request.query); // pull params from search URL
 
 	/* allows for us to create an error alert based off of the results of the server's validataion*/
 		
@@ -514,7 +515,7 @@ app.get("/loginsuccess", function (request, response) {
 		  </nav>
 	
 		  <div class="container text-center" style="padding-bottom: 50px;">
-		  <h1 style="font-size: 6em;"> ${tfiles["loginsuccesstemp"].currentuser},</h1>
+		  <h1 style="font-size: 6em;"> ${actusers[currentuser].fullname},</h1>
 		  <p style="font-size: 2em;">you have logged in successfully</p>
 		</div>
 
@@ -1142,7 +1143,166 @@ app.get("/invoice", function (request, response) {
 });
 
 app.post("/invoice", function (request, response) {
-	response.write(`hello`);
+	var quantities = []; // declaring empty array 'quantities'
+	let params = new URLSearchParams(request.query); // pull params from search URL
+	console.log(params);
+	if (params.has("currentuser")) {
+		currentuser = params.get("currentuser");
+	}
+	console.log(params);
+	params.forEach(
+		// for each iterates through all the keys
+		function (value, key) {
+			quantities.push(value); // pushes the value to quantities array
+		}
+	);
+	quantities.pop(); // learned from https://stackoverflow.com/questions/19544452/remove-last-item-from-array
+	console.log("Qs" + quantities);
+
+	response.write(`
+	<!DOCTYPE html>
+	<html lang="en">
+	<!-- 
+	Invoice for Assignment1
+	Author: Deborah Yuan
+	Date: 11/2/22
+	Desc: This html page produces an invoice for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+	-->
+	
+	<!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
+	
+	<head>
+	  <meta charset="UTF-8">
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	  <script src="../products.json"></script>
+	  <script src="../user_registration_info.json" type="application/json
+	  "></script> <!-- loading in user data from user_registration_info.json -->
+	
+	  <link rel="preconnect" href="https://fonts.googleapis.com">
+	  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+	
+	  <link href="products-style.css" rel="stylesheet">
+	  
+	  <title>Invoice</title>
+	</head>
+	
+	<body>
+	  <main>
+
+	<h1 class="invoiceheader" style="text-align: center;">${actusers[currentuser].fullname}'s Invoice</h1>
+	  <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
+		<tbody>
+		  <thead>
+		  <tr>
+			<th align="center">Image</th>
+			<th>Item</th>
+			<th>Quantity</th>
+			<th>Cost of Item</th>
+			<th>Extended Price</th>
+		  </tr>
+		</thead>
+`);
+
+	// Compute subtotal
+	var subtotal = 0;
+
+	// Compute tax
+	var tax_rate = 0.0475;
+	var tax = tax_rate * subtotal;
+
+	for (let i in quantities) {
+		if (quantities[i] == 0) {
+			// if quantities = 0, then skip the row
+			continue;
+		} else {
+			let extended_price = quantities[i] * products[i].price;
+			console.log(products[i].price);
+			// toFixed added to $ values to preserve cents
+			response.write(`
+	<tr>
+	  <td align="center"><img src="${
+			products[i].image
+		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+	  <td>${products[i].name}</td>
+	  <td align="center">${quantities[i]}</td>
+	  <td align="center">$${products[i].price.toFixed(2)}</td>
+	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
+	</tr>
+	  `);
+
+			subtotal += extended_price;
+			console.log(products[i].price);
+		}
+	}
+
+	// Compute shipping
+	var shipping;
+	if (subtotal < 1000) {
+		shipping = 5;
+	} else if (subtotal >= 1000 && subtotal < 1500) {
+		shipping = 10;
+	} else if (subtotal >= 1500) {
+		shipping = subtotal * 0.02;
+	}
+	// Compute grand total
+	var total = tax + subtotal + shipping;
+
+	response.write(`
+		  <!-- table formatting, with some inline css -->
+		  <tr>
+			<td colspan="5" width="100%">&nbsp;</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: right;" colspan="4" width="67%">Sub-total</td>
+			<td width="54%">$
+			  ${subtotal.toFixed(2)}
+			</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: right;" colspan="4" width="67%">Tax @ 4.75%</span></td>
+			<td width="54%">$
+			${tax.toFixed(2)}
+			</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: right;" colspan="4" width="67%">Shipping</td>
+			<td width="54%">$
+			${shipping.toFixed(2)}
+			</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: right;" colspan="4" width="67%"><strong>Total</strong></td>
+			<td width="54%"><strong>$
+			${total.toFixed(2)}
+			  </strong></td>
+		  </tr>
+		  <tr>
+			<td style="text-align: center;" colspan="5" width="100%">
+			  <b> <!-- shipping policy info -->
+				Shipping Policy:
+				<BR>
+				Orders with subtotals of $0 - $999.99 will be charged $5 for shipping.
+				<BR>
+				Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
+				<BR>Orders with subtotals of $1500 and over will be charged 2% of the subtotal amount.</b>
+			</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: center;" colspan="5" width="100%">
+			  <form name='confirmpurchase' action=/goodbye?${params} method="POST">
+			<input type="submit" id="button" value='Confirm Purchase' id="Return" class="button"></input>
+		  </form>
+		   </td>
+		  </tr>
+		</tbody>
+	  </table>
+	</main>
+	</body>
+	
+	</html>`);
 	response.end();
 });
 
@@ -1151,6 +1311,28 @@ app.post("/goodbye", function (request, response) {
 	if (params.has("currentuser")) {
 		// identify current user get get it
 		currentuser = params.get("currentuser");
+	}
+	var quantities = []; // declaring empty array 'quantities'
+	params.forEach(
+		// for each iterates through all the keys
+		function (value, key) {
+			quantities.push(value); // pushes the value to quantities array
+		}
+	);
+	console.log("quantities=" + quantities);
+	if (actusers[currentuser].loginstatus == true) {
+		// modified from stack overflow (https://stackoverflow.com/questions/34909706/how-to-prevent-user-from-accessing-webpage-directly-in-node-js)
+		for (i in quantities) {
+			values = quantities[i];
+			if (values != 0 && isNonNegativeInteger(values)) {
+				console.log("values= " + values);
+				products[i].quantity_available -= Number(values); // Stock, or quantity_available is subtracted by the order quantity
+				products[i].quantity_sold =
+					Number(products[i].quantity_sold) + Number(values); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
+				let proddata = JSON.stringify(products);
+				fs.writeFileSync(prodname, proddata, "utf-8");
+			}
+		}
 	}
 	response.send(`
 	<!-- 
@@ -1225,12 +1407,12 @@ app.post("/goodbye", function (request, response) {
 
 	  <div class="container text-center" style="padding-bottom: 50px;">
 	  <p style="font-size: 2em;">Thank you</p>
-	  <h1 style="font-size: 6em;"> ${currentuser}</h1><BR>
+	  <h1 style="font-size: 6em;"> ${actusers[currentuser].fullname}</h1><BR>
 	  <p style="font-size: 2em;">for your purchase</p>
 	  <BR><BR>
 	  <p style="font-size: 2em;"><B>Click the button below to log out<B></p><BR>
 	  <form action="logout?${params.toString()}" method="GET">
-<input type="submit" value='Log Out' id="button" class="button"></input>
+<input type="submit" value='Log Out      ' id="button" class="button"></input>
 </form>
 	</div>
 `);
