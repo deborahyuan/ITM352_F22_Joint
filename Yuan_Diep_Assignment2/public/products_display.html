@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <!-- 
-Products Display for Assignment1
-Author: Deborah Yuan
-Date: 11/2/22
+Products Display for Assignment2
+Author: Deborah Yuan & Evon Diep
+Date: 11/18/22
 Desc: This html page pulls data from a separate products file (products.json) and displays the files without hardcoding any values. In this particular case, the store has 6 different models of iPhones. The page will present a variety of error messages if the quantities desired for purchase are invalid. This page also contains a form, which will be submitted to the server (server.js), where the data will then be validated. If the user attempts to submit invalid quantities for purchase despite error messages, they will be redirected back to this page to fix their errors. This page also has a navigation bar that allows users to switch between the Home page (index) and the products page (this page). The base template for this site was taken from w3 schools, but has been adequately modified to fit the needs of this store.
 -->
 
@@ -52,6 +52,35 @@ Desc: This html page pulls data from a separate products file (products.json) an
 </head>
 
 <script>
+
+  window.onload = function () {
+    let params = (new URL(document.location)).searchParams;  // pull params from search URL
+
+// displays error messages
+    if (params.has(`error`)) {
+      let err_msg = params.get(`error`);
+      document.getElementById("error").innerHTML = err_msg;
+    }
+
+    var quantities = []; // declaring empty array 'quantities
+        params.forEach( // for each iterates through all the keys
+          function (value, key) {
+            quantities.push(value); // pushes the value to quantities array
+          }
+        )
+
+    // Modified code by Dan Port Assignment 1 to make textboxes sticky
+    for (i = 0; i < products.length; i++) {
+      if (params.has(`error`)) {
+        stickyUser = quantities[i];
+        console.log("this: " + stickyUser);
+        quantity_form[`quantitytextbox[${i}]`].value = stickyUser;
+      }
+    }
+
+  };
+
+
   /* function section */
 
   // isNonNegativeInteger tests the input for errors, then returns error messages if any
@@ -103,11 +132,7 @@ Desc: This html page pulls data from a separate products file (products.json) an
   let params = (new URL(document.location)).searchParams;
 
   console.log("Params=" + params); // shows what the params are in the console
-  // Check for an error and if so, pop up an alert to the user
-  if (params.has("error")) {
-    let err_msg = params.get("error");
-    alert(err_msg);
-  }
+  // Check for an error and if so, display error message
 
 </script>
 
@@ -137,10 +162,10 @@ Desc: This html page pulls data from a separate products file (products.json) an
 </nav>
 
 
-  <div class="container text-center" style="padding-bottom: 50px;">
-    <h1 style="font-size: 6em;">iPhone</h1>
-    <p style="font-size: 2em;">Models for Sale</p>
-  </div>
+<div class="container text-center" style="padding-bottom: 50px;">
+  <h1 style="font-size: 6em;">iPhone</h1>
+  <p style="font-size: 2em;">Models for Sale</p>
+</div>
 
 <!-- formatting provided by w3 schools -->
 <form name='quantity_form' action="/purchase" method="POST">
@@ -178,9 +203,10 @@ Desc: This html page pulls data from a separate products file (products.json) an
   </div>
   <br><br>
 
-
+ <!-- footer -->
   <footer class="container-fluid text-center">
-    <!-- footer -->
+   <!-- if there are any errors that prevent the user from continuing to login, they will show up here -->
+    <h2 id="error"></h2>
     <input type="submit" value='Purchase' id="button" class="button"></input>
 </form>
 <h3 style="padding: 10px;">
