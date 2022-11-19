@@ -16,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 // read files
 var fs = require("fs");
 const e = require("express");
+const { application } = require("express");
 var fname = "user_registration_info.json";
 var prodname = __dirname + "/products.json";
 var actname = __dirname + "/active_users.json";
@@ -207,6 +208,7 @@ loginError = {}; // object for login error messages
 // login
 app.get("/login", function (request, response) {
 	let params = new URLSearchParams(request.query);
+
 	console.log(params);
 	console.log(params.toString());
 	ordered = "";
@@ -263,6 +265,7 @@ app.get("/login", function (request, response) {
 			var stickyUser = params.get('username');
 			document.getElementById('username').value = stickyUser;
 		}
+
 	};	
 	</script>
 
@@ -275,8 +278,13 @@ app.get("/login", function (request, response) {
 	<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Log In</p>
 	<form name='login' action="?${
 		params.toString().split("username")[0]
-	}" method="POST"> <!-- make sure to remove the error message -->
+	}" method="POST">
 	<BR>
+	<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
+		typeof loginError["noquantities"] != "undefined"
+			? loginError["noquantities"]
+			: ""
+	}</b></p><BR>
 	<span id="usernamelabel" name="usernamelabel" style="color: white;"><p style="font-family: 'Source Sans Pro', sans-serif;"><B>Enter a username</B></p></span>
 	<input type="text" id ="username" class="username" name="username" placeholder="Username" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif" ></input><BR>
 	<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
@@ -301,12 +309,20 @@ app.get("/login", function (request, response) {
 	}' method="POST">
 <input type="submit" value='New User? Click Here     ' id="button2" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input></form>
 <BR>
-<form name='returntoproddisplay' action='/products_display.html' method="GET">
+<form name='returntoproddisplay' action='/returntoproductsdisplay?${
+		params.toString().split("currentfullname")[0]
+	}' method="POST">
 <input type="submit" value='Return to Products     ' id="button3" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input></form>
 </body>
   </div>
 	
 </html>`);
+});
+
+app.post("/returntoproductsdisplay", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	response.redirect("/products_display.html?" + params.toString());
 });
 
 app.post("/login", function (request, response) {
@@ -335,6 +351,13 @@ app.post("/login", function (request, response) {
 			fs.writeFileSync(actname, actdata, "utf-8");
 			console.log("hi");
 			response.redirect("loginsuccess?" + params.toString() + "&" + userstatus);
+		} else if (params.has("iPhone") != true) {
+			response.redirect(
+				"login?" + params.toString() + "&username=" + inputusername
+			);
+			loginError[
+				"noquantities"
+			] = `No Product Quantities have been selected, please return to the product selection page!`;
 		} else {
 			response.redirect(
 				"login?" + params.toString() + "&username=" + inputusername
@@ -500,10 +523,10 @@ app.get("/loginsuccess", function (request, response) {
 	  </div>
 	  <div class="container text-center" style="padding-bottom: 50px;">
 	<form name='editaccount' action='?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
-	<input type="submit" value='Edit Account Information        ' id="button"; class="button"></input>
+	<input type="submit" value='Edit Account Information      ' id="button"; class="button" style="min-width: 20%"></input>
 	</form>
-	<form name='gotoinvoice' action='invoice?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
-	<input type="submit" value='Go To Invoice        ' id="button2"; class="button" style="min-width: 30%"></input>
+	<form name='gotoinvoice' action='/invoice?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
+	<input type="submit" value='Go To Invoice      ' id="button2"; class="button" style="min-width: 20%"></input>
 	</form>
 	</div>`
 	);
@@ -624,86 +647,66 @@ if (params.has("currentuser")) {
 
 	<span id="editfullnamelabel" name="editfullnamelabel"><p style="font-size: 1em;"><B>Enter your current full name in the first textbox,  <BR>then your new full name in the second textbox</B></p></span>
 
-	<input type="text" id ="currentfullname" class="currentfullname" name="currentfullname" placeholder="Enter Current Full Name" style="border-radius: 5px;"></input><BR><BR>
-
-	<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name" style="border-radius: 5px;"></input>
-	<BR>
-
-	<b>${
+	<input type="text" id ="currentfullname" class="currentfullname" name="currentfullname" placeholder="Enter Current Full Name" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
+	
+	<p style="color:#A74ADC"><b>${
 		typeof regErrors["wrong_name"] != "undefined" ? regErrors["wrong_name"] : ""
-	}</b><BR>
-	<b>${
-		typeof regErrors["bad_userlength"] != "undefined"
-			? regErrors["bad_userlength"]
-			: ""
-	}</b><BR>
-	<b>${
-		typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
-	}</b><BR>
+	}${typeof regErrors["bad_userlength"] != "undefined" ? regErrors["bad_userlength"] : ""}${typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""}</b></p>
+
+	<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
 
 			
 	<span id="editusernamelabel" name="editusernamelabel"><p style="font-size: 1em;"><B>Enter your current email in the first textbox,  <BR>then your new email in the second textbox</B></p></span>
 
-	<input type="text" id ="currentusername" class="currentusername" name="currentusername" placeholder="Enter Current Email"  style="border-radius: 5px;"></input><BR><BR>
-
-	<input type="text" id ="newusername" class="newusername" name="newusername" placeholder="Enter New Email" style="border-radius: 5px;"></input><BR><BR>
-
-	<b>${
+	<input type="text" id ="currentusername" class="currentusername" name="currentusername" placeholder="Enter Current Email"  style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif""></input><BR><BR>	
+	<p style="color:#A74ADC"><b>${
 		typeof regErrors["taken_email"] != "undefined"
 			? regErrors["taken_email"]
 			: ""
-	}</b><BR>
-	<b>${
-		typeof regErrors["wrong_email"] != "undefined"
-			? regErrors["wrong_email"]
-			: ""
-	}</b><BR>
-	<b>${
-		typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
-	}</b><BR>
+	}${typeof regErrors["wrong_email"] != "undefined" ? regErrors["wrong_email"] : ""}${typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""}</b></p>
+
+	<input type="text" id ="newusername" class="newusername" name="newusername" placeholder="Enter New Email" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
+
+
 
 
 	<span id="editpasswordlabel" name="editpasswordlabel"><p style="font-size: 1em;"><B>Enter your current password in the first textbox,  <BR>then your new password in the second textbox</B></p></span>
 
-	<input type="password" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password" style="border-radius: 5px;"></input><BR><BR>
-
-	<input type="password" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password" style="border-radius: 5px;"></input><BR><BR>
-
-	<b>${
+	<input type="password" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>	
+	
+	<p style="color:#A74ADC"><b>${
 		typeof regErrors["wrong_pass"] != "undefined" ? regErrors["wrong_pass"] : ""
-	}</b><BR>
-	<b>${
-		typeof regErrors["bad_passlength"] != "undefined"
-			? regErrors["bad_passlength"]
-			: ""
-	}</b><BR>
+	}${typeof regErrors["bad_passlength"] != "undefined" ? regErrors["bad_passlength"] : ""}</b></p>
+
+	<input type="password" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
+
+
 
 	<span id="passwordconfirmlabel" name="passwordconfirmlabel"><p style="font-size: 1em;"><B>Confirm your new password by typing it again</B></p></span>
-	<input type="password" id ="newpasswordconfirm" class="newpasswordconfirm" name="newpasswordconfirm" placeholder="Enter New Password Again" style="border-radius: 5px;"></input><BR><BR>
-	<b>${
+	<input type="password" id ="newpasswordconfirm" class="newpasswordconfirm" name="newpasswordconfirm" placeholder="Enter New Password Again" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
+	
+	<p style="color:#A74ADC"><b>${
 		typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
-	}</b><BR>
-	<b>${
-		typeof regErrors["nomatch_pass"] != "undefined"
-			? regErrors["nomatch_pass"]
-			: ""
-	}</b><BR>
-	<b>${
-		typeof regErrors["contains_space"] != "undefined"
-			? regErrors["contains_space"]
-			: ""
-	}</b>
+	}${typeof regErrors["nomatch_pass"] != "undefined" ? regErrors["nomatch_pass"] : ""}${typeof regErrors["contains_space"] != "undefined" ? regErrors["contains_space"] : ""}</b></p><BR>
 			
-<input type="submit" value='Submit Changes       ' id="button"; class="button" style="min-width:30%"></input></form><BR><BR>
-<!-- <form name='returntologinsuccess' action="loginsuccess?${
+<input type="submit" value='Submit Changes       ' id="button"; class="button" style="min-width:30%"></input></form><BR>
+
+<form name='returntologinsuccess' action="/returntologinsuccess?${
 		params.toString().split("currentfullname")[0]
-	}" method="GET">
-<input type="submit" value='Return to Previous Page     ' id="button2"; class="button" style="min-width:30%;"></input></form>-->
+	}" method="POST">
+<input type="submit" value='Return to Previous Page     ' id="button2"; class="button" style="min-width:30%;"></input></form>
 			</div>
 
 
 	</body>
 	`);
+});
+
+app.post("/returntologinsuccess", function (request, response) {
+	// specifically used for returning to the login success page while keeping params
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	response.redirect("/loginsuccess?" + params.toString());
 });
 
 // Code inspired by Assignment 2 Code Examples
@@ -738,11 +741,11 @@ app.post("/editaccount", function (request, response) {
 		console.log(
 			"new: " + actusers[currentuser].fullname + "current " + curr_full_name
 		);
-		regErrors["wrong_name"] = `Current Full Name is incorrect!`;
+		regErrors["wrong_name"] = `Current Full Name is incorrect!`; // pushes out this error in regErrors array if true
 	} else if (new_full_name.length < 2 || new_full_name.length > 30) {
 		regErrors["bad_userlength"] = `Name must be between 2 and 30 characters.`; // checks to see if full name entered is between 2 and 30 characters
 	} else if (/^[A-Za-z_ -]+$/.test(new_full_name) == false) {
-		regErrors["bad_user"] = `Name must only contain letters.`;
+		regErrors["bad_user"] = `Name must only contain letters.`; // pushes out this error in regErrors array if true
 	} else {
 		// if new full name box isn't empty
 		actusers[currentuser].fullname = new_full_name; // set new full name to current full name
@@ -754,11 +757,12 @@ app.post("/editaccount", function (request, response) {
 		// if password isn't blank
 	} else if (actusers[currentuser].password != curr_pass) {
 		console.log("Current Password is incorrect"); // status
-		regErrors["wrong_pass"] = `Current Password is incorrect!`;
+		regErrors["wrong_pass"] = `Current Password is incorrect!`; // pushes out this error in regErrors array if true
 	} else if (new_pass != new_pass_2) {
 		console.log("New Password Doesn't match"); // status
-		regErrors["nomatch_pass"] = `New password does not match!`;
+		regErrors["nomatch_pass"] = `New password does not match!`; // pushes out this error in regErrors array if true
 	} else if (
+		// tests for requiring at least one special password and number
 		/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]/.test(
 			request.body.password
 		) == false
@@ -769,7 +773,7 @@ app.post("/editaccount", function (request, response) {
 	} else if (new_pass.length < 10 || new_pass.length > 16) {
 		regErrors[
 			"bad_passlength"
-		] = `Password must be between 10 and 16 characters.`;
+		] = `Password must be between 10 and 16 characters.`; // pushes out this error in regErrors array if true
 	} else if (/^\S*$/.test(new_pass) == false) {
 		regErrors["contains_space"] = `Passwords should not contain spaces.`;
 	} else {
@@ -799,6 +803,7 @@ app.post("/editaccount", function (request, response) {
 
 		if (
 			/^[a-zA-Z0-9._]+@[a-zA-Z0-9.]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+				// makes sure there are no special characters in the email and NEEDS @
 				request.body.newusername
 			) == false
 		) {
@@ -940,37 +945,37 @@ app.get("/register", function (request, response) {
 		<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Register</p>
 
 		<form method ="POST" action ="?${params.toString().split("fullname")[0]}">
-		<b>${
+		<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
 			typeof regErrors["empty_boxes"] != "undefined"
 				? regErrors["empty_boxes"]
 				: ""
-		}</b><BR>
+		}</b></p><BR>
 			
-		<span id="fullnamelabel" name="fullnamelabel" style="color: white;"><B>Enter your full name</B></span><BR>
-		<input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name" style="border-radius: 5px;"></input><BR>
-		<b>${
+		<span id="fullnamelabel" name="fullnamelabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter your full name</B></span><BR>
+		<input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
+		<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
 			typeof regErrors["bad_userlength"] != "undefined"
 				? regErrors["bad_userlength"]
 				: ""
 		}<BR>
 		${
 			typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
-		}</b><BR>
+		}</b></p><BR>
 	
-		<span id="usernamelabel" name="usernamelabel" style="color: white;"><B>Enter an email</B></span><BR>
-		<input type="text" id ="username" class="username" name="username" placeholder="bob@example.com" style="border-radius: 5px;"></input><BR>
-		<b>${
+		<span id="usernamelabel" name="usernamelabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter an email</B></span><BR>
+		<input type="text" id ="username" class="username" name="username" placeholder="example@example.com" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
+		<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
 			typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
 		}<BR>
 		${
 			typeof regErrors["username_taken"] != "undefined"
 				? regErrors["username_taken"]
 				: ""
-		}</b><BR>
+		}</b></p><BR>
 	
-		<span id="passwordlabel" name="passwordlabel" style="color: white;"><B>Enter a password</B></span><BR>
-		<input type="text" id ="password" class="password" name="password" placeholder="Password" style="border-radius: 5px;"></input><BR>
-		<b>${
+		<span id="passwordlabel" name="passwordlabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter a password</B></span><BR>
+		<input type="password" id ="password" class="password" name="password" placeholder="Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
+		<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
 			typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
 		}</b><BR>
 		<b>${
@@ -982,21 +987,33 @@ app.get("/register", function (request, response) {
 			typeof regErrors["contains_space"] != "undefined"
 				? regErrors["contains_space"]
 				: ""
-		}</b><BR>
+		}</b></p>
 			
 	
-		<span id="passwordlabelconfirm" name="passwordlabelconfirm" style="color: white;"><B>Repeat password</B></span><BR>
-		<input type="text" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password" style="border-radius: 5px;"></input><BR>
-		<b>${
+		<span id="passwordlabelconfirm" name="passwordlabelconfirm" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Repeat password</B></span><BR>
+		<input type="password" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
+		<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
 			typeof regErrors["password_mismatch"] != "undefined"
 				? regErrors["password_mismatch"]
 				: ""
-		}</b><BR>
+		}</b></p><BR>
 	<BR>
-    <input type="submit" value='Register        ' id="button" class="button" name="submitbutton" onclick="changeValue(); style="width:20%;"></input>
+    <input type="submit" value='Register        ' id="button" class="button" name="submitbutton" onclick="changeValue(); style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input>
     </form>
+	<BR>
+<form name='returntologin' action='returntologin?${
+			params.toString().split("fullname")[0]
+		}' method="POST">
+<input type="submit" value='Return to Login       ' id="button2"   class="button" style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input></form>
     `
 	);
+});
+
+app.post("/returntologin", function (request, response) {
+	// specifically used for returning to the login page while keeping params
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	response.redirect("/login?" + params.toString());
 });
 
 // Code inspired by Assignment 2 Code Examples
@@ -1117,46 +1134,16 @@ app.post("/startregister", function (request, response) {
 });
 
 app.get("/invoice", function (request, response) {
+	// if someone tries to type in /invoice into the URL, it will redirect them to products display
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	console.log(params.toString());
 	response.redirect("products_display.html");
 });
 
 app.post("/invoice", function (request, response) {
-	let params = new URLSearchParams(request.query);
-	console.log(params);
-	console.log(params.toString());
-	/*if (params.has("currentuser")) {
-		currentuser = params.get("currentuser");
-	}
-	console.log(currentuser);
-	actusers[currentuser].loginstatus*/
-	if (params.has("currentuser")) {
-		currentuser = params.get("currentuser");
-	}
-	var quantities = []; // declaring empty array 'quantities'
-	params.forEach(
-		// for each iterates through all the keys
-		function (value, key) {
-			quantities.push(value); // pushes the value to quantities array
-		}
-	);
-	console.log("quantities=" + quantities);
-	if (typeof currentuser != "undefined") {
-		// modified from stack overflow (https://stackoverflow.com/questions/34909706/how-to-prevent-user-from-accessing-webpage-directly-in-node-js)
-		for (i in quantities) {
-			values = quantities[i];
-			if (values != 0 && isNonNegativeInteger(values)) {
-				console.log("values= " + values);
-				products[i].quantity_available -= Number(values); // Stock, or quantity_available is subtracted by the order quantity
-				products[i].quantity_sold =
-					Number(products[i].quantity_sold) + Number(values); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
-				let proddata = JSON.stringify(products);
-				fs.writeFileSync(prodname, proddata, "utf-8");
-			}
-		}
-		response.redirect("invoice.html?" + params.toString());
-	} else {
-		response.redirect("products_display.html");
-	}
+	response.write(`hello`);
+	response.end();
 });
 
 app.post("/goodbye", function (request, response) {
@@ -1246,17 +1233,16 @@ app.post("/goodbye", function (request, response) {
 <input type="submit" value='Log Out' id="button" class="button"></input>
 </form>
 	</div>
-
-
 `);
 });
 
 app.get("/logout", function (request, response) {
 	let params = new URLSearchParams(request.query); // grab params from url
 	if (params.has("currentuser")) {
-		// identify current user get get it
+		// identify current user get it
 		currentuser = params.get("currentuser");
 	}
+	console.log(currentuser);
 	ordered = "";
 	actusers[currentuser].loginstatus = false;
 	users[currentuser] = actusers[currentuser];

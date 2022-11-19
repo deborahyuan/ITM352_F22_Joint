@@ -102,15 +102,15 @@ p {
 .invoice-table tbody tr:nth-last-of-type(7) {
 	border-bottom: 2px solid black;
 }
-
+/* table row bottom border line */
 .invoice-table tbody tr:nth-last-of-type(3),
 .invoice-table tbody tr:nth-last-of-type(2) {
-	border-bottom: 3px dashed black;
+	border-bottom: 4px dashed black;
 }
 
 /* table row highlight light blue when hovered */
 .invoice-table tbody tr:hover {
-	background-color: #a1d3d4;
+	background-color: #e5cced;
 }
 
 /*///////*/
