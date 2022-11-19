@@ -1,1 +1,26 @@
-{"itm352@hawaii.edu":{"fullname":"ITM 352","password":"grader","loginstatus":false,"lasttimelog":"11/17/2022 12:11AM","currtimelog":"11/17/2022 12:11AM","amtlogin":3},"evond@hawaii.edu":{"fullname":"Evon Diep","password":"heyhihello1@","loginstatus":false,"lasttimelog":"11/16/2022 6:15PM","currtimelog":"11/16/2022 11:37PM","amtlogin":2},"dyuan@hawaii.edu":{"password":"heyhihello1@","loginstatus":false,"amtlogin":36,"fullname":"Deborah Yuan","lasttimelog":"11/18/2022 8:08PM","currtimelog":"11/18/2022 8:14PM"}}
+{
+	"itm352@hawaii.edu": {
+		"fullname": "ITM 352",
+		"password": "grader",
+		"loginstatus": false,
+		"lasttimelog": "11/17/2022 12:11AM",
+		"currtimelog": "11/17/2022 12:11AM",
+		"amtlogin": 3
+	},
+	"evond@hawaii.edu": {
+		"fullname": "Evon Diep",
+		"password": "heyhihello1@",
+		"loginstatus": false,
+		"lasttimelog": "11/16/2022 6:15PM",
+		"currtimelog": "11/16/2022 11:37PM",
+		"amtlogin": 2
+	},
+	"dyuan@hawaii.edu": {
+		"password": "heyhihello1@",
+		"loginstatus": false,
+		"amtlogin": 0,
+		"fullname": "Deborah Yuan",
+		"lasttimelog": 0,
+		"currtimelog": "11/18/2022 9:58PM"
+	}
+}

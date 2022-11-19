@@ -209,7 +209,6 @@ loginError = {}; // object for login error messages
 // login
 app.get("/login", function (request, response) {
 	let params = new URLSearchParams(request.query);
-
 	console.log(params);
 	console.log(params.toString());
 	ordered = "";
@@ -245,7 +244,7 @@ app.get("/login", function (request, response) {
 
 	<script>
 
-	let params = new URLSearchParams(request.query); // pull params from search URL
+	let params = (new URL(document.location)).searchParams; // pull params from search URL
 
 	/* allows for us to create an error alert based off of the results of the server's validataion*/
 		
@@ -266,7 +265,6 @@ app.get("/login", function (request, response) {
 			var stickyUser = params.get('username');
 			document.getElementById('username').value = stickyUser;
 		}
-
 	};	
 	</script>
 
@@ -281,11 +279,7 @@ app.get("/login", function (request, response) {
 		params.toString().split("username")[0]
 	}" method="POST">
 	<BR>
-	<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
-		typeof loginError["noquantities"] != "undefined"
-			? loginError["noquantities"]
-			: ""
-	}</b></p><BR>
+
 	<span id="usernamelabel" name="usernamelabel" style="color: white;"><p style="font-family: 'Source Sans Pro', sans-serif;"><B>Enter a username</B></p></span>
 	<input type="text" id ="username" class="username" name="username" placeholder="Username" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif" ></input><BR>
 	<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
@@ -305,11 +299,13 @@ app.get("/login", function (request, response) {
 <BR>
 <input type="submit" value='Login        ' id="button" style="min-width:20%;" class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input>
 </form><BR>
+
 <form name='login' action='/startregister?${
 		params.toString().split("currentfullname")[0]
 	}' method="POST">
-<input type="submit" value='New User? Click Here     ' id="button2" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input></form>
-<BR>
+<input type="submit" value='New User? Click Here     ' id="button2" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input>
+</form><BR>
+
 <form name='returntoproddisplay' action='/returntoproductsdisplay?${
 		params.toString().split("currentfullname")[0]
 	}' method="POST">
@@ -352,13 +348,6 @@ app.post("/login", function (request, response) {
 			fs.writeFileSync(actname, actdata, "utf-8");
 			console.log("hi");
 			response.redirect("loginsuccess?" + params.toString() + "&" + userstatus);
-		} else if (params.has("iPhone") != true) {
-			response.redirect(
-				"login?" + params.toString() + "&username=" + inputusername
-			);
-			loginError[
-				"noquantities"
-			] = `No Product Quantities have been selected, please return to the product selection page!`;
 		} else {
 			response.redirect(
 				"login?" + params.toString() + "&username=" + inputusername
@@ -642,7 +631,9 @@ if (params.has("currentuser")) {
 		params.toString().split("currentfullname")[0]
 	}' method="POST">
 
-	<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">Hi ${currentuser},</h1></span><BR>
+	<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">Hi ${
+		actusers[currentuser].fullname
+	},</h1></span><BR>
 	<p style="font-size: 2em;">Edit your account information here:</p>
 	<p style="font-size: 1.5em;">Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
 
@@ -891,7 +882,7 @@ app.get("/register", function (request, response) {
 		<!-- 
 		Registration Page for Assignment2
 		Author: Deborah Yuan & Evon Diep
-		Date: 11/16/22
+		Date: 11/18/22
 		Desc: This html page serves as a landing page for a user visiting the site. It features a navigation bar at the top, alongside a looping video of the iPhone 14 Pro, taken from Apple's website. There is a button labeled 'enter', which the user can click -- this leads to the products display page. 
 		-->
 		
@@ -914,10 +905,6 @@ app.get("/register", function (request, response) {
 		
 		   <!-- my own stylesheet (products-style.css) -->
 		  <link href="products-style.css" rel="stylesheet">
-		  <style>
-
-
-		  </style>
 		</head>
 	<html>
 		<script>
@@ -927,7 +914,7 @@ app.get("/register", function (request, response) {
 			if (params.has('fullname')) {
 				var fullname = params.get('fullname');
 				document.getElementById('fullname').value = fullname;
-				document.getElementById("submitbutton").outerHTML = '<input type="submit" value="Continue" id="button" name="button"></input>'
+				document.getElementById("submitbutton").outerHTML = '<input type="submit" value="Continue        " id="submitbutton" class="button" name="submitbutton" style="min-width:20%";></input>'
 			}
 	
 			if (params.has('email')) {
@@ -935,78 +922,86 @@ app.get("/register", function (request, response) {
 					document.getElementById('username').value = email;
 			}
 		};
+			</script>
 	
-		</script>
-		<body style="background-color: black;">
-		<div class="container text-center" style="padding-top: 30px;">
-		<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment2_images/applergbgif.gif" alt="" style="max-width: 20%;" ></a>
-		</div>
-		<div class="container text-center" style="padding-bottom: 50px; padding-top: 0px;">
-		<h1 style="font-size: 4em; color:white">Register</h1>
-		<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Register</p>
+		
+			<body style="background-color: black;">
+			<div class="container text-center" style="padding-top: 30px;">
+			<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment2_images/applergbgif.gif" alt="" style="max-width: 20%;" ></a>
+			</div>
+			<div class="container text-center" style="padding-bottom: 50px; padding-top: 0px;">
+			<h1 style="font-size: 4em; color:white">Register</h1>
+			<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Register</p>
 
-		<form method ="POST" action ="?${params.toString().split("fullname")[0]}">
-		<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
-			typeof regErrors["empty_boxes"] != "undefined"
-				? regErrors["empty_boxes"]
-				: ""
-		}</b></p><BR>
+		
+			<form method ="POST" action ="?${params.toString().split("fullname")[0]}">
+			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;">
+			<b>${
+				typeof regErrors["empty_boxes"] != "undefined"
+					? regErrors["empty_boxes"]
+					: ""
+			}</b></p>
 			
-		<span id="fullnamelabel" name="fullnamelabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter your full name</B></span><BR>
-		<input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
-		<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
-			typeof regErrors["bad_userlength"] != "undefined"
-				? regErrors["bad_userlength"]
-				: ""
-		}<BR>
-		${
-			typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
-		}</b></p><BR>
-	
-		<span id="usernamelabel" name="usernamelabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter an email</B></span><BR>
-		<input type="text" id ="username" class="username" name="username" placeholder="example@example.com" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
-		<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
-			typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
-		}<BR>
-		${
-			typeof regErrors["username_taken"] != "undefined"
-				? regErrors["username_taken"]
-				: ""
-		}</b></p><BR>
-	
-		<span id="passwordlabel" name="passwordlabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter a password</B></span><BR>
-		<input type="password" id ="password" class="password" name="password" placeholder="Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
-		<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
-			typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
-		}</b><BR>
-		<b>${
-			typeof regErrors["bad_passlength"] != "undefined"
-				? regErrors["bad_passlength"]
-				: ""
-		}<BR>
-		${
-			typeof regErrors["contains_space"] != "undefined"
-				? regErrors["contains_space"]
-				: ""
-		}</b></p>
-			
-	
-		<span id="passwordlabelconfirm" name="passwordlabelconfirm" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Repeat password</B></span><BR>
-		<input type="password" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
-		<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
-			typeof regErrors["password_mismatch"] != "undefined"
-				? regErrors["password_mismatch"]
-				: ""
-		}</b></p><BR>
-	<BR>
-    <input type="submit" value='Register        ' id="button" class="button" name="submitbutton" onclick="changeValue(); style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input>
-    </form>
-	<BR>
-<form name='returntologin' action='returntologin?${
-			params.toString().split("fullname")[0]
-		}' method="POST">
-<input type="submit" value='Return to Login       ' id="button2"   class="button" style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input></form>
-    `
+			<span id="fullnamelabel" name="fullnamelabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter your full name</B></span><BR>
+			<input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
+			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;">
+			<b>${
+				typeof regErrors["bad_userlength"] != "undefined"
+					? regErrors["bad_userlength"]
+					: ""
+			}<BR>
+			${
+				typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
+			}</b></p><BR>
+		
+			<span id="usernamelabel" name="usernamelabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter an email</B></span><BR>
+			<input type="text" id ="username" class="username" name="username" placeholder="example@example.com" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
+			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
+				typeof regErrors["bad_email"] != "undefined"
+					? regErrors["bad_email"]
+					: ""
+			}<BR>
+			${
+				typeof regErrors["username_taken"] != "undefined"
+					? regErrors["username_taken"]
+					: ""
+			}</b></p><BR>
+		
+			<span id="passwordlabel" name="passwordlabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter a password</B></span><BR>
+			<input type="password" id ="password" class="password" name="password" placeholder="Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
+			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;">
+			<b>${
+				typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
+			}</b><BR>
+			<b>${
+				typeof regErrors["bad_passlength"] != "undefined"
+					? regErrors["bad_passlength"]
+					: ""
+			}
+			${
+				typeof regErrors["contains_space"] != "undefined"
+					? regErrors["contains_space"]
+					: ""
+			}</b></p><BR>
+				
+		
+			<span id="passwordlabelconfirm" name="passwordlabelconfirm" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Repeat password</B></span><BR>
+			<input type="password" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
+			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;">
+			<b>${
+				typeof regErrors["password_mismatch"] != "undefined"
+					? regErrors["password_mismatch"]
+					: ""
+			}</b></p><BR><BR>
+				
+			<input type="submit" value='Register        ' id="submitbutton" class="button" name="submitbutton" style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input>
+			</form>
+			<BR>
+			<form name='returntologin' action='returntologin?${
+				params.toString().split("fullname")[0]
+			}' method="POST">
+	<input type="submit" value='Return to Login       ' id="button2"   class="button" style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input></form>
+			`
 	);
 });
 
