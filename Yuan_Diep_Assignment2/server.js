@@ -500,10 +500,10 @@ app.get("/loginsuccess", function (request, response) {
 	  </div>
 	  <div class="container text-center" style="padding-bottom: 50px;">
 	<form name='editaccount' action='?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
-	<input type="submit" value='Edit Account Information    ' id="button"; class="button"></input>
+	<input type="submit" value='Edit Account Information        ' id="button"; class="button"></input>
 	</form>
 	<form name='gotoinvoice' action='invoice?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
-	<input type="submit" value='Go To Invoice   ' id="button2"; class="button" ></input>
+	<input type="submit" value='Go To Invoice        ' id="button2"; class="button" style="min-width: 30%"></input>
 	</form>
 	</div>`
 	);
@@ -799,7 +799,7 @@ app.post("/editaccount", function (request, response) {
 
 		if (
 			/^[a-zA-Z0-9._]+@[a-zA-Z0-9.]+(?:\.[a-zA-Z0-9-]+)*$/.test(
-				request.body.username
+				request.body.newusername
 			) == false
 		) {
 			{
@@ -832,8 +832,8 @@ app.post("/editaccount", function (request, response) {
 			users[new_user_name].password = actusers[new_user_name].password;
 			users[new_user_name].loginstatus = actusers[new_user_name].loginstatus;
 			users[new_user_name].amtlogin = actusers[new_user_name].amtlogin;
-			userse[new_user_name].lasttimelog = actusers[new_user_name].lasttimelog;
-			userse[new_user_name].currtimelog = actusers[new_user_name].currtimelog;
+			users[new_user_name].lasttimelog = actusers[new_user_name].lasttimelog;
+			users[new_user_name].currtimelog = actusers[new_user_name].currtimelog;
 
 			delete users[currentuser];
 		}

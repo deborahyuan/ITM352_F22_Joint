@@ -1,11 +1,1 @@
-{
-	"usernamechange": { "newparams": {} },
-	"dyuan@gmail.com": {
-		"fullname": "Deborah L Yuan",
-		"password": "heyhihello1@",
-		"loginstatus": true,
-		"amtlogin": 21,
-		"lasttimelog": "11/18/2022 1:51AM",
-		"currtimelog": "11/18/2022 2:02AM"
-	}
-}
+{"usernamechange":{"newparams":{}},"dyuan@hawaii.edu":{"password":"heyhihello1@","loginstatus":true,"amtlogin":23,"fullname":"Deborah Yuan","lasttimelog":"11/18/2022 11:18AM","currtimelog":"11/18/2022 11:20AM"}}
