@@ -69,6 +69,11 @@ Desc: This html page pulls data from a separate products file (products.json) an
           }
         )
 
+if (params.has(`series`)) {
+      let series = params.get(`series`);
+      products = products[series];
+    }
+
     // Modified code by Dan Port Assignment 1 to make textboxes sticky
     for (i = 0; i < products.length; i++) {
       if (params.has(`error`)) {
@@ -77,13 +82,11 @@ Desc: This html page pulls data from a separate products file (products.json) an
         quantity_form[`quantitytextbox[${i}]`].value = stickyUser;
       }
     }
-
   };
+
+  console.log("hi="+products[1]);
 // Switching between product pages
-if (params.has(`series`)) {
-      let series = params.get(`series`);
-      products = products["iPhone"];
-    }
+
 
 
 

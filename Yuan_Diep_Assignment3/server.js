@@ -15,7 +15,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // read files
 var fs = require("fs");
-const { response } = require("express");
 var fname = "user_registration_info.json";
 var prodname = __dirname + "/products.json";
 var actname = __dirname + "/active_users.json";
