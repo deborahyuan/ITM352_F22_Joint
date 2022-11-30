@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<!-- 
+Products Display for Assignment2
+Author: Deborah Yuan & Evon Diep
+Date: 11/18/22
+Desc: This html page pulls data from a separate products file (products.json) and displays the files without hardcoding any values. In this particular case, the store has 6 different models of iPhones. The page will present a variety of error messages if the quantities desired for purchase are invalid. This page also contains a form, which will be submitted to the server (server.js), where the data will then be validated. If the user attempts to submit invalid quantities for purchase despite error messages, they will be redirected back to this page to fix their errors. This page also has a navigation bar that allows users to switch between the Home page (index) and the products page (this page). The base template for this site was taken from w3 schools, but has been adequately modified to fit the needs of this store.
+-->
+
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Smart Phone Store</title>
+
+  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <!-- google fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- my own stylesheet (products-style.css) -->
+  <link href="products-style.css" rel="stylesheet">
+  <script src="../products.json"></script> <!-- loading in product data from products.json -->
+  <script src="../user_registration_info.json" type="application/json
+  "></script> <!-- loading in user data from user_registration_info.json -->
+  <style>
+    /* Remove the navbar's default rounded borders and increase the bottom margin */
+    .navbar {
+      margin-bottom: 50px;
+      border-radius: 0;
+    }
+
+    /* Remove the jumbotron's default bottom margin */
+    .jumbotron {
+      margin-top: 0;
+      margin-bottom: 0;
+      position: relative;
+
+    }
+
+    /* Add a gray background color and some padding to the footer */
+    footer {
+      background-color: rgba(0, 0, 0, 0);
+    }
+  </style>
+</head>
+
+<script>
+
+  window.onload = function () {
+    let params = (new URL(document.location)).searchParams;  // pull params from search URL
+
+// displays error messages
+    if (params.has(`error`)) {
+      let err_msg = params.get(`error`);
+      document.getElementById("error").innerHTML = err_msg;
+    }
+
+    var quantities = []; // declaring empty array 'quantities
+        params.forEach( // for each iterates through all the keys
+          function (value, key) {
+            quantities.push(value); // pushes the value to quantities array
+          }
+        )
+
+    // Modified code by Dan Port Assignment 1 to make textboxes sticky
+    for (i = 0; i < products.length; i++) {
+      if (params.has(`error`)) {
+        stickyUser = quantities[i];
+        console.log("this: " + stickyUser);
+        quantity_form[`quantitytextbox[${i}]`].value = stickyUser;
+      }
+    }
+
+  };
+
+
+  /* function section */
+
+  // isNonNegativeInteger tests the input for errors, then returns error messages if any
+  function isNonNegativeInteger(queryString, returnErrors = false) {
+    errors = []; // assume no errors at first
+    if (Number(queryString) != queryString) {
+      errors.push('Not a number!'); // Check if string is a number value
+    } else {
+      if (queryString < 0) errors.push('a Negative value!'); // Check if it is non-negative
+      if (parseInt(queryString) != queryString) errors.push('Not an integer!'); // Check that it is an integer
+    }
+
+    if (returnErrors) {
+      return errors;
+    } else if (errors.length == 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // checkQuantityTextbox uses the input to write out errors, adjust textbox quantities, or recolor text/textbox borders
+  function checkQuantityTextbox(theTextbox) { // EC IR2: Added additional text and font styles to indicate whether quantities were valid or not
+    let input_string = theTextbox.value;
+    let error_array = isNonNegativeInteger(input_string, true);
+    let test = document.getElementsByClassName(theTextbox.name + '').item(0); // let test = 'quantitytextbox'
+
+    /* EC IR3: Having 'quantitytextbox[${i}]_available_message' display a red error message if Available Quantity > Stock, have quantitytextbox readjust to valid quantity, change textbox border to red */
+    if (Number(input_string) > document.getElementById(theTextbox.name + '_available').innerHTML) { // if user inputted quantity is > products[i].quantity_available, then...
+      document.getElementById(theTextbox.name + '_message').outerHTML = ('<span id="' + theTextbox.name + '_message" name="' + theTextbox.name + '_message"><font color="red"><b>We don\'t have ' + input_string + ' available.</b></font></span>'); // change quantitytextbox[${i}]_available_message's outerHTML to write that x quantity is not available
+      var extra = input_string - document.getElementById(theTextbox.name + '_available').innerHTML // defining extra, which is the user inputted quantity - products[i].quantity_available
+      setTimeout(function () { // delays this code for a bit (500) so the user inputted quantity that exceeds stock isn't INSTANTLY changed
+        test.value = input_string - extra // quantitytextbox = user inputted quantity - the # of products that exceeds stock
+      }, 500);
+      test.style.borderColor = "red"; // changes quantitytextbox's border to red
+      return;
+    } else {
+      test.style.borderColor = "black"; // if the quantity is fixed, changes quantitytextbox's border to red
+    };
+
+    if (error_array.length == 0) { // EC IR2 (pt.2): if there are no errors...
+      document.getElementById(theTextbox.name + '_message').innerHTML = ('You want <b>' + input_string + '</b>'); //  tell the user how much they want
+    } else { // tell the user what the errors are and make the text red
+      document.getElementById(theTextbox.name + '_message').innerHTML = ('<font color="red"><b>Quantity is ' + error_array.join("; ") + '</b></font>');
+    }
+  };
+
+  /* allows for us to create an error alert based off of the results of the server's validataion*/
+  let params = (new URL(document.location)).searchParams;
+
+  console.log("Params=" + params); // shows what the params are in the console
+  // Check for an error and if so, display error message
+
+</script>
+
+
+<nav class="navbar navbar-inverse">
+  <!-- navigation bar from w3 schools -->
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">
+        <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png"
+          width="20" alt=""></a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li><a href="./index.html">Home</a></li>
+      </ul>
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="./">Products</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+<div class="container text-center" style="padding-bottom: 50px;">
+  <h1 style="font-size: 6em;">iPhone</h1>
+  <p style="font-size: 2em;">Models for Sale</p>
+</div>
+
+<!-- formatting provided by w3 schools -->
+<form name='quantity_form' action="/purchase" method="POST">
+  <!-- start of the form -->
+  <script>
+    for (i in products) { // for loop that loops x amount of times, depending on the number of products in 'products.json'
+      row = "";
+      if (parseInt(i / 3) == i / 3) { // 
+        document.write(`<div class="container">
+            <div class="row">`)
+      }
+    }
+    for (i in products) {
+      document.write(`
+          <div class="col-sm-4" >
+          <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white;">
+          <div class="panel-heading" style="background-color:black"><b>${products[i].name}</b></div> <!-- some inline css to override the template defaults -->
+          <div class="panel-body"><img src="${products[i].image}" class="img-responsive" style="width:100%" alt="Image"></div>
+          <div class="panel-footer"><h2 id="price">$${products[i].price}</h2><BR>
+          <label id ="quantitylabel" name="quantity${[i]}_label">Quantity Desired</label><BR>
+          <span id="quantitytextbox[${i}]_message" name="quantitytextbox[${i}]_message">Enter a quantity</span><BR><BR>
+          <input type="text" id ="quantitytextbox" class="quantitytextbox[${i}]" name="quantitytextbox[${i}]" onkeyup="checkQuantityTextbox(this)"></input><BR><BR>
+          <div id="qtyform">
+          <label id ="quantitytextbox[${i}]_available_message" name="quantitytextbox[${i}]_available_message">Quantity Available</label><BR>
+          <p id ="quantitytextbox[${i}]_available" name ="quantitytextbox[${i}]_available">${products[i].quantity_available}</p>
+          <label id ="quantitysoldemessage" name="quantity_sold[${i}]_message">Quantity Sold</label><BR>
+          <p>${products[i].quantity_sold}</p>
+          </div>
+         </div>
+         </div>
+          </div>
+        `)
+    }
+  </script>
+  </div>
+  <br><br>
+
+ <!-- footer -->
+  <footer class="container-fluid text-center">
+   <!-- if there are any errors that prevent the user from continuing to login, they will show up here -->
+    <h2 id="error"></h2>
+    <input type="submit" value='Purchase' id="button" class="button"></input>
+</form>
+<h3 style="padding: 10px;">
+  <B>Apple Online Store</B>
+</h3>
+
+</footer>
+
+</body>
+
+</html>
