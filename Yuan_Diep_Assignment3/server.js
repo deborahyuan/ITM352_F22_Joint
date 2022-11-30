@@ -120,6 +120,7 @@ app.get("/products.json", function (request, response, next) {
 // monitor all requests
 app.all("*", function (request, response, next) {
 	console.log(request.method + " to " + request.path);
+	//console.log(request);
 	next();
 });
 

@@ -52,8 +52,8 @@ Desc: This html page pulls data from a separate products file (products.json) an
 </head>
 
 <script>
+ 
 
-  window.onload = function () {
     let params = (new URL(document.location)).searchParams;  // pull params from search URL
 
 // displays error messages
@@ -82,7 +82,7 @@ if (params.has(`series`)) {
         quantity_form[`quantitytextbox[${i}]`].value = stickyUser;
       }
     }
-  };
+  
 
   console.log("hi="+products[1]);
 // Switching between product pages
@@ -138,7 +138,7 @@ if (params.has(`series`)) {
   };
 
   /* allows for us to create an error alert based off of the results of the server's validataion*/
-  let params = (new URL(document.location)).searchParams;
+  //let params = (new URL(document.location)).searchParams;
 
   console.log("Params=" + params); // shows what the params are in the console
   // Check for an error and if so, display error message
