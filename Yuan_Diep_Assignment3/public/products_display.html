@@ -79,6 +79,12 @@ Desc: This html page pulls data from a separate products file (products.json) an
     }
 
   };
+// Switching between product pages
+if (params.has(`series`)) {
+      let series = params.get(`series`);
+      products = products["iPhone"];
+    }
+
 
 
   /* function section */
