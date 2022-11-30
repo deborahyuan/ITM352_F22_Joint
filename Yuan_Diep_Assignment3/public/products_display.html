@@ -70,8 +70,9 @@ Desc: This html page pulls data from a separate products file (products.json) an
         )
 
 if (params.has(`series`)) {
-      let series = params.get(`series`);
+      series = params.get(`series`);
       products = products[series];
+      console.log ("series="+series);
     }
 
     // Modified code by Dan Port Assignment 1 to make textboxes sticky
@@ -146,33 +147,53 @@ if (params.has(`series`)) {
 </script>
 
 
-<nav class="navbar navbar-inverse">
-  <!-- navigation bar from w3 schools -->
+<!-- navigation bar from w3 schools -->
+<nav class="navbar navbar-inverse">  
   <div class="container-fluid">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="#">
-        <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png"
-          width="20" alt=""></a>
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">
+       <!-- corner navbar Apple icon -->
+      <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
-      <ul class="nav navbar-nav">
-        <li><a href="./index.html">Home</a></li>
+    <ul class="nav navbar-nav">
+      <li><a href="./">Home</a></li>
+    </ul>
+    <ul class="nav navbar-nav">
+      <!-- clicking this 'tab' leads to products display -->
+      <li class="active" id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>
+    </ul>
+    <ul class="nav navbar-nav">
+      <!-- clicking this 'tab' leads to products display -->
+      <li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>
+    </ul>
+    <ul class="nav navbar-nav">
+      <!-- clicking this 'tab' leads to products display -->
+      <li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+    <div class="collapse navbar-collapse" id="myNavbar">
+    <ul class="nav navbar-nav">
+    <!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
+   <li ><a href="./products_display.html"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+    </ul>
+    <ul class="nav navbar-nav">
+      <!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
+     <li ><a href="./products_display.html"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
       </ul>
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="./">Products</a></li>
-      </ul>
+    </ul> 
     </div>
   </div>
-</nav>
+  </nav>
 
 
 <div class="container text-center" style="padding-bottom: 50px;">
-  <h1 style="font-size: 6em;">iPhone</h1>
+  <h1 style="font-size: 6em;"><script>document.write(`${series}`)</script></h1>
   <p style="font-size: 2em;">Models for Sale</p>
 </div>
 
