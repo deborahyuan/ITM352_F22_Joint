@@ -198,7 +198,9 @@ if (params.has(`series`)) {
 </div>
 
 <!-- formatting provided by w3 schools -->
-<form name='quantity_form' action="/purchase" method="POST">
+<form name='quantity_form' action="/addtocart" method="GET">
+ <script>
+  document.write(`<input type="hidden" name="series" value=${series}>`)</script> 
   <!-- start of the form -->
   <script>
     for (i in products) { // for loop that loops x amount of times, depending on the number of products in 'products.json'

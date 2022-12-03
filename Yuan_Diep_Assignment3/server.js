@@ -1,5 +1,5 @@
 /* 
-Server for Assignment2
+Server for Assignment3
 Author: Deborah Yuan & Evon Diep
 Date: 11/18/22
 Desc: This server, server.js, provides validation for the data submitted by the form on products display, responding with the appropriate response depending on whether the quantities inputted are valid or invalid. In case of valid quantities, the user will be sent to the login. With invalid quantities, the user will be sent an error and be returned to the products display page. This server also contains almost all the pages for this Assignment, minus the index, invoice, and products display.
@@ -8,10 +8,16 @@ Desc: This server, server.js, provides validation for the data submitted by the 
 var express = require("express"); // requires node's express
 var app = express();
 var path = require("path");
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
+
+
 
 app.use(express.static(__dirname + "/public")); // route all other GET/POST requests to files in public
 app.use("/css", express.static(__dirname + "/public")); // calls css for everything in server
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(session({ secret: "MySecretKey", resave: true, saveUninitialized: true }));
 
 // read files
 var fs = require("fs");
@@ -124,6 +130,90 @@ app.all("*", function (request, response, next) {
 	next();
 });
 
+//
+app.get("/addtocart", function (request, response) {
+
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	var series = request.query['series']; // get the product series sent from the form post
+	var customerquantities = request.query['quantitytextbox'];
+	console.log("helloseries"+series);
+
+	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1
+	// process purchase request (validate quantities, check quantity available)
+	let validinput = true; // assume that all terms are valid
+	let allblank = false; // assume that it ISN'T all blank
+	let instock = true; // if it is in stock
+	let othererrors = false; //assume that there aren't other errors
+	// process form by redirecting to the receipt page
+	ordered = ""; // sets ordered back to empty
+	console.log("QUANTITIES=" + customerquantities);
+
+	for (let i in customerquantities) {
+		// Iterate over all text boxes in the form.
+		qtys = customerquantities[i];
+
+		let model = products[i]["name"];
+		if (qtys == 0) {
+			// assigning no value to certain models to avoid errors in invoice
+
+			ordered += model + "=" + qtys + "&";
+		} else if (
+			isNonNegativeInteger(qtys) &&
+			Number(qtys) <= products[i].quantity_available
+		) {
+			// if qtys is true, added to ordered string
+			ordered += model + "=" + qtys + "&"; // appears in invoice's URL
+		} else if (qtys == -0) {
+			// if qtys is -0 block order
+			validinput = false;
+			ordered += model + "=" + qtys + "&"; // appears in invoice's URL
+		} else if (isNonNegativeInteger(qtys) != true) {
+			// quantity is "Not a Number, Negative Value, or not an Integer"
+			validinput = false;
+			ordered += model + "=" + qtys + "&";
+		} else if (Number(qtys) >= products[i].quantity_available) {
+			// Existing stock is less than desired quantity
+			instock = false;
+			ordered += model + "=" + qtys + "&";
+		} else {
+			// textbox has gone missing? or some other error
+			othererrors = true;
+		}
+	}
+
+	if (allblank) {
+		// if all boxes are blank, there is an error, pops up alert
+		console.log(allblank);
+		// ordered = "";
+		response.redirect(
+			"products_display.html?" +
+				ordered +
+				"error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
+		);
+	} else if (!validinput || !instock || othererrors) {
+		// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
+		// ordered = "";
+		response.redirect(
+			"products_display.html?" + "series=" + series +
+				ordered  +
+				"error=FixErrors"
+		);
+	} else {
+
+	shoppingCart = request.session.cart; // create shopping cart session
+	
+	if (typeof shoppingCart == 'undefined') { // if shoppingCart session doesn't exist, then make a session object called shoppingCart
+		request.session.cart = {};
+		request.session.cart[series]=customerquantities;
+	} else if (typeof shoppingCart[series] == 'undefined') { // if shoppingCart series doesn't exist, then add series
+		request.session.cart[series] = customerquantities;
+	} else {
+
+	}}
+
+
+})
 // THIS IS FOR LOGIN AND REGISTER
 
 ordered = ""; // have a variable called ordered with no value, purchased quantities will initially be in here
