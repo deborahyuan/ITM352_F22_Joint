@@ -49,28 +49,47 @@ Desc: This html page serves as a landing page for a user visiting the site. It f
 </head>
 
  <!-- navigation bar from w3 schools -->
-  <nav class="navbar navbar-inverse">  
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="#">
-           <!-- corner navbar Apple icon -->
-          <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
-      </div>
-      <div class="collapse navbar-collapse" id="myNavbar">
-        <ul class="nav navbar-nav">
-          <li class="active"><a href="./">Home</a></li>
-        </ul>
-        <ul class="nav navbar-nav">
-          <!-- clicking this 'tab' leads to products display -->
-          <li ><a href="./products_display.html">Products</a></li>
-        </ul>
-      </div>
+<nav class="navbar navbar-inverse">  
+  <div class="container-fluid">
+    <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">
+       <!-- corner navbar Apple icon -->
+      <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
     </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+    <ul class="nav navbar-nav">
+      <li class="active" id="hometab"><a href="./">Home</a></li>
+    </ul>
+    <ul class="nav navbar-nav">
+      <!-- clicking this 'tab' leads to products display -->
+      <li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>
+    </ul>
+    <ul class="nav navbar-nav">
+      <!-- clicking this 'tab' leads to products display -->
+      <li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>
+    </ul>
+    <ul class="nav navbar-nav">
+      <!-- clicking this 'tab' leads to products display -->
+      <li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+    <div class="collapse navbar-collapse" id="myNavbar">
+    <ul class="nav navbar-nav">
+    <!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
+   <li ><a href="./products_display.html"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+    </ul>
+    <ul class="nav navbar-nav">
+      <!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
+     <li ><a href="./products_display.html"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
+      </ul>
+    </ul> 
+    </div>
+  </div>
   </nav>
 <main>
 

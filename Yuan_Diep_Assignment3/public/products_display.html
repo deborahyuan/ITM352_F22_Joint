@@ -26,9 +26,9 @@ Desc: This html page pulls data from a separate products file (products.json) an
 
   <!-- my own stylesheet (products-style.css) -->
   <link href="products-style.css" rel="stylesheet">
-  <script src="../products.json"></script> <!-- loading in product data from products.json -->
   <script src="../user_registration_info.json" type="application/json
   "></script> <!-- loading in user data from user_registration_info.json -->
+  <script src="./functions.js"></script>
   <style>
     /* Remove the navbar's default rounded borders and increase the bottom margin */
     .navbar {
@@ -52,10 +52,21 @@ Desc: This html page pulls data from a separate products file (products.json) an
 </head>
 
 <script>
- 
-
+          loadJSON('get_products_data', function (response) {
+            // Parsing JSON string into object
+            products = JSON.parse(response);
+        });
+  console.log ("PREproducts="+products);
     let params = (new URL(document.location)).searchParams;  // pull params from search URL
 
+if (params.has(`series`)) {
+      series = params.get(`series`);      
+      console.log ("productsseries="+products["iPhone"]);
+      console.log ("products="+products);
+      console.log ("series="+series);
+
+    }      
+  let products_S = products[series];
 // displays error messages
     if (params.has(`error`)) {
       let err_msg = params.get(`error`);
@@ -69,27 +80,19 @@ Desc: This html page pulls data from a separate products file (products.json) an
           }
         )
 
-if (params.has(`series`)) {
-      series = params.get(`series`);
-      products = products[series];
-      console.log ("series="+series);
-    }
 
     // Modified code by Dan Port Assignment 1 to make textboxes sticky
-    for (i = 0; i < products.length; i++) {
+  for (i = 0; i < products_S.length; i++) {
       if (params.has(`error`)) {
         stickyUser = quantities[i];
         console.log("this: " + stickyUser);
         quantity_form[`quantitytextbox[${i}]`].value = stickyUser;
       }
-    }
-  
+    }  
+    console.log("hi="+products_S[1]["name"]);
 
-  console.log("hi="+products[1]);
+
 // Switching between product pages
-
-
-
 
   /* function section */
 
@@ -184,7 +187,7 @@ if (params.has(`series`)) {
     </ul>
     <ul class="nav navbar-nav">
       <!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
-     <li ><a href="./products_display.html"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
+     <li ><a href="./cart"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
       </ul>
     </ul> 
     </div>
@@ -198,39 +201,40 @@ if (params.has(`series`)) {
 </div>
 
 <!-- formatting provided by w3 schools -->
-<form name='quantity_form' action="/purchase" method="POST">
+<form name='quantity_form' action="/addtocart" method="POST">
  <script>
   document.write(`<input type="hidden" name="series" value=${series}>`)</script> 
   <!-- start of the form -->
   <script>
-    for (i in products) { // for loop that loops x amount of times, depending on the number of products in 'products.json'
+    for (i in products_S) { // for loop that loops x amount of times, depending on the number of products in 'products.json'
       row = "";
       if (parseInt(i / 3) == i / 3) { // 
         document.write(`<div class="container">
             <div class="row">`)
       }
     }
-    for (i in products) {
+    for (i in products_S) {
       document.write(`
           <div class="col-sm-4" >
           <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white;">
-          <div class="panel-heading" style="background-color:black"><b>${products[i].name}</b></div> <!-- some inline css to override the template defaults -->
-          <div class="panel-body"><img src="${products[i].image}" class="img-responsive" style="width:100%" alt="Image"></div>
-          <div class="panel-footer"><h2 id="price">$${products[i].price}</h2><BR>
+          <div class="panel-heading" style="background-color:black"><b>${products_S[i].name}</b></div> <!-- some inline css to override the template defaults -->
+          <div class="panel-body"><img src="${products_S[i].image}" class="img-responsive" style="width:100%" alt="Image"></div>
+          <div class="panel-footer"><h2 id="price">$${products_S[i].price}</h2><BR>
           <label id ="quantitylabel" name="quantity${[i]}_label">Quantity Desired</label><BR>
           <span id="quantitytextbox[${i}]_message" name="quantitytextbox[${i}]_message">Enter a quantity</span><BR><BR>
-          <input type="text" id ="quantitytextbox" class="quantitytextbox[${i}]" name="quantitytextbox[${i}]" onkeyup="checkQuantityTextbox(this)"></input><BR><BR>
+          <input type="text" id ="quantitytextbox[${i}]" class="quantitytextbox[${i}]" name="quantitytextbox[${i}]" onkeyup="checkQuantityTextbox(this)"></input><BR><BR>
           <div id="qtyform">
           <label id ="quantitytextbox[${i}]_available_message" name="quantitytextbox[${i}]_available_message">Quantity Available</label><BR>
-          <p id ="quantitytextbox[${i}]_available" name ="quantitytextbox[${i}]_available">${products[i].quantity_available}</p>
+          <p id ="quantitytextbox[${i}]_available" name ="quantitytextbox[${i}]_available">${products_S[i].quantity_available}</p>
           <label id ="quantitysoldemessage" name="quantity_sold[${i}]_message">Quantity Sold</label><BR>
-          <p>${products[i].quantity_sold}</p>
+          <p>${products_S[i].quantity_sold}</p>
           </div>
          </div>
          </div>
           </div>
         `)
     }
+    console.log ("POSTproducts="+products_S);
   </script>
   </div>
   <br><br>

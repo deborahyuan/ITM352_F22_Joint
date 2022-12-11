@@ -11,6 +11,9 @@ var path = require("path");
 var session = require("express-session");
 var cookieParser = require("cookie-parser");
 
+// require products data
+products_data = require("./products.json");
+
 app.use(express.static(__dirname + "/public")); // route all other GET/POST requests to files in public
 app.use("/css", express.static(__dirname + "/public")); // calls css for everything in server
 app.use(express.urlencoded({ extended: true }));
@@ -116,11 +119,16 @@ function isNonNegativeInteger(queryString, returnErrors = false) {
 	}
 }
 
-app.get("/products.json", function (request, response, next) {
+/*app.get("/products.json", function (request, response, next) {
 	// if /products.json is being requested, then send back products as a string
 	response.type(".json");
 	var products_str = `var products = ${JSON.stringify(products)};`;
 	response.send(products_str);
+});*/
+
+// TAKEN FROM ASSIGNMENT 3 SAMPLE CODE
+app.post("/get_products_data", function (request, response) {
+	response.json(products_data);
 });
 
 // monitor all requests
@@ -175,45 +183,52 @@ app.get("/add_cart", function (req, res) {
 app.post("/addtocart", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
-	var series = request.query["series"]; // get the product series sent from the form post
-	customerquantities = request.body[`quantitytextbox`];
+	series = request.body["series"]; // get the product series sent from the form post
+	customerquantities = [];
+	console.log("productlength= " + products[series].length);
+
+	// console.log(request.body["quantitytextbox" + [1]]);
+	/*for (let i in products[series].length) {
+		customerquantities.push(Number(request.body["quantitytextbox" + [i]]));
+	}*/
+	customerquantities = request.body["quantitytextbox"];
 
 	console.log("QUANTITIES=" + customerquantities);
-	console.log("typeofQUANTITIES=" + typeof customerquantities);
+	console.log("2QUANTITIES=" + customerquantities[1]);
 	console.log("helloseries=" + series);
 
 	products = products[series];
-	console.log("helloproducts=" + products[0]["name"]);
+	console.log("helloproducts=" + products[1]["name"]); // products[series][1]["name"]
 
 	shoppingCart = request.session.cart; // create shopping cart session
 
-	if (typeof shoppingCart == "undefined") {
+	if (typeof request.session.cart == "undefined") {
 		// if shoppingCart session doesn't exist, then make a session object called shoppingCart
 		request.session.cart = {};
 		request.session.cart[series] = customerquantities;
+		console.log("CARTSERIES=" + request.session.cart[series]);
 		console.log("sessioncartinfo=" + request.session.cart);
-	}
-
-	if (typeof shoppingCart[series] == "undefined") {
+	} else if (typeof request.session.cart[series] == "undefined") {
 		// if shoppingCart series doesn't exist, then add series
 		request.session.cart[series] = customerquantities;
-
+	} else {
 		for (let i in customerquantities) {
-			if (customerquantities[i] >= products[series][i].quantity_available) {
+			if (customerquantities[i] >= products[i]["quantity_available"]) {
 				continue;
 			} else {
-				request.session.cart[series][i] += customerquantities[i];
+				request.session.cart[series][i] += Number(customerquantities[i]);
 				console.log(
-					"request.session.car" +
-						"series" +
+					"request.session.cart" +
+						series +
 						[i] +
 						"=" +
 						request.session.cart[series][i]
 				);
 			}
 		}
-		response.redirect("products_display.html?" + "series=" + series);
 	}
+	shoppingCart = request.session.cart; //sync Cart
+	response.redirect("products_display.html?" + "series=" + series);
 });
 
 // THIS IS FOR LOGIN AND REGISTER
@@ -221,7 +236,7 @@ app.post("/addtocart", function (request, response) {
 ordered = ""; // have a variable called ordered with no value, purchased quantities will initially be in here
 
 app.post("/purchase", function (request, response) {
-	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1
+	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1&2
 	// process purchase request (validate quantities, check quantity available)
 	let validinput = true; // assume that all terms are valid
 	let allblank = false; // assume that it ISN'T all blank
@@ -684,6 +699,11 @@ app.get("/loginsuccess", function (request, response) {
 	</form>
 	</div>`
 	);
+});
+
+// CART
+app.get("/cart", function (request, response) {
+	response.send(`${request.session.cart["iPhone"]}`);
 });
 
 // POST LOGIN SUCCESS
