@@ -185,7 +185,6 @@ app.post("/addtocart", function (request, response) {
 	console.log(params);
 	series = request.body["series"]; // get the product series sent from the form post
 	customerquantities = [];
-	console.log("productlength= " + products[series].length);
 
 	// console.log(request.body["quantitytextbox" + [1]]);
 	/*for (let i in products[series].length) {
@@ -197,8 +196,7 @@ app.post("/addtocart", function (request, response) {
 	console.log("2QUANTITIES=" + customerquantities[1]);
 	console.log("helloseries=" + series);
 
-	products = products[series];
-	console.log("helloproducts=" + products[1]["name"]); // products[series][1]["name"]
+	products = products_data[series];
 
 	shoppingCart = request.session.cart; // create shopping cart session
 
@@ -213,10 +211,12 @@ app.post("/addtocart", function (request, response) {
 		request.session.cart[series] = customerquantities;
 	} else {
 		for (let i in customerquantities) {
-			if (customerquantities[i] >= products[i]["quantity_available"]) {
+			if (Number(customerquantities[i]) >= products[i]["quantity_available"]) {
 				continue;
 			} else {
-				request.session.cart[series][i] += Number(customerquantities[i]);
+				request.session.cart[series][i] =
+					Number(request.session.cart[series][i]) +
+					Number(customerquantities[i]);
 				console.log(
 					"request.session.cart" +
 						series +
@@ -701,9 +701,11 @@ app.get("/loginsuccess", function (request, response) {
 	);
 });
 
-// CART
+// GO TO CART
 app.get("/cart", function (request, response) {
-	response.send(`${request.session.cart["iPhone"]}`);
+	response.send(
+		`iPhone = ${request.session.cart["iPhone"]} <BR> iPad = ${request.session.cart["iPad"]} <BR> Mac = ${request.session.cart["Mac"]}`
+	);
 });
 
 // POST LOGIN SUCCESS
