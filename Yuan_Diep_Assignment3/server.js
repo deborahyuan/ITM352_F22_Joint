@@ -11,7 +11,7 @@ var path = require("path");
 var session = require("express-session");
 var cookieParser = require("cookie-parser");
 
-// require products data
+// require products data // ASSIGNMENT 3 EXAMPLE CODE
 products_data = require("./products.json");
 
 app.use(express.static(__dirname + "/public")); // route all other GET/POST requests to files in public
@@ -138,47 +138,6 @@ app.all("*", function (request, response, next) {
 	next();
 });
 
-app.get("/add_cart", function (req, res) {
-	let params = new URLSearchParams(request.query).toString();
-	var series = request.query["series"]; // get the product key sent from the form post
-	let customerquantities = [];
-	let error = false;
-	for (var i = 0; i < products_array[type].length; i++) {
-		quantities.push(Number(req.query["betta" + i]));
-		// if not valid integer THEN throw an error message
-		if (
-			checkNonNegInt(customerquantities[i], true) != true &&
-			quantities[i] != 0
-		) {
-			res.redirect("store?error=&" + params);
-			error = true;
-			break;
-		}
-	}
-
-	//if there is no errors
-	if (error == false) {
-		//assign shopping_cart to the session cart
-		shopping_cart = req.session.cart;
-
-		if (typeof shopping_cart == "undefined") {
-			req.session.cart = {};
-			req.session.cart[type] = quantities;
-		} else if (typeof shopping_cart[type] == "undefined") {
-			req.session.cart[type] = quantities;
-		} else {
-			for (var i = 0; i < products_array[type].length; i++) {
-				if (quantities[i] >= products_array[type][i].quantity_available) {
-					continue;
-				} else {
-					req.session.cart[type][i] += quantities[i];
-				}
-			}
-		}
-		res.redirect("./store?type=" + type);
-	}
-});
-
 // ADDING TO CART FUNCTIONALITY
 app.post("/addtocart", function (request, response) {
 	let params = new URLSearchParams(request.query);
@@ -186,10 +145,6 @@ app.post("/addtocart", function (request, response) {
 	series = request.body["series"]; // get the product series sent from the form post
 	customerquantities = [];
 
-	// console.log(request.body["quantitytextbox" + [1]]);
-	/*for (let i in products[series].length) {
-		customerquantities.push(Number(request.body["quantitytextbox" + [i]]));
-	}*/
 	customerquantities = request.body["quantitytextbox"];
 
 	console.log("QUANTITIES=" + customerquantities);
@@ -198,42 +153,136 @@ app.post("/addtocart", function (request, response) {
 
 	products = products_data[series];
 
-	shoppingCart = request.session.cart; // create shopping cart session
+	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1&2
+	// process purchase request (validate quantities, check quantity available)
+	let validinput = true; // assume that all terms are valid
+	let allblank = false; // assume that it ISN'T all blank
+	let instock = true; // if it is in stock
 
-	if (typeof request.session.cart == "undefined") {
-		// if shoppingCart session doesn't exist, then make a session object called shoppingCart
-		request.session.cart = {};
-		request.session.cart[series] = customerquantities;
-		console.log("CARTSERIES=" + request.session.cart[series]);
-		console.log("sessioncartinfo=" + request.session.cart);
-	} else if (typeof request.session.cart[series] == "undefined") {
-		// if shoppingCart series doesn't exist, then add series
-		request.session.cart[series] = customerquantities;
-	} else {
-		for (let i in customerquantities) {
-			if (Number(customerquantities[i]) >= products[i]["quantity_available"]) {
-				continue;
-			} else {
-				request.session.cart[series][i] =
-					Number(request.session.cart[series][i]) +
-					Number(customerquantities[i]);
-				console.log(
-					"request.session.cart" +
-						series +
-						[i] +
-						"=" +
-						request.session.cart[series][i]
-				);
-			}
+	ordered = ""; // have a variable called ordered with no value, purchased quantities will initially be in here
+
+	for (let i in customerquantities) {
+		// Iterate over all text boxes in the form.
+		qtys = customerquantities[i];
+
+		let model = products[i]["name"];
+		if (qtys == 0) {
+			// assigning no value to certain models to avoid errors in invoice
+			ordered += model + "=" + qtys + "&";
+		} else if (
+			isNonNegativeInteger(qtys) &&
+			Number(qtys) <= products[i].quantity_available
+		) {
+			// if qtys is true, added to ordered string
+			ordered += model + "=" + qtys + "&"; // appears in invoice's URL
+		} else if (qtys == -0) {
+			// if qtys is -0 block order
+			validinput = false;
+			ordered += model + "=" + qtys + "&"; // appears in invoice's URL
+		} else if (isNonNegativeInteger(qtys) != true) {
+			// quantity is "Not a Number, Negative Value, or not an Integer"
+			validinput = false;
+			ordered += model + "=" + qtys + "&";
+		} else if (Number(qtys) >= products[i].quantity_available) {
+			// Existing stock is less than desired quantity
+			instock = false;
+			ordered += model + "=" + qtys + "&";
+		} else {
+			// textbox has gone missing? or some other error
+			othererrors = true;
 		}
 	}
-	shoppingCart = request.session.cart; //sync Cart
-	response.redirect("products_display.html?" + "series=" + series);
+
+	if (customerquantities.join("") == 0) {
+		// if the array customerquantities adds up to 0, that means there are no quantities typed in
+		allblank = true;
+	}
+
+	if (validinput || !allblank || instock) {
+		if (allblank) {
+			// if all boxes are blank, there is an error, pops up alert
+			console.log(allblank);
+			// ordered = "";
+			response.redirect(
+				"products_display.html?" +
+					ordered +
+					"series=" +
+					series +
+					"&" +
+					"error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
+			);
+		} else if (!validinput) {
+			// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
+			// ordered = "";
+			response.redirect(
+				"products_display.html?" +
+					ordered +
+					"series=" +
+					series +
+					"&" +
+					"error=Invalid%20Quantity:%20Please%20Fix%20the%20Errors%20on%20the%20Order%20Page!"
+			);
+		} else if (!instock) {
+			// Existing stock is less than desired quantity, pops up alert
+			// ordered = "";
+			response.redirect(
+				"products_display.html?" +
+					ordered +
+					"series=" +
+					series +
+					"&" +
+					"error=Invalid%20Quantity:%20Requested%20Quantity%20Exceeds%20Stock"
+			);
+		} else {
+			// textbox has gone missing? or some other error, pops up alert
+			// ordered = "";
+			response.redirect(
+				"products_display.html?" +
+					ordered +
+					"series=" +
+					series +
+					"&" +
+					"error=Invalid%20Quantity:%20Unknown%20Error%20has%20occured"
+			);
+		}
+	} else {
+		shoppingCart = request.session.cart; // create shopping cart session
+
+		if (typeof request.session.cart == "undefined") {
+			// if shoppingCart session doesn't exist, then make a session object called shoppingCart
+			request.session.cart = {};
+			request.session.cart[series] = customerquantities;
+			console.log("CARTSERIES=" + request.session.cart[series]);
+			console.log("sessioncartinfo=" + request.session.cart);
+		} else if (typeof request.session.cart[series] == "undefined") {
+			// if shoppingCart series doesn't exist, then add series
+			request.session.cart[series] = customerquantities;
+		} else {
+			for (let i in customerquantities) {
+				if (
+					Number(customerquantities[i]) >= products[i]["quantity_available"]
+				) {
+					continue;
+				} else {
+					request.session.cart[series][i] =
+						Number(request.session.cart[series][i]) +
+						Number(customerquantities[i]);
+					console.log(
+						"request.session.cart" +
+							series +
+							[i] +
+							"=" +
+							request.session.cart[series][i]
+					);
+				}
+			}
+		}
+		shoppingCart = request.session.cart; //sync Cart
+		response.redirect("products_display.html?" + "series=" + series);
+	}
 });
 
 // THIS IS FOR LOGIN AND REGISTER
-
-ordered = ""; // have a variable called ordered with no value, purchased quantities will initially be in here
 
 app.post("/purchase", function (request, response) {
 	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1&2
@@ -338,7 +387,7 @@ app.post("/purchase", function (request, response) {
 		}
 	}
 
-	/*if (allblank) {
+	if (allblank) {
 		// if all boxes are blank, there is an error, pops up alert
 		console.log(allblank);
 		// ordered = "";
@@ -374,7 +423,7 @@ app.post("/purchase", function (request, response) {
 	} else {
 		// If everything is good, redirect to the invoice page.
 		response.redirect("login?" + ordered);
-	}*/
+	}
 });
 
 loginError = {}; // empty error object for login error messages
@@ -703,9 +752,13 @@ app.get("/loginsuccess", function (request, response) {
 
 // GO TO CART
 app.get("/cart", function (request, response) {
-	response.send(
-		`iPhone = ${request.session.cart["iPhone"]} <BR> iPad = ${request.session.cart["iPad"]} <BR> Mac = ${request.session.cart["Mac"]}`
-	);
+	if (typeof request.session.cart == "undefined") {
+		response.send(`Your cart is empty.`);
+	} else {
+		response.send(
+			`iPhone = ${request.session.cart["iPhone"]} <BR> iPad = ${request.session.cart["iPad"]} <BR> Mac = ${request.session.cart["Mac"]}`
+		);
+	}
 });
 
 // POST LOGIN SUCCESS
