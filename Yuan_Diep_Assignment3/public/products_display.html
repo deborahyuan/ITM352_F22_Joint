@@ -62,7 +62,7 @@ if (params.has(`series`)) {
       series = params.get(`series`);      
       console.log ("series="+series);
     }      
-  let products_S = products[series]; // new product variable that accounts for the series    
+
   
 var quantities = []; // declaring empty array 'quantities'
         params.forEach( // for each iterates through all the keys
@@ -71,16 +71,6 @@ var quantities = []; // declaring empty array 'quantities'
           }
         )
 console.log ("QTYS="+ quantities);    
-
-// Modified code by Dan Port Assignment 1 to make textboxes sticky
-  for (i = 0; i < products_S.length; i++) {
-      if (params.has(`error`)) {
-        stickyUser = quantities[i];
-        console.log("this: " + stickyUser);
-        quantity_form[`quantitytextbox[${i}]`].value = stickyUser;
-      }
-    }  
-    console.log("hi="+products_S[1]["name"]);
 
 // displays error messages
     if (params.has(`error`)) {
@@ -164,7 +154,7 @@ console.log ("QTYS="+ quantities);
       <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>`)
     } else {
       document.write(`
-    <a class="navbar-brand" href="./">
+    <a class="navbar-brand active" href="./">
        <!-- corner navbar Apple icon -->
       <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>`)
     }
@@ -172,12 +162,12 @@ console.log ("QTYS="+ quantities);
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
     <ul class="nav navbar-nav">
-      <li><a href="./">Home</a></li>
+      <li><a href="./products_display.html">Home</a></li>
     </ul>
     <ul class="nav navbar-nav">
       <!-- clicking this 'tab' leads to products display -->
     <script>
-      if (series == "iPhone") {
+    if (typeof series != "undefined" && series == "iPhone") {
       document.write(`<li class="active" id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>`)
     } else {
       document.write(`<li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>`)
@@ -187,7 +177,7 @@ console.log ("QTYS="+ quantities);
     <ul class="nav navbar-nav">
       <!-- clicking this 'tab' leads to products display -->
       <script>
-        if (series == "iPad") {
+        if (typeof series != "undefined" && series == "iPad") {
         document.write(`
       <li class="active" id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>`)
         } else {
@@ -199,7 +189,7 @@ console.log ("QTYS="+ quantities);
     <ul class="nav navbar-nav">
       <!-- clicking this 'tab' leads to products display -->
       <script>
-        if (series == "Mac") {
+        if (typeof series != "undefined" && series == "Mac") {
         document.write(`
       <li class="active" id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>`)
         } else {
@@ -225,6 +215,18 @@ console.log ("QTYS="+ quantities);
 
 <script>
 if (params.has(`series`)) {
+let products_S = products[series]; // new product variable that accounts for the series
+
+// Modified code by Dan Port Assignment 1 to make textboxes sticky
+for (i = 0; i < products_S.length; i++) {
+      if (params.has(`error`)) {
+        stickyUser = quantities[i];
+        console.log("this: " + stickyUser);
+        quantity_form[`quantitytextbox[${i}]`].value = stickyUser;
+      }
+    }  
+    console.log("hi="+products_S[1]["name"]);    
+
 document.write (`
 <div class="container text-center" style="padding-bottom: 50px;">
   <h1 style="font-size: 6em;">${series}</h1>
@@ -286,6 +288,15 @@ document.write(`
   <h1 style="font-size: 6em;">Welcome to the Apple Store</h1>
   <p style="font-size: 2em;">Choose From the Series Below</p>
 </div>
+
+          <div class="col-md" >
+          <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white">
+          <div class="panel-heading" style="background-color:black"><b>iPhone</b></div> <!-- some inline css to override the template defaults -->
+          <div class="panel-body"><img src="https://www.apple.com/v/iphone-14/c/images/meta/iphone-14_overview__ewkgx3s30v8m_og.png" class="img-responsive" style="width:100%" alt="Image"></div>
+          <div class="panel-footer"><h2 id="price">Shop for iPhones</h2><BR>
+          </div>
+          </div>
+
   <!-- footer -->
   <footer class="container-fluid text-center">
 <h3 style="padding: 10px;">
