@@ -39,7 +39,6 @@ var fs = require("fs");
 var fname = "user_registration_info.json";
 var prodname = __dirname + "/products.json";
 var actname = __dirname + "/active_users.json";
-var tempname = __dirname + "/tempfile.json";
 
 if (fs.existsSync(fname)) {
 	// file syncing/rewriting for user registration info
@@ -71,17 +70,6 @@ if (fs.existsSync(actname)) {
 	console.log("Sorry file " + actname + " does not exist.");
 	actusers = {};
 }
-
-if (fs.existsSync(tempname)) {
-	// file syncing/rewriting for 'temporary' files
-	tempdata = fs.readFileSync(tempname, "utf-8");
-	tfiles = JSON.parse(tempdata);
-	console.log(tfiles);
-} else {
-	console.log("Sorry file " + fname + " does not exist.");
-	users = {};
-}
-
 var regErrors = {}; // empty error object for errors in edit account and register pages
 
 /* FUNCTIONS */
@@ -439,34 +427,63 @@ app.get("/login", function (request, response) {
 	console.log(params);
 	console.log(params.toString());
 	ordered = "";
-	response.send(`
+	if (typeof request.cookies["activeuser"] != "undefined") {
+		active_user = ""; // active_variable is set to empty
+		response.clearCookie(["activeuser"]); // destroys cookie
+		response.redirect("./"); // FIX: IS IT SUPPOSED TO GO BACK TO INDEX?
+	} else {
+		response.send(`
 	<!-- 
-		Login Page for Assignment2
+		Login Page for Assignment3
 		Author: Deborah Yuan & Evon Diep
-		Date: 11/18/22
-		Desc: This  page serves as a login page for a user visiting the site. It features login capabilities, with textboxes for entering a username and password if the user has an account on the site. If the user attempts to log in with an invalid username or incorrect password, they will not be allowed to proceed, with error messages showing up underneath the textboxes. In addition, there are 3 buttons below the textboxes: Login, Register, and Return to Products Display. Each button has a different functionality. If the user does not have an account with us and needs to register, they will be sent to the register page. If the customer decideds they no longer want to log in, they can head back to the products display page.
+		Date: 12/14/22
+		Desc: This page serves as a login page for a user visiting the site. It features login capabilities, with textboxes for entering a username and password if the user has an account on the site. If the user attempts to log in with an invalid username or incorrect password, they will not be allowed to proceed, with error messages showing up underneath the textboxes. In addition, there are 3 buttons below the textboxes: Login, Register, and Return to Products Display. Each button has a different functionality. If the user does not have an account with us and needs to register, they will be sent to the register page. If the customer decideds they no longer want to log in, they can head back to the products display page.
 		-->
 		
 		<head>
-		  <meta charset="utf-8">
-		
-		  <meta name="viewport" content="width=device-width, initial-scale=1">
-		
-		  <title>Smart Phone Store</title>
-		
-		  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
-		  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-		  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-		
-		  <!-- google fonts -->
-		  <link rel="preconnect" href="https://fonts.googleapis.com">
-		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
-		
-		   <!-- my own stylesheet (products-style.css) -->
-		  <link href="products-style.css" rel="stylesheet">
-		</head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Shopping Cart</title>
+
+  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <!-- google fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- my own stylesheet (products-style.css) -->
+  <link href="products-style.css" rel="stylesheet">
+
+  <script src="../user_registration_info.json" type="application/json
+  "></script> <!-- loading in user data from user_registration_info.json -->
+  <script src="./functions.js"></script>
+  <style>
+    /* Remove the navbar's default rounded borders and increase the bottom margin */
+    .navbar {
+      margin-bottom: 50px;
+      border-radius: 0;
+    }
+
+    /* Remove the jumbotron's default bottom margin */
+    .jumbotron {
+      margin-top: 0;
+      margin-bottom: 0;
+      position: relative;
+
+    }
+
+    /* Add a gray background color and some padding to the footer */
+    footer {
+      background-color: rgba(0, 0, 0, 0);
+    }
+  </style>
+</head>
 	<html>
 
 	<script>
@@ -485,18 +502,55 @@ app.get("/login", function (request, response) {
 	
 	console.log("Params=" + params); // shows what the params are in the console
 
-	window.onload = function() {
-		let params = (new URL(document.location)).searchParams;
 	
 		if (params.has('username')) {
 			var stickyUser = params.get('username');
 			document.getElementById('username').value = stickyUser;
-		}
-	};	
+		};	
 	</script>
 
+	<!-- navigation bar from w3 schools -->
+	<nav class="navbar navbar-inverse">  
+	  <div class="container-fluid">
+		<div class="navbar-header">
+		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+		  <span class="icon-bar"></span>
+		  <span class="icon-bar"></span>
+		  <span class="icon-bar"></span>
+		</button>
+		<a class="navbar-brand active" href="./">
+		   <!-- corner navbar Apple icon -->
+		  <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+		</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+		<ul class="nav navbar-nav">
+		  <li><a href="./products_display.html">Home</a></li>
+		</ul>
+		<ul class="nav navbar-nav">
+		  <!-- clicking this 'tab' leads to products display -->
+		  <li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>
+		</ul>
+		<ul class="nav navbar-nav">
+		  <!-- clicking this 'tab' leads to products display -->
+		  <li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>
+		</ul>
+		<ul class="nav navbar-nav">
+		  <!-- clicking this 'tab' leads to products display -->
+			  <li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>
+		</ul>
+		<ul class="nav navbar-nav navbar-right">
+		<ul class="nav navbar-nav">
+		<li class="active"><a href="./login">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;Login&emsp;</a></li>
+		</ul>
+		<ul class="nav navbar-nav">
+		 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart&emsp;</a></li>
+		  </ul>
+		</ul> 
+	  </div>
+	  </nav>
+
 	<body style="background-color: black;">
-	<div class="container text-center" style="padding-top: 30px;">
+	<div class="container text-center" style="padding-top: 5px;">
 	<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment2_images/applergbgif.gif" alt="" style="max-width: 20%;" ></a>
 	</div>
 	<div class="container text-center" style="padding-bottom: 50px; padding-top: 0px;">
@@ -530,20 +584,12 @@ app.get("/login", function (request, response) {
 <input type="submit" value='Login        ' id="button" style="min-width:20%;" class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input>
 </form><BR>
 
-<form name='login' action='/startregister?${
-		params.toString().split("currentfullname")[0]
-	}' method="POST">
+<form name='login' action='/startregister' method="POST">
 <input type="submit" value='New User? Click Here     ' id="button2" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input>
 </form><BR>
-
-<form name='returntoproddisplay' action='/returntoproductsdisplay?${
-		params.toString().split("currentfullname")[0]
-	}' method="POST">
-<input type="submit" value='Return to Products     ' id="button3" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input></form>
-</body>
-  </div>
 	
 </html>`);
+	}
 });
 
 // RETURN TO PRODUCTS DISPLAY
@@ -562,30 +608,32 @@ app.post("/login", function (request, response) {
 	let inputusername = request.body[`username`].toLowerCase();
 	console.log(inputusername);
 	let inputpassword = request.body[`password`];
-	let currentuser = inputusername; // current user is based off of what the person put in as their username
 	loginError = {}; // resets to no errors
 
 	var encryptedPassword = encrypt(inputpassword); // variable to encrypt the inputted password
 
 	if (typeof users[inputusername] != "undefined") {
 		//
-		if (users[inputusername].password == encryptedPassword) {
+		if (
+			users[inputusername].password == encryptedPassword ||
+			(!users[inputusername].encrypted &&
+				users[inputusername].password == inputpassword)
+		) {
 			// if the password typed in the login page matches with the one on file then...
 			users[inputusername].amtlogin += Number(1); // increase the number of times someone has logged in by 1
 			actusers[inputusername] = {}; // creates an emtpy array for a new active(online/logged in) user
 			users[inputusername].loginstatus = true; // sets the user's account login status to true
 			users[inputusername].lasttimelog = users[inputusername].currtimelog; // changes what was previously the current time logged in to the LAST time they logged in
 			users[inputusername].currtimelog = getCurrentDate(); // get current date and set that to the current time in the user's account
-			actusers[inputusername] = users[inputusername]; // copies over all the information on the user's account, including login status, into the active user object JSON
-			userstatus = "currentuser=" + currentuser + "&"; // creates a variable user status to add to params later
 
-			response.cookie("name", "express").send("cookie set"); // sets the cookie's name as express
+			response.cookie("activeuser", inputusername); // sets the cookie's active user as the username if credentials are correct
+			active_user = request.cookies["activeuser"]; // active user cookie set to active_user variable
 
 			let data = JSON.stringify(users); // rewrites user reg. file
 			let actdata = JSON.stringify(actusers); // rewrites active user file
 			fs.writeFileSync(fname, data, "utf-8"); // syncs user reg. file
 			fs.writeFileSync(actname, actdata, "utf-8"); // syncs active user file
-			response.redirect("loginsuccess?" + params.toString() + "&" + userstatus); // appends the currentuser to the end of params
+			response.redirect("loginsuccess"); //
 		} else {
 			// if the password was incorrect, then keep the user on the login page, with their inputted username kept as a sticky
 			response.redirect(
@@ -604,64 +652,57 @@ app.post("/login", function (request, response) {
 // GET LOGIN SUCCESS : the page you get sent to if login is successful
 app.get("/loginsuccess", function (request, response) {
 	//
-	let params = new URLSearchParams(request.query); // grabs params from query
-	console.log(params.toString());
-	if (params.has("currentuser")) {
-		// if params has currentuser, set that as a variable
-		currentuser = params.get("currentuser");
-	}
-
-	tfiles["loginsuccesstemp"] = {}; // writing temp files to solve issue of restarting server T^T
-	tfiles["loginsuccesstemp"].currentuser = currentuser;
-	tfiles["loginsuccesstemp"].stringparams = params.toString();
-
-	let tempdata = JSON.stringify(tfiles); // writing and syncing temp data files
-	fs.writeFileSync(tempname, tempdata, "utf-8");
-
-	// WELCOME MESSAGES
-	if (Object.keys(actusers).length == 2) {
-		// PART OF IR5: keeping track of how many users are logged in (using values stored in the active_users.json object)
-		// if there is 1 active user in the object (the number is 2 because there is an object permanently there that isn't a user's account), then adjust the sentence structure
-		// grammar fixer
-		str =
-			"There is currently " +
-			Number(Object.keys(actusers).length - 1) +
-			" person logged in.";
+	if (typeof request.cookies["activeuser"] == "undefined") {
+		response.redirect("./");
 	} else {
-		str =
-			"There are currently " +
-			Number(Object.keys(actusers).length - 1) +
-			" people logged in.";
-	}
+		active_user = request.cookies["activeuser"]; // active user cookie set to active_user variable
 
-	if (actusers[tfiles["loginsuccesstemp"].currentuser].amtlogin == 1) {
-		// if the user has only logged in once, adjust the grammar
-		// grammar fixer
-		str2 =
-			"You've logged in a total of " +
-			actusers[tfiles["loginsuccesstemp"].currentuser].amtlogin +
-			" time.";
-	} else {
-		str2 =
-			"You've logged in a total of " +
-			actusers[tfiles["loginsuccesstemp"].currentuser].amtlogin +
-			" times.";
-	}
+		// WELCOME MESSAGES
+		if (Object.keys(actusers).length == 1) {
+			// Keeping track of how many users are logged in (using values stored in the active_users.json object)
+			// if there is 1 active user in the object (the number is 2 because there is an object permanently there that isn't a user's account), then adjust the sentence structure
+			// grammar fixer
+			str =
+				"There is currently " +
+				Number(Object.keys(actusers).length) +
+				" person logged in.";
+		} else {
+			str =
+				"There are currently " +
+				Number(Object.keys(actusers).length) +
+				" people logged in.";
+		}
 
-	if (
-		// if this is the user's first time logging in
-		actusers[tfiles["loginsuccesstemp"].currentuser].lasttimelog == 0 ||
-		actusers[tfiles["loginsuccesstemp"].currentuser].lasttimelog == undefined
-	) {
-		str3 = "This is the first time you've logged in.";
-	} else {
-		str3 =
-			"You were last logged in on " +
-			actusers[tfiles["loginsuccesstemp"].currentuser].lasttimelog +
-			". <B>Welcome back!<B>";
-	}
-	response.send(
-		`
+		if (users[active_user].amtlogin == 1) {
+			// if the user has only logged in once, adjust the grammar
+			// grammar fixer
+			str2 =
+				"You've logged in a total of " + users[active_user].amtlogin + " time.";
+		} else {
+			str2 =
+				"You've logged in a total of " +
+				users[active_user].amtlogin +
+				" times.";
+		}
+
+		if (
+			// if this is the user's first time logging in
+			users[active_user].lasttimelog == 0 ||
+			typeof users[active_user].lasttimelog == "undefined"
+		) {
+			str3 = "This is the first time you've logged in.";
+		} else {
+			str3 =
+				"You were last logged in on " +
+				users[active_user].lasttimelog +
+				". <B>Welcome back!<B>";
+		}
+
+		let data = JSON.stringify(users); // rewrites user reg. file
+		fs.writeFileSync(fname, data, "utf-8"); // syncs user reg. file
+
+		response.write(
+			`
 		<!-- 
 		Login/Registration Success for Assignment2
 		Author: Deborah Yuan & Evon Diep
@@ -698,52 +739,59 @@ app.get("/loginsuccess", function (request, response) {
 		  </style>
 		</head>
 		
-		 <!-- navigation bar from w3 schools -->
-		  <nav class="navbar navbar-inverse">  
-			<div class="container-fluid">
-			  <div class="navbar-header">
-				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-				  <span class="icon-bar"></span>
-				  <span class="icon-bar"></span>
-				  <span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#">
-				   <!-- corner navbar Apple icon -->
-				  <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
-			  </div>
-			  <div class="collapse navbar-collapse" id="myNavbar">
-				<ul class="nav navbar-nav">
-				  <li class="active"><a href="./">Home</a></li>
-				</ul>
-				<ul class="nav navbar-nav">
-				  <!-- clicking this 'tab' leads to products display -->
-				  <li ><a href="./products_display.html">Products</a></li>
-				</ul>
-				<ul class="nav navbar-nav navbar-right">
-				<div class="collapse navbar-collapse" id="myNavbar">
-				<ul class="nav navbar-nav">
-				<li>
-				<!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
-				<form action="?${tfiles["loginsuccesstemp"].stringparams}" method="POST" style="position: absolute; top: 14px; right: 70px; width: 100px">
-				<a href="javascript:;" onclick="parentNode.submit();" style="text-decoration: none; color: grey;"><span class="glyphicon glyphicon-user"></span> Edit Account</a>
-				<input type="hidden" name="mess" value='Edit Account'>
-				</form></li>
-				</ul>
-				<ul class="nav navbar-nav">
-				<li>
-				<!-- click the text to redirect to invoice -->
-				<form action="invoice?${tfiles["loginsuccesstemp"].stringparams}" method="POST" style="position: absolute; top: 14px; right: -50px; width: 100px">
-				<a href="javascript:;" onclick="parentNode.submit();" style="text-decoration: none; color: grey;"><span class="glyphicon glyphicon-shopping-cart"></span> Invoice</a>
-				<input type="hidden" name="mess" value='Invoice'>
-				</form></li>
-				</ul>
-				</ul> 
-			  </div>
+		<!-- navigation bar from w3 schools -->
+		<nav class="navbar navbar-inverse">  
+		  <div class="container-fluid">
+			<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand active" href="./">
+			   <!-- corner navbar Apple icon -->
+			  <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
 			</div>
+			<div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav">
+			  <li><a href="./products_display.html">Home</a></li>
+			</ul>
+			<ul class="nav navbar-nav">
+			  <!-- clicking this 'tab' leads to products display -->
+			  <li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>
+			</ul>
+			<ul class="nav navbar-nav">
+			  <!-- clicking this 'tab' leads to products display -->
+			  <li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>
+			</ul>
+			<ul class="nav navbar-nav">
+			  <!-- clicking this 'tab' leads to products display -->
+				  <li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+			<ul class="nav navbar-nav">`
+		);
+
+		if (typeof active_user != "undefined") {
+			response.write(
+				`<li><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+			);
+		} else {
+			response.write(
+				`<li><a href="./login">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;Login&emsp;</a></li>`
+			);
+		}
+		response.write(`
+			</ul>
+			<ul class="nav navbar-nav">
+			 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart &emsp;</a></li>
+			  </ul>
+			</ul> 
+		  </div>
 		  </nav>
-	
+
 		  <div class="container text-center" style="padding-bottom: 50px;">
-		  <h1 style="font-size: 6em;"> ${actusers[currentuser].fullname},</h1>
+		  <h1 style="font-size: 6em;"> ${users[active_user].fullname},</h1>
 		  <p style="font-size: 2em;">you have logged in successfully</p>
 		</div>
 
@@ -751,14 +799,15 @@ app.get("/loginsuccess", function (request, response) {
 		<p style="font-size: 2em;">${str}<BR>${str2}<BR>${str3}</p>
 	  </div>
 	  <div class="container text-center" style="padding-bottom: 50px;">
-	<form name='editaccount' action='?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
+	<form name='editaccount' action='./editaccount' method="POST">
 	<input type="submit" value='Edit Account Information      ' id="button"; class="button" style="min-width: 20%"></input>
 	</form>
-	<form name='gotoinvoice' action='/invoice?${tfiles["loginsuccesstemp"].stringparams}' method="POST">
+	<form name='gotoinvoice' action='/cart' method="GET">
 	<input type="submit" value='Go To Invoice      ' id="button2"; class="button" style="min-width: 20%"></input>
 	</form>
-	</div>`
-	);
+	</div>`);
+	}
+	response.end();
 });
 
 // GO TO CART
@@ -770,50 +819,134 @@ app.get("/cart", function (request, response) {
 			`iPhone = ${request.session.cart["iPhone"]} <BR> iPad = ${request.session.cart["iPad"]} <BR> Mac = ${request.session.cart["Mac"]}`
 		);
 	}
-	//
-	let params = new URLSearchParams(request.query); // pull params from search URL
-	console.log(params);
-	if (params.has("currentuser")) {
-		currentuser = params.get("currentuser");
+	if (typeof active_user != "undefined") {
+		usernameCart = users[active_user].fullname;
+	} else {
+		usernameCart = "Your";
 	}
-	//quantities.pop(); // learned from https://stackoverflow.com/questions/19544452/remove-last-item-from-array
 
 	response.write(`
 	<!DOCTYPE html>
 	<html lang="en">
 	<!-- 
-	Invoice for Assignment1
+	Cart for Assignment3
 	Author: Deborah Yuan
-	Date: 11/2/22
-	Desc: This html page produces an invoice for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+	Date: 11/14/22
+	Desc: This html page produces an cart for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
 	-->
 	
 	<!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
 	
 	<head>
-	  <meta charset="UTF-8">
-	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
-	  <script src="../user_registration_info.json" type="application/json
-	  "></script> <!-- loading in user data from user_registration_info.json -->
-	
-	  <link rel="preconnect" href="https://fonts.googleapis.com">
-	  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
-	
-	  <link href="products-style.css" rel="stylesheet">
-	  
-	  <title>Invoice</title>
-	</head>
-	
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Shopping Cart</title>
+
+  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <!-- google fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- my own stylesheet (products-style.css) -->
+  <link href="products-style.css" rel="stylesheet">
+
+  <script src="../user_registration_info.json" type="application/json
+  "></script> <!-- loading in user data from user_registration_info.json -->
+  <script src="./functions.js"></script>
+  <style>
+    /* Remove the navbar's default rounded borders and increase the bottom margin */
+    .navbar {
+      margin-bottom: 50px;
+      border-radius: 0;
+    }
+
+    /* Remove the jumbotron's default bottom margin */
+    .jumbotron {
+      margin-top: 0;
+      margin-bottom: 0;
+      position: relative;
+
+    }
+
+    /* Add a gray background color and some padding to the footer */
+    footer {
+      background-color: rgba(0, 0, 0, 0);
+    }
+  </style>
+</head>
 	<body>
 	  <main>
+	
+	  <!-- navigation bar from w3 schools -->
+	  <nav class="navbar navbar-inverse">  
+		<div class="container-fluid">
+		  <div class="navbar-header">
+		  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand active" href="./">
+			 <!-- corner navbar Apple icon -->
+			<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+		  </div>
+		  <div class="collapse navbar-collapse" id="myNavbar">
+		  <ul class="nav navbar-nav">
+			<li><a href="./products_display.html">Home</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav">
+			<!-- clicking this 'tab' leads to products display -->
+			<li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav">
+			<!-- clicking this 'tab' leads to products display -->
+			<li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav">
+			<!-- clicking this 'tab' leads to products display -->
+				<li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav navbar-right">
+		  <ul class="nav navbar-nav">`);
 
-	<h1 class="invoiceheader" style="text-align: center;">Person's Invoice</h1>
+	if (typeof active_user != "undefined") {
+		response.write(
+			`<li><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+		);
+	} else {
+		response.write(
+			`<li><a href="./login">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;Login&emsp;</a></li>`
+		);
+	}
+	response.write(`
+		  </ul>
+		  <ul class="nav navbar-nav">
+		   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart &emsp;</a></li>
+			</ul>
+		  </ul> 
+		</div>
+		</nav>
+
+	<h1 class="invoiceheader" style="text-align: center;">${usernameCart} Cart</h1>
+	<BR>
 	  <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
 		<tbody>
-		  <thead>
+		  <thead>`);
+	if (typeof request.session.cart == "undefined") {
+		response.write(
+			`<tr><th style= "text-align: center;"><h1>Your cart is empty.</h1></th></tr>
+			</thead>
+			<tr><td style= "text-align: center;"><a href="/products_display.html" style = "color: black;"><h2>Return to shopping</h2></a></td></tr>`
+		);
+	} else {
+		response.write(`
 		  <tr>
 			<th align="center">Image</th>
 			<th>Item</th>
@@ -823,123 +956,20 @@ app.get("/cart", function (request, response) {
 		  </tr>
 		</thead>
 `);
-
-	// Compute subtotal
-	var subtotal = 0;
-
-	// Compute tax
-	var tax_rate = 0.0475;
-	var tax = tax_rate * subtotal;
-
-	if (typeof request.session.cart != "undefined") {
-		quantities = request.session.cart["iPhone"];
-		products = products_data["iPhone"];
-		for (let i in quantities) {
-			if (quantities[i] == 0) {
-				// if quantities = 0, then skip the row
-				continue;
-			} else {
-				let extended_price = quantities[i] * products[i].price;
-				console.log(products[i].price);
-				// toFixed added to $ values to preserve cents
-				response.write(`
-	<tr>
-	  <td align="center"><img src="${
-			products[i].image
-		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
-	  <td>${products[i].name}</td>
-	  <td align="center">${quantities[i]}</td>
-	  <td align="center">$${products[i].price.toFixed(2)}</td>
-	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
-	</tr>
-	  `);
-			}
-			subtotal += extended_price;
-			console.log(products[i].price);
-		}
 	}
 
-	// Compute shipping
-	var shipping;
-	if (subtotal < 1000) {
-		shipping = 5;
-	} else if (subtotal >= 1000 && subtotal < 1500) {
-		shipping = 10;
-	} else if (subtotal >= 1500) {
-		shipping = subtotal * 0.02;
-	}
-	// Compute grand total
-	var total = tax + subtotal + shipping;
-
-	response.write(`
-		  <!-- table formatting, with some inline css -->
-		  <tr>
-			<td colspan="5" width="100%">&nbsp;</td>
-		  </tr>
-		  <tr>
-			<td style="text-align: right;" colspan="4" width="67%">Sub-total</td>
-			<td width="54%">$
-			  ${subtotal.toFixed(2)}
-			</td>
-		  </tr>
-		  <tr>
-			<td style="text-align: right;" colspan="4" width="67%">Tax @ 4.75%</span></td>
-			<td width="54%">$
-			${tax.toFixed(2)}
-			</td>
-		  </tr>
-		  <tr>
-			<td style="text-align: right;" colspan="4" width="67%">Shipping</td>
-			<td width="54%">$
-			${shipping.toFixed(2)}
-			</td>
-		  </tr>
-		  <tr>
-			<td style="text-align: right;" colspan="4" width="67%"><strong>Total</strong></td>
-			<td width="54%"><strong>$
-			${total.toFixed(2)}
-			  </strong></td>
-		  </tr>
-		  <tr>
-			<td style="text-align: center;" colspan="5" width="100%">
-			  <b> <!-- shipping policy info -->
-				Shipping Policy:
-				<BR>
-				Orders with subtotals of $0 - $999.99 will be charged $5 for shipping.
-				<BR>
-				Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
-				<BR>Orders with subtotals of $1500 and over will be charged 2% of the subtotal amount.</b>
-			</td>
-		  </tr>
-		  <tr>
-			<td style="text-align: center;" colspan="5" width="100%">
-			  <form name='confirmpurchase' action=/goodbye?${params} method="POST">
-			<input type="submit" id="button" value='Confirm Purchase' id="Return" class="button"></input>
-		  </form>
-		   </td>
-		  </tr>
-		</tbody>
-	  </table>
-	</main>
-	</body>
-	
-	</html>`);
 	response.end();
 });
 
 // POST LOGIN SUCCESS
 app.post("/loginsuccess", function (request, response) {
 	// redirects to edit account page
-	response.redirect("editaccount?" + tfiles["loginsuccesstemp"].stringparams);
+	response.redirect("editaccount");
 });
 
 // Code modified from Assignment 2 Example Codes
 // GET page to Edit Account
 app.get("/editaccount", function (request, response) {
-	let params = new URLSearchParams(request.query); // pulls query sets as params
-	if (params.has("currentuser")) {
-		currentuser = params.get("currentuser");
-	}
 	response.send(`
 	<!-- 
 		Edit Account for Assignment2
@@ -986,7 +1016,6 @@ app.get("/editaccount", function (request, response) {
 		  </style>
 		</head>
 		<script>
-		window.onload = function() {
 			let params = (new URL(document.location)).searchParams;
 		
 			if (params.has('currentuser')) { // if params has current user, it'll change the value of the element that has the id 'currentfullname' to the current full name; same concept applies for below
@@ -1001,8 +1030,7 @@ app.get("/editaccount", function (request, response) {
 		
 				var newusername = params.get('newusername');
 				document.getElementById('newusername').value = newusername;
-			}
-		};
+			};
 	</script>
 	<!-- navigation bar from w3 schools -->
 	<nav class="navbar navbar-inverse">  
@@ -1016,27 +1044,19 @@ app.get("/editaccount", function (request, response) {
 		  <a class="navbar-brand" href="#">
 			 <!-- corner navbar Apple icon -->
 			<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
-		</div>
+		</div>document.cookie
 	   
 	  </div>
 	</nav>
 
 <body>
-<script>
-let params = (new URL(document.location)).searchParams; // pull params from search URL
-console.log(params);
-if (params.has("currentuser")) { // looks for current user in params
-	  currentuser = params.get("currentuser");
-  }
-</script>
+
 <div class="container text-center" style="padding-bottom: 50px;">
 
-<form name='editaccount' action='?${
-		params.toString().split("currentfullname")[0]
-	}' method="POST">
+<form name='editaccount' action='?${params.toString()}' method="POST">
 
 	<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">Hi ${
-		actusers[currentuser].fullname
+		users[active_user].fullname
 	},</h1></span><BR>
 	<p style="font-size: 2em;">Edit your account information here:</p>
 	<p style="font-size: 1.5em;">Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
@@ -1088,9 +1108,7 @@ if (params.has("currentuser")) { // looks for current user in params
 			
 <input type="submit" value='Submit Changes       ' id="button"; class="button" style="min-width:30%"></input></form><BR>
 
-<form name='returntologinsuccess' action="/returntologinsuccess?${
-		params.toString().split("currentfullname")[0]
-	}" method="POST">
+<form name='returntologinsuccess' action="/loginsuccess" method="POST">
 <input type="submit" value='Return to Previous Page     ' id="button2"; class="button" style="min-width:30%;"></input></form>
 			</div>
 
@@ -1099,23 +1117,12 @@ if (params.has("currentuser")) { // looks for current user in params
 	`);
 });
 
-// POST FOR RETURN TO LOGIN SUCCESS: for when the user no longer wants to edit the page and wants to go back go login/register sucecss
-app.post("/returntologinsuccess", function (request, response) {
-	// specifically used for returning to the login success page while keeping params
-	let params = new URLSearchParams(request.query);
-	console.log(params);
-	response.redirect("/loginsuccess?" + params.toString());
-});
-
 // Code inspired by Assignment 2 Code Examples
 // POST FOR EDIT ACCOUNT
 app.post("/editaccount", function (request, response) {
 	// POST for editing the account information
 	let params = new URLSearchParams(request.query); // grab params from url
-	if (params.has("currentuser")) {
-		// identify current user get get it
-		currentuser = params.get("currentuser");
-	}
+
 	regErrors = {}; // reset errors array
 
 	console.log("EDITACCPARAM" + params);
@@ -1135,10 +1142,10 @@ app.post("/editaccount", function (request, response) {
 	// if the current username/email exists
 	if (new_full_name == "") {
 		console.log("New Full Name is blank"); // status
-	} else if (actusers[currentuser].fullname != curr_full_name) {
+	} else if (users[active_user].fullname != curr_full_name) {
 		console.log("Current Full Name is incorrect"); // status
 		console.log(
-			"new: " + actusers[currentuser].fullname + "current " + curr_full_name
+			"new: " + users[active_user].fullname + "current " + curr_full_name
 		);
 		regErrors["wrong_name"] = `Current Full Name is incorrect!`; // pushes out this error in regErrors array if true
 	} else if (new_full_name.length < 2 || new_full_name.length > 30) {
@@ -1147,14 +1154,18 @@ app.post("/editaccount", function (request, response) {
 		regErrors["bad_user"] = `Name must only contain letters.`; // pushes out this error in regErrors array if true
 	} else {
 		// if new full name box isn't empty
-		actusers[currentuser].fullname = new_full_name; // set new full name to current full name
+		users[active_user].fullname = new_full_name; // set new full name to current full name
 	}
 
 	// if the new password isn't blank and matches
 	if (new_pass == "") {
 		console.log("New Password is blank"); // status
 		// if password isn't blank
-	} else if (actusers[currentuser].password != encrypt(curr_pass)) {
+	} else if (
+		users[active_user].password != encrypt(curr_pass) || // if the current password IS encrypted and isn't the same as the one typed in OR
+		(users[active_user].encrypt == false && // if the current password ISN'T encrypted and isn't the same as the one typed in
+			users[active_user].password != curr_pass)
+	) {
 		console.log("Current Password is incorrect"); // status
 		regErrors["wrong_pass"] = `Current Password is incorrect!`; // pushes out this error in regErrors array if true
 	} else if (new_pass != new_pass_2) {
@@ -1176,28 +1187,23 @@ app.post("/editaccount", function (request, response) {
 	} else if (/^\S*$/.test(new_pass) == false) {
 		regErrors["contains_space"] = `Passwords should not contain spaces.`;
 	} else {
-		actusers[currentuser].password = encrypt(new_pass); // set current password to new password; ENCRYPT NEW PASS HERE
+		users[active_user].password = encrypt(new_pass); // set current password to new password; ENCRYPT NEW PASS HERE
 	}
 
 	if (new_user_name == "") {
 		//pulls email/username value from params if the customer doesn't plan on changing their email/username
 		// if new username box is empty
 		console.log("New Email is blank");
-		users[currentuser] = actusers[currentuser];
 	} else {
 		// if the new email/username box has a value in it, meaning the customer wants to change their username/email
-		if (currentuser != curr_user_name) {
+		if (active_user != curr_user_name) {
 			console.log("Username error: Current Email is incorrect");
 			regErrors["wrong_email"] = `Username error: Current Email is incorrect`;
-
-			users[currentuser] = actusers[currentuser];
 		}
-		if (users[new_user_name] != undefined) {
+		if (typeof users[new_user_name] != "undefined") {
 			// if other accounts are using the desired email
 			console.log("Username error: the Email is already taken!"); // status if email is in use
 			regErrors["taken_email"] = `Username error: the Email is already taken!`;
-
-			users[currentuser] = actusers[currentuser];
 		}
 
 		if (
@@ -1212,47 +1218,25 @@ app.post("/editaccount", function (request, response) {
 		}
 
 		if (Object.keys(regErrors).length == 0) {
-			actusers[new_user_name] = {}; // makes empty object for the user's new account
-			actusers[new_user_name].password = actusers[currentuser].password; // copies over current password
-			actusers[new_user_name].loginstatus = actusers[currentuser].loginstatus; // copies over current login status
-			actusers[new_user_name].amtlogin = actusers[currentuser].amtlogin; // copies over the amount of times logged in
-			actusers[new_user_name].fullname = actusers[currentuser].fullname; // copies over user's full name
-			actusers[new_user_name].lasttimelog = actusers[currentuser].lasttimelog; // copies over user's last time logging in
-			actusers[new_user_name].currtimelog = actusers[currentuser].currtimelog; // copies over user's last time logging in
+			users[new_user_name] = {}; // makes empty object for the user's new account
+			users[new_user_name].password = users[active_user].password; // copies over current password
+			users[new_user_name].loginstatus = users[active_user].loginstatus; // copies over current login status
+			users[new_user_name].amtlogin = users[active_user].amtlogin; // copies over the amount of times logged in
+			users[new_user_name].fullname = users[active_user].fullname; // copies over user's full name
+			users[new_user_name].lasttimelog = users[active_user].lasttimelog; // copies over user's last time logging in
+			users[new_user_name].currtimelog = users[active_user].currtimelog; // copies over user's last time logging in
+			users[new_user_name].encrypted = users[active_user].encrypted; // copies over user's encrypted password status
+			users[new_user_name].admin = users[active_user].admin; // copies over user's admin account status
 
-			actusers["usernamechange"].formerusername = currentuser; // stores info on the now OLD username
-			actusers["usernamechange"].currentusername = new_user_name; // stores info on what the NEW username is
-			paramsstring = params.toString(); // turns the current params into a string
-			paramcutqty = Number("currentuser=".length + currentuser.length + 2); // calculates how long the OLD username is (in the query string)
-			console.log("CUTQUTY" + paramcutqty); // console.log to check length
-			removedcurruserfromparams = paramsstring.slice(0, -paramcutqty); // sets the remaining params left to a new variable
-			console.log(removedcurruserfromparams);
 			changetonew = true; // set to true means that new params will be made
-			console.log(removedcurruserfromparams);
-			delete actusers[currentuser];
 
-			users[new_user_name] = {}; // creates a new user object with the user's new username/email
-			users[new_user_name].fullname = actusers[new_user_name].fullname; // next steps are moving every single key for the user in active users to the permanent users account
-			users[new_user_name].password = actusers[new_user_name].password;
-			users[new_user_name].loginstatus = actusers[new_user_name].loginstatus;
-			users[new_user_name].amtlogin = actusers[new_user_name].amtlogin;
-			users[new_user_name].lasttimelog = actusers[new_user_name].lasttimelog;
-			users[new_user_name].currtimelog = actusers[new_user_name].currtimelog;
-
-			delete users[currentuser]; // deletes the user's old profile that uses their old username/email
+			delete actusers[active_user];
+			actusers[new_user_name] = {};
+			delete users[active_user];
+			request.cookies["activeuser"] = new_user_name; // renaming the cookie "activeuser" to the new username
+			active_user = request.cookies["activeuser"]; // changing the variable active_user to the new username
 		}
 	}
-
-	if (changetonew == true) {
-		// true = new params will be made
-		actusers["usernamechange"].newparams =
-			removedcurruserfromparams.toString() + "&currentuser=" + new_user_name;
-	} else {
-		// else use the old params that are stored
-		actusers["usernamechange"].newparams = params;
-	}
-
-	newparams = actusers["usernamechange"].newparams; // stores it in a variable
 
 	if (Object.keys(regErrors).length == 0) {
 		// if there are no errors then save the file
@@ -1262,7 +1246,7 @@ app.post("/editaccount", function (request, response) {
 		fs.writeFileSync(fname, data, "utf-8");
 		fs.writeFileSync(actname, actdata, "utf-8");
 
-		response.redirect("loginsuccess?" + newparams);
+		response.redirect("loginsuccess");
 	} else {
 		response.redirect(
 			// otherwise use sticky forms and have the user correct the error
@@ -1317,7 +1301,6 @@ app.get("/register", function (request, response) {
 		</head>
 	<html>
 		<script>
-		window.onload = function() {
 			let params = (new URL(document.location)).searchParams;
 	
 			if (params.has('fullname')) {
@@ -1329,8 +1312,7 @@ app.get("/register", function (request, response) {
 			if (params.has('email')) {
 					var email = params.get('email');
 					document.getElementById('username').value = email;
-			}
-		};
+			};
 			</script>
 	
 		
@@ -1410,20 +1392,10 @@ app.get("/register", function (request, response) {
 			<input type="submit" value='Register        ' id="submitbutton" class="button" name="submitbutton" style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input>
 			</form>
 			<BR>
-			<form name='returntologin' action='returntologin?${
-				params.toString().split("fullname")[0]
-			}' method="POST">
+			<form name='returntologin' action='/login' method="POST">
 	<input type="submit" value='Return to Login       ' id="button2"   class="button" style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input></form>
 			`
 	);
-});
-
-//POST RETURN TO LOG IN : if the user wants to return back to the login page
-app.post("/returntologin", function (request, response) {
-	// specifically used for returning to the login page while keeping params
-	let params = new URLSearchParams(request.query);
-	console.log(params);
-	response.redirect("/login?" + params.toString());
 });
 
 // Code inspired by Assignment 2 Code Examples
@@ -1517,15 +1489,16 @@ app.post("/register", function (request, response) {
 		actusers[user_name] = {};
 		actusers[user_name] = users[user_name];
 
+		response.cookie("activeuser", inputusername); // sets the cookie's active user as the username if credentials are correct
+		active_user = request.cookies["activeuser"]; // active user cookie set to active_user variable
+
 		let data = JSON.stringify(users);
 		let actdata = JSON.stringify(actusers);
 
 		fs.writeFileSync(fname, data, "utf-8");
 		fs.writeFileSync(actname, actdata, "utf-8");
 
-		response.redirect(
-			"./loginsuccess?" + params.toString() + "&currentuser=" + currentuser
-		);
+		response.redirect("./loginsuccess");
 	} else {
 		response.redirect(
 			"./register?" +
@@ -1540,13 +1513,14 @@ app.post("/register", function (request, response) {
 });
 
 app.post("/startregister", function (request, response) {
+	// FIX: CONSIDER REMOVING
 	let params = new URLSearchParams(request.query);
 	response.redirect("register?" + params.toString());
 });
 
 // blocks someone from just accessing invoice directly
 app.get("/invoice", function (request, response) {
-	// if someone tries to type in /invoice into the URL, it will redirect them to products display
+	// if someone tries to type in /invoice into the URL, it will redirect them to products display // FIX: NEED TO REDIRECT BACK TO PREVIOUS PAGE
 	let params = new URLSearchParams(request.query);
 	console.log(params);
 	console.log(params.toString());
@@ -1558,9 +1532,7 @@ app.post("/invoice", function (request, response) {
 	var quantities = []; // declaring empty array 'quantities'
 	let params = new URLSearchParams(request.query); // pull params from search URL
 	console.log(params);
-	if (params.has("currentuser")) {
-		currentuser = params.get("currentuser");
-	}
+
 	console.log(params);
 	params.forEach(
 		// for each iterates through all the keys
@@ -1721,10 +1693,7 @@ app.post("/invoice", function (request, response) {
 // POST GOODBYE, the page before logging out, where stock
 app.post("/goodbye", function (request, response) {
 	let params = new URLSearchParams(request.query); // grab params from url
-	if (params.has("currentuser")) {
-		// identify current user get get it
-		currentuser = params.get("currentuser");
-	}
+
 	var quantities = []; // declaring empty array 'quantities'
 	params.forEach(
 		// for each iterates through all the keys
@@ -1733,7 +1702,7 @@ app.post("/goodbye", function (request, response) {
 		}
 	);
 	console.log("quantities=" + quantities);
-	if (actusers[currentuser].loginstatus == true) {
+	if (users[active_user].loginstatus == true) {
 		// modified from stack overflow (https://stackoverflow.com/questions/34909706/how-to-prevent-user-from-accessing-webpage-directly-in-node-js)
 		for (i in quantities) {
 			values = quantities[i];
@@ -1834,24 +1803,15 @@ app.post("/goodbye", function (request, response) {
 // GET LOGOUT, officially logs out user and removes them from active user list
 app.get("/logout", function (request, response) {
 	let params = new URLSearchParams(request.query); // grab params from url
-	if (params.has("currentuser")) {
-		// identify current user get it
-		currentuser = params.get("currentuser");
-	}
-	console.log(currentuser);
-	ordered = "";
-	actusers[currentuser].loginstatus = false;
-	users[currentuser] = actusers[currentuser];
-	delete actusers[currentuser];
 
-	tfiles["loginsuccesstemp"] = {}; // delete tfiles
+	ordered = "";
+	users[active_user].loginstatus = false;
+	delete actusers[active_user];
 
 	let data = JSON.stringify(users);
 	let actdata = JSON.stringify(actusers);
-	let tempdata = JSON.stringify(tfiles);
 	fs.writeFileSync(fname, data, "utf-8");
 	fs.writeFileSync(actname, actdata, "utf-8");
-	fs.writeFileSync(tempname, tempdata, "utf-8");
 	response.redirect("/login");
 });
 
