@@ -820,7 +820,7 @@ app.get("/cart", function (request, response) {
 		);
 	}
 	if (typeof active_user != "undefined") {
-		usernameCart = users[active_user].fullname;
+		usernameCart = users[active_user].fullname + "'s";
 	} else {
 		usernameCart = "Your";
 	}
