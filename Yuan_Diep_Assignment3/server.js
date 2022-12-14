@@ -21,6 +21,18 @@ app.use(cookieParser());
 app.use(
 	session({ secret: "MySecretKey", resave: true, saveUninitialized: true })
 );
+// Code modified from https://stackoverflow.com/questions/60369148/how-do-i-replace-deprecated-crypto-createcipher-in-node-js#:~:text=according%20to%20the%20deprecation%20docs,salt)%20and%20static%20initialization%20vectors and https://stackoverflow.com/questions/51280576/trying-to-add-data-in-unsupported-state-at-cipher-update
+
+// require crypto for password encryption
+const crypto = require("crypto");
+
+// Encrypt text
+function encrypt(text) {
+	encryptAlgo = crypto.createCipher("aes192", "secretKey");
+	let encrypted = encryptAlgo.update(text, "utf-8", "hex");
+	encrypted += encryptAlgo.final("hex");
+	return encrypted;
+}
 
 // read files
 var fs = require("fs");
@@ -118,13 +130,6 @@ function isNonNegativeInteger(queryString, returnErrors = false) {
 		return false;
 	}
 }
-
-/*app.get("/products.json", function (request, response, next) {
-	// if /products.json is being requested, then send back products as a string
-	response.type(".json");
-	var products_str = `var products = ${JSON.stringify(products)};`;
-	response.send(products_str);
-});*/
 
 // TAKEN FROM ASSIGNMENT 3 SAMPLE CODE
 app.post("/get_products_data", function (request, response) {
@@ -559,9 +564,12 @@ app.post("/login", function (request, response) {
 	let inputpassword = request.body[`password`];
 	let currentuser = inputusername; // current user is based off of what the person put in as their username
 	loginError = {}; // resets to no errors
+
+	var encryptedPassword = encrypt(inputpassword); // variable to encrypt the inputted password
+
 	if (typeof users[inputusername] != "undefined") {
 		//
-		if (users[inputusername].password == inputpassword) {
+		if (users[inputusername].password == encryptedPassword) {
 			// if the password typed in the login page matches with the one on file then...
 			users[inputusername].amtlogin += Number(1); // increase the number of times someone has logged in by 1
 			actusers[inputusername] = {}; // creates an emtpy array for a new active(online/logged in) user
@@ -570,6 +578,9 @@ app.post("/login", function (request, response) {
 			users[inputusername].currtimelog = getCurrentDate(); // get current date and set that to the current time in the user's account
 			actusers[inputusername] = users[inputusername]; // copies over all the information on the user's account, including login status, into the active user object JSON
 			userstatus = "currentuser=" + currentuser + "&"; // creates a variable user status to add to params later
+
+			response.cookie("name", "express").send("cookie set"); // sets the cookie's name as express
+
 			let data = JSON.stringify(users); // rewrites user reg. file
 			let actdata = JSON.stringify(actusers); // rewrites active user file
 			fs.writeFileSync(fname, data, "utf-8"); // syncs user reg. file
@@ -1143,7 +1154,7 @@ app.post("/editaccount", function (request, response) {
 	if (new_pass == "") {
 		console.log("New Password is blank"); // status
 		// if password isn't blank
-	} else if (actusers[currentuser].password != curr_pass) {
+	} else if (actusers[currentuser].password != encrypt(curr_pass)) {
 		console.log("Current Password is incorrect"); // status
 		regErrors["wrong_pass"] = `Current Password is incorrect!`; // pushes out this error in regErrors array if true
 	} else if (new_pass != new_pass_2) {
@@ -1165,7 +1176,7 @@ app.post("/editaccount", function (request, response) {
 	} else if (/^\S*$/.test(new_pass) == false) {
 		regErrors["contains_space"] = `Passwords should not contain spaces.`;
 	} else {
-		actusers[currentuser].password = new_pass; // set current password to new password
+		actusers[currentuser].password = encrypt(new_pass); // set current password to new password; ENCRYPT NEW PASS HERE
 	}
 
 	if (new_user_name == "") {
@@ -1498,7 +1509,7 @@ app.post("/register", function (request, response) {
 		users[user_name] = {};
 		users[user_name].username = request.body.username;
 		users[user_name].fullname = request.body.fullname;
-		users[user_name].password = request.body.password;
+		users[user_name].password = encrypt(request.body.password); // encrypt password
 		users[user_name].loginstatus = true;
 		users[user_name].lasttimelog = 0;
 		users[user_name].currtimelog = getCurrentDate(); // retrieves current date
