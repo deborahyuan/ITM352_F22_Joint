@@ -10,3 +10,7 @@ function loadJSON(service, callback) {
 	};
 	xobj.send(null);
 }
+
+// Restricts input for the given textbox to the given inputFilter.
+
+// Install input filters.

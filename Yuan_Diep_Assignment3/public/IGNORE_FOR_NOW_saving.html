@@ -1,37 +1,4 @@
-// Compute subtotal
-	var subtotal = 0;
 
-	// Compute tax
-	var tax_rate = 0.0475;
-	var tax = tax_rate * subtotal;
-
-	if (typeof request.session.cart != "undefined") {
-		quantities = request.session.cart["iPhone"];
-		products = products_data["iPhone"];
-		for (let i in quantities) {
-			if (quantities[i] == 0) {
-				// if quantities = 0, then skip the row
-				continue;
-			} else {
-				let extended_price = quantities[i] * products[i].price;
-				console.log(products[i].price);
-				// toFixed added to $ values to preserve cents
-				response.write(`
-	<tr>
-	  <td align="center"><img src="${
-			products[i].image
-		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
-	  <td>${products[i].name}</td>
-	  <td align="center">${quantities[i]}</td>
-	  <td align="center">$${products[i].price.toFixed(2)}</td>
-	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
-	</tr>
-	  `);
-			}
-			subtotal += extended_price;
-			console.log(products[i].price);
-		}
-	}
 
 	// Compute shipping
 	var shipping;

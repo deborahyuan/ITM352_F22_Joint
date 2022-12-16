@@ -9,6 +9,10 @@ Desc: This css stylesheet is used for all 3 html pages under /public. The backbo
 /* general text css */
 /*//////////////////*/
 
+.input-error {
+	outline: 1px solid red;
+}
+
 h1 {
 	font-family: "Source Sans Pro", sans-serif;
 	font-weight: bolder;

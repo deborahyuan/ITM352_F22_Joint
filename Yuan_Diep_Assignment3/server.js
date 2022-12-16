@@ -39,6 +39,7 @@ var fs = require("fs");
 var fname = "user_registration_info.json";
 var prodname = __dirname + "/products.json";
 var actname = __dirname + "/active_users.json";
+var proddisplay = __dirname + "/products_display.html";
 
 if (fs.existsSync(fname)) {
 	// file syncing/rewriting for user registration info
@@ -131,6 +132,12 @@ app.all("*", function (request, response, next) {
 	next();
 });
 
+app.get("/products_display", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	response.sendFile(proddisplay);
+});
+
 // ADDING TO CART FUNCTIONALITY
 app.post("/addtocart", function (request, response) {
 	let params = new URLSearchParams(request.query);
@@ -197,7 +204,7 @@ app.post("/addtocart", function (request, response) {
 			console.log(allblank);
 			// ordered = "";
 			response.redirect(
-				"products_display.html?" +
+				"products_display" +
 					ordered +
 					"series=" +
 					series +
@@ -208,7 +215,7 @@ app.post("/addtocart", function (request, response) {
 			// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
 			// ordered = "";
 			response.redirect(
-				"products_display.html?" +
+				"products_display?" +
 					ordered +
 					"series=" +
 					series +
@@ -219,7 +226,7 @@ app.post("/addtocart", function (request, response) {
 			// Existing stock is less than desired quantity, pops up alert
 			// ordered = "";
 			response.redirect(
-				"products_display.html?" +
+				"products_display?" +
 					ordered +
 					"series=" +
 					series +
@@ -230,7 +237,7 @@ app.post("/addtocart", function (request, response) {
 			// textbox has gone missing? or some other error, pops up alert
 			// ordered = "";
 			response.redirect(
-				"products_display.html?" +
+				"products_display?" +
 					ordered +
 					"series=" +
 					series +
@@ -271,7 +278,7 @@ app.post("/addtocart", function (request, response) {
 			}
 		}
 		shoppingCart = request.session.cart; //sync Cart
-		response.redirect("products_display.html?" + "series=" + series);
+		response.redirect("products_display?" + "series=" + series);
 	}
 });
 
@@ -385,7 +392,7 @@ app.post("/purchase", function (request, response) {
 		console.log(allblank);
 		// ordered = "";
 		response.redirect(
-			"products_display.html?" +
+			"products_display?" +
 				ordered +
 				"error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
 		);
@@ -393,7 +400,7 @@ app.post("/purchase", function (request, response) {
 		// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
 		// ordered = "";
 		response.redirect(
-			"products_display.html?" +
+			"products_display?" +
 				ordered +
 				"error=Invalid%20Quantity:%20Please%20Fix%20the%20Errors%20on%20the%20Order%20Page!"
 		);
@@ -401,7 +408,7 @@ app.post("/purchase", function (request, response) {
 		// Existing stock is less than desired quantity, pops up alert
 		// ordered = "";
 		response.redirect(
-			"products_display.html?" +
+			"products_display?" +
 				ordered +
 				"error=Invalid%20Quantity:%20Requested%20Quantity%20Exceeds%20Stock"
 		);
@@ -409,7 +416,7 @@ app.post("/purchase", function (request, response) {
 		// textbox has gone missing? or some other error, pops up alert
 		// ordered = "";
 		response.redirect(
-			"products_display.html?" +
+			"products_display?" +
 				ordered +
 				"error=Invalid%20Quantity:%20Unknown%20Error%20has%20occured"
 		);
@@ -524,19 +531,19 @@ app.get("/login", function (request, response) {
 		</div>
 		<div class="collapse navbar-collapse" id="myNavbar">
 		<ul class="nav navbar-nav">
-		  <li><a href="./products_display.html">Home</a></li>
+		  <li><a href="./products_display">Home</a></li>
 		</ul>
 		<ul class="nav navbar-nav">
 		  <!-- clicking this 'tab' leads to products display -->
-		  <li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>
+		  <li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>
 		</ul>
 		<ul class="nav navbar-nav">
 		  <!-- clicking this 'tab' leads to products display -->
-		  <li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>
+		  <li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>
 		</ul>
 		<ul class="nav navbar-nav">
 		  <!-- clicking this 'tab' leads to products display -->
-			  <li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>
+			  <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
 		</ul>
 		<ul class="nav navbar-nav navbar-right">
 		<ul class="nav navbar-nav">
@@ -597,7 +604,7 @@ app.post("/returntoproductsdisplay", function (request, response) {
 	// if a customer on the login page no longer wishes to proceed with logging in, clicking on the button "Return to Products" will make use of this functionality
 	let params = new URLSearchParams(request.query);
 	console.log(params);
-	response.redirect("/products_display.html?" + params.toString());
+	response.redirect("/products_display?" + params.toString());
 });
 
 // POST FOR LOGIN
@@ -754,19 +761,19 @@ app.get("/loginsuccess", function (request, response) {
 			</div>
 			<div class="collapse navbar-collapse" id="myNavbar">
 			<ul class="nav navbar-nav">
-			  <li><a href="./products_display.html">Home</a></li>
+			  <li><a href="./products_display">Home</a></li>
 			</ul>
 			<ul class="nav navbar-nav">
 			  <!-- clicking this 'tab' leads to products display -->
-			  <li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>
+			  <li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>
 			</ul>
 			<ul class="nav navbar-nav">
 			  <!-- clicking this 'tab' leads to products display -->
-			  <li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>
+			  <li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>
 			</ul>
 			<ul class="nav navbar-nav">
 			  <!-- clicking this 'tab' leads to products display -->
-				  <li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>
+				  <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 			<ul class="nav navbar-nav">`
@@ -818,6 +825,12 @@ app.get("/cart", function (request, response) {
 		console.log(
 			`iPhone = ${request.session.cart["iPhone"]} <BR> iPad = ${request.session.cart["iPad"]} <BR> Mac = ${request.session.cart["Mac"]}`
 		);
+	}
+	if (
+		typeof request.cookies["activeuser"] != "undefined" &&
+		request.cookies["activeuser"] != ""
+	) {
+		active_user = request.cookies["activeuser"];
 	}
 	if (typeof active_user != "undefined") {
 		usernameCart = users[active_user].fullname + "'s";
@@ -899,19 +912,19 @@ app.get("/cart", function (request, response) {
 		  </div>
 		  <div class="collapse navbar-collapse" id="myNavbar">
 		  <ul class="nav navbar-nav">
-			<li><a href="./products_display.html">Home</a></li>
+			<li><a href="./products_display">Home</a></li>
 		  </ul>
 		  <ul class="nav navbar-nav">
 			<!-- clicking this 'tab' leads to products display -->
-			<li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>
+			<li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>
 		  </ul>
 		  <ul class="nav navbar-nav">
 			<!-- clicking this 'tab' leads to products display -->
-			<li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>
+			<li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>
 		  </ul>
 		  <ul class="nav navbar-nav">
 			<!-- clicking this 'tab' leads to products display -->
-				<li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>
+				<li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
 		  </ul>
 		  <ul class="nav navbar-nav navbar-right">
 		  <ul class="nav navbar-nav">`);
@@ -943,7 +956,7 @@ app.get("/cart", function (request, response) {
 		response.write(
 			`<tr><th style= "text-align: center;"><h1>Your cart is empty.</h1></th></tr>
 			</thead>
-			<tr><td style= "text-align: center;"><a href="/products_display.html" style = "color: black;"><h2>Return to shopping</h2></a></td></tr>`
+			<tr><td style= "text-align: center;"><h2 class="underlinecss"><a href="/products_display" style = "color: black; text-decoration: none;">Return to shopping</a></h2></td></tr>`
 		);
 	} else {
 		response.write(`
@@ -956,6 +969,94 @@ app.get("/cart", function (request, response) {
 		  </tr>
 		</thead>
 `);
+		// Compute subtotal
+		var subtotal = 0;
+
+		// Compute tax
+		var tax_rate = 0.0475;
+		var tax = tax_rate * subtotal;
+
+		if (typeof request.session.cart["iPhone"] != "undefined") {
+			quantities = request.session.cart["iPhone"];
+			products = products_data["iPhone"];
+			for (let i in quantities) {
+				if (quantities[i] == 0) {
+					// if quantities = 0, then skip the row
+					continue;
+				} else {
+					var extended_price = quantities[i] * products[i].price;
+					console.log(products[i].price);
+					// toFixed added to $ values to preserve cents
+					response.write(`
+	<tr>
+	  <td align="center"><img src="${
+			products[i].image
+		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+	  <td>${products[i].name}</td>
+	  <td align="center">${quantities[i]}</td>
+	  <td align="center">$${products[i].price.toFixed(2)}</td>
+	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
+	</tr>
+	  `);
+					subtotal += extended_price;
+					console.log(products[i].price);
+				}
+			}
+		}
+		if (typeof request.session.cart["iPad"] != "undefined") {
+			quantities = request.session.cart["iPad"];
+			products = products_data["iPad"];
+			for (let i in quantities) {
+				if (quantities[i] == 0) {
+					// if quantities = 0, then skip the row
+					continue;
+				} else {
+					var extended_price = quantities[i] * products[i].price;
+					console.log(products[i].price);
+					// toFixed added to $ values to preserve cents
+					response.write(`
+	<tr>
+	  <td align="center"><img src="${
+			products[i].image
+		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+	  <td>${products[i].name}</td>
+	  <td align="center">${quantities[i]}</td>
+	  <td align="center">$${products[i].price.toFixed(2)}</td>
+	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
+	</tr>
+	  `);
+					subtotal += extended_price;
+					console.log(products[i].price);
+				}
+			}
+		}
+		if (typeof request.session.cart["Mac"] != "undefined") {
+			quantities = request.session.cart["Mac"];
+			products = products_data["Mac"];
+			for (let i in quantities) {
+				if (quantities[i] == 0) {
+					// if quantities = 0, then skip the row
+					continue;
+				} else {
+					var extended_price = quantities[i] * products[i].price;
+					console.log(products[i].price);
+					// toFixed added to $ values to preserve cents
+					response.write(`
+	<tr>
+	  <td align="center"><img src="${
+			products[i].image
+		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+	  <td>${products[i].name}</td>
+	  <td align="center" contenteditable="true">${quantities[i]}</td>
+	  <td align="center">$${products[i].price.toFixed(2)}</td>
+	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
+	</tr>
+	  `);
+					subtotal += extended_price;
+					console.log(products[i].price);
+				}
+			}
+		}
 	}
 
 	response.end();
@@ -977,7 +1078,7 @@ app.get("/editaccount", function (request, response) {
 		request.cookies["activeuser"] == ""
 	) {
 		console.log("You can't access this page unless you are logged in!");
-		response.redirect("./products_display.html");
+		response.redirect("./products_display");
 	} else {
 		active_user = request.cookies["activeuser"];
 
@@ -1058,19 +1159,19 @@ app.get("/editaccount", function (request, response) {
 		</div>
 		<div class="collapse navbar-collapse" id="myNavbar">
 		<ul class="nav navbar-nav">
-		  <li><a href="./products_display.html">Home</a></li>
+		  <li><a href="./products_display">Home</a></li>
 		</ul>
 		<ul class="nav navbar-nav">
 		  <!-- clicking this 'tab' leads to products display -->
-		  <li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>
+		  <li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>
 		</ul>
 		<ul class="nav navbar-nav">
 		  <!-- clicking this 'tab' leads to products display -->
-		  <li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>
+		  <li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>
 		</ul>
 		<ul class="nav navbar-nav">
 		  <!-- clicking this 'tab' leads to products display -->
-			  <li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>
+			  <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
 		</ul>
 		<ul class="nav navbar-nav navbar-right">
 		<ul class="nav navbar-nav">
@@ -1586,7 +1687,7 @@ app.get("/invoice", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
 	console.log(params.toString());
-	response.redirect("products_display.html");
+	response.redirect("products_display");
 });
 
 // POST INVOICE
@@ -1612,7 +1713,7 @@ app.post("/invoice", function (request, response) {
 	Invoice for Assignment1
 	Author: Deborah Yuan
 	Date: 11/2/22
-	Desc: This html page produces an invoice for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+	Desc: This html page produces an invoice for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
 	-->
 	
 	<!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
@@ -1843,7 +1944,7 @@ app.post("/goodbye", function (request, response) {
 			</ul>
 			<ul class="nav navbar-nav">
 			  <!-- clicking this 'tab' leads to products display -->
-			  <li ><a href="./products_display.html">Products</a></li>
+			  <li ><a href="./products_display">Products</a></li>
 			</ul>
 		  </div>
 		</div>

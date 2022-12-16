@@ -194,18 +194,18 @@ Desc: This html page pulls data from a separate products file (products.json) an
 			</div>
 		<div class="collapse navbar-collapse" id="myNavbar">
 			<ul class="nav navbar-nav">
-				<li><a href="./products_display.html">Home</a></li>
+				<li><a href="./products_display">Home</a></li>
 			</ul>
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
 				<script>
 					if (typeof series != "undefined" && series == "iPhone") {
 						document.write(
-							`<li class="active" id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>`
+							`<li class="active" id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>`
 						);
 					} else {
 						document.write(
-							`<li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>`
+							`<li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>`
 						);
 					}
 				</script>
@@ -215,10 +215,10 @@ Desc: This html page pulls data from a separate products file (products.json) an
 				<script>
 					if (typeof series != "undefined" && series == "iPad") {
 						document.write(`
-      <li class="active" id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>`);
+      <li class="active" id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>`);
 					} else {
 						document.write(`
-      <li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>`);
+      <li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>`);
 					}
 				</script>
 			</ul>
@@ -227,10 +227,10 @@ Desc: This html page pulls data from a separate products file (products.json) an
 				<script>
 					if (typeof series != "undefined" && series == "Mac") {
 						document.write(`
-      <li class="active" id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>`);
+      <li class="active" id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>`);
 					} else {
 						document.write(`
-          <li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>`);
+          <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>`);
 					}
 				</script>
 			</ul>
@@ -387,7 +387,7 @@ function scrollToTop() {
         <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white">
         <div class="panel-heading" style="background-color:black"><b>iPhone</b></div> <!-- some inline css to override the template defaults -->
         <div class="panel-body"><img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/products_display/iphone-14-lineup.png" class="img-responsive" style="width:100%" alt="Image"></div>
-     <div class="panel-footer"><BR><h2 class="underlinecss" style="text-align:center;"><a href="./products_display.html?series=iPhone" style = "color: black; text-decoration: none;">Shop for iPhones ➜</a></h2><BR>
+     <div class="panel-footer"><BR><h2 class="underlinecss" style="text-align:center;"><a href="./products_display?series=iPhone" style = "color: black; text-decoration: none;">Shop for iPhones ➜</a></h2><BR>
           </div>
         </div>
       </div>
@@ -395,7 +395,7 @@ function scrollToTop() {
         <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white">
         <div class="panel-heading" style="background-color:black"><b>iPad</b></div> <!-- some inline css to override the template defaults -->
         <div class="panel-body"><img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/products_display/iPad-lineup.png" class="img-responsive" style="width:100%" alt="Image"></div>
-        <div class="panel-footer"><BR><h2 class="underlinecss" style="text-align:center;"><a href="./products_display.html?series=iPad" style = "color: black; text-decoration: none;">Shop for iPads ➜</a></h2><BR>
+        <div class="panel-footer"><BR><h2 class="underlinecss" style="text-align:center;"><a href="./products_display?series=iPad" style = "color: black; text-decoration: none;">Shop for iPads ➜</a></h2><BR>
           </div>
         </div>
       </div>
@@ -403,7 +403,7 @@ function scrollToTop() {
         <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white">
         <div class="panel-heading" style="background-color:black"><b>Mac</b></div> <!-- some inline css to override the template defaults -->
         <div class="panel-body"><img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/products_display/Mac-lineup.png" class="img-responsive" style="width:100%" alt="Image"></div>
-        <div class="panel-footer"><BR><h2 class="underlinecss" style="text-align:center;"><a href="./products_display.html?series=Mac" style = "color: black; text-decoration: none;"">Shop for Macs ➜</a></h2></ul><BR>
+        <div class="panel-footer"><BR><h2 class="underlinecss" style="text-align:center;"><a href="./products_display?series=Mac" style = "color: black; text-decoration: none;"">Shop for Macs ➜</a></h2></ul><BR>
           </div>
         </div>
       </div>
