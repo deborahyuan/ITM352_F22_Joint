@@ -119,23 +119,6 @@ Desc: This html page pulls data from a separate products file (products.json) an
 			let error_array = isNonNegativeInteger(input_string, true);
 			let test = document.getElementsByClassName(theTextbox.name + "").item(0); // let test = 'quantitytextbox'
 
-			function getCookie(cookieUser) {
-				// function from w3 schools to get cookies
-				let name = cookieUser + "=";
-				let decodedCookie = decodeURIComponent(document.cookie);
-				let splitCookie = decodedCookie.split(";");
-				for (let i = 0; i < splitCookie.length; i++) {
-					let savedCookie = splitCookie[i];
-					while (savedCookie.charAt(0) == " ") {
-						savedCookie = savedCookie.substring(1);
-					}
-					if (savedCookie.indexOf(name) == 0) {
-						return savedCookie.substring(name.length, savedCookie.length);
-					}
-				}
-				return "";
-			}
-
 			/* Having 'quantitytextbox[${i}]_available_message' display a red error message if Available Quantity > Stock, have quantitytextbox readjust to valid quantity, change textbox border to red */
 			if (
 				Number(input_string) >
@@ -182,7 +165,7 @@ Desc: This html page pulls data from a separate products file (products.json) an
 		console.log("Params=" + params); // shows what the params are in the console
 		// Check for an error and if so, display error message
 
-    if (typeof document.cookie != "undefined") {
+    if (typeof document.cookie != "undefined" && document.cookie!= "") {
 					active_user = document.cookie;
 				}
 	</script>
@@ -276,6 +259,39 @@ Desc: This html page pulls data from a separate products file (products.json) an
 			</ul>
 		</div>
 	</nav>
+
+	<div class="top-btn"> <!-- code and css partially borrowed from https://codepen.io/rafi_kadir/pen/oNgOyZb --> 
+		<i class="fas fa-arrow-up">↑</i>
+  </div>
+  <script>
+document.addEventListener("scroll", handleScroll); // code modified from (https://dev.to/ljcdev/scroll-to-top-button-in-vanilla-js-beginners-2nc)
+// get a reference to our predefined button
+var scrollToTopBtn = document.querySelector(".top-btn");
+
+function handleScroll() {
+  var scrollableHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var GOLDEN_RATIO = 0.5;
+
+  if ((document.documentElement.scrollTop / scrollableHeight ) > GOLDEN_RATIO) {
+    //show button
+    if(!scrollToTopBtn.classList.contains("showScrollBtn"))
+    scrollToTopBtn.classList.add("showScrollBtn")
+  } else {
+    //hide button
+    if(scrollToTopBtn.classList.contains("showScrollBtn"))
+    scrollToTopBtn.classList.remove("showScrollBtn")
+  }
+}
+
+scrollToTopBtn.addEventListener("click", scrollToTop);
+
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+  </script>
 
 	<script>
 		if (params.has(`series`)) {
@@ -371,7 +387,7 @@ Desc: This html page pulls data from a separate products file (products.json) an
         <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white">
         <div class="panel-heading" style="background-color:black"><b>iPhone</b></div> <!-- some inline css to override the template defaults -->
         <div class="panel-body"><img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/products_display/iphone-14-lineup.png" class="img-responsive" style="width:100%" alt="Image"></div>
-        <div class="panel-footer"><h2><a href="./products_display.html?series=iPhone" style = "color: black;">Shop for iPhones<BR>➜</a></h2>
+     <div class="panel-footer"><BR><h2 class="underlinecss" style="text-align:center;"><a href="./products_display.html?series=iPhone" style = "color: black; text-decoration: none;">Shop for iPhones ➜</a></h2><BR>
           </div>
         </div>
       </div>
@@ -379,7 +395,7 @@ Desc: This html page pulls data from a separate products file (products.json) an
         <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white">
         <div class="panel-heading" style="background-color:black"><b>iPad</b></div> <!-- some inline css to override the template defaults -->
         <div class="panel-body"><img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/products_display/iPad-lineup.png" class="img-responsive" style="width:100%" alt="Image"></div>
-        <div class="panel-footer"><h2><a href="./products_display.html?series=iPad" style = "color: black;">Shop for iPads<BR>➜</a></h2>
+        <div class="panel-footer"><BR><h2 class="underlinecss" style="text-align:center;"><a href="./products_display.html?series=iPad" style = "color: black; text-decoration: none;">Shop for iPads ➜</a></h2><BR>
           </div>
         </div>
       </div>
@@ -387,7 +403,7 @@ Desc: This html page pulls data from a separate products file (products.json) an
         <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white">
         <div class="panel-heading" style="background-color:black"><b>Mac</b></div> <!-- some inline css to override the template defaults -->
         <div class="panel-body"><img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/products_display/Mac-lineup.png" class="img-responsive" style="width:100%" alt="Image"></div>
-        <div class="panel-footer"><h2><a href="./products_display.html?series=Mac" style = "color: black;">Shop for Macs<BR>➜</a></h2>
+        <div class="panel-footer"><BR><h2 class="underlinecss" style="text-align:center;"><a href="./products_display.html?series=Mac" style = "color: black; text-decoration: none;"">Shop for Macs ➜</a></h2></ul><BR>
           </div>
         </div>
       </div>

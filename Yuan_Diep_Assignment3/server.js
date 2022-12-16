@@ -799,7 +799,7 @@ app.get("/loginsuccess", function (request, response) {
 		<p style="font-size: 2em;">${str}<BR>${str2}<BR>${str3}</p>
 	  </div>
 	  <div class="container text-center" style="padding-bottom: 50px;">
-	<form name='editaccount' action='./editaccount' method="POST">
+	<form name='editaccount' action='./editaccount' method="GET">
 	<input type="submit" value='Edit Account Information      ' id="button"; class="button" style="min-width: 20%"></input>
 	</form>
 	<form name='gotoinvoice' action='/cart' method="GET">
@@ -970,9 +970,20 @@ app.post("/loginsuccess", function (request, response) {
 // Code modified from Assignment 2 Example Codes
 // GET page to Edit Account
 app.get("/editaccount", function (request, response) {
-	response.send(`
+	let params = new URLSearchParams(request.query);
+	if (
+		// if the user isn't logged in
+		typeof request.cookies["activeuser"] == "undefined" ||
+		request.cookies["activeuser"] == ""
+	) {
+		console.log("You can't access this page unless you are logged in!");
+		response.redirect("./products_display.html");
+	} else {
+		active_user = request.cookies["activeuser"];
+
+		response.send(`
 	<!-- 
-		Edit Account for Assignment2
+		Edit Account for Assignment3
 		Author: Deborah Yuan & Evon Diep
 		Date: 11/18/22
 		Desc: This page is where the user can choose to edit their full name, username (email), or password. All changes will be updated and saved. If there are any errors with the user's inputs, they will be blocked from submission. Edit Account textboxes are sticky for everything but the password. The user can choose to click a button to go back to the Login/Registration success page, or they can edit their account as many times as they wish.
@@ -1036,17 +1047,41 @@ app.get("/editaccount", function (request, response) {
 	<nav class="navbar navbar-inverse">  
 	  <div class="container-fluid">
 		<div class="navbar-header">
-		  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-		  </button>
-		  <a class="navbar-brand" href="#">
-			 <!-- corner navbar Apple icon -->
-			<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
-		</div>document.cookie
-	   
+		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+		  <span class="icon-bar"></span>
+		  <span class="icon-bar"></span>
+		  <span class="icon-bar"></span>
+		</button>
+		<a class="navbar-brand active" href="./">
+		   <!-- corner navbar Apple icon -->
+		  <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+		</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+		<ul class="nav navbar-nav">
+		  <li><a href="./products_display.html">Home</a></li>
+		</ul>
+		<ul class="nav navbar-nav">
+		  <!-- clicking this 'tab' leads to products display -->
+		  <li id="iPhonetab"><a href="./products_display.html?series=iPhone">iPhone</a></li>
+		</ul>
+		<ul class="nav navbar-nav">
+		  <!-- clicking this 'tab' leads to products display -->
+		  <li id="iPadtab"><a href="./products_display.html?series=iPad">iPad</a></li>
+		</ul>
+		<ul class="nav navbar-nav">
+		  <!-- clicking this 'tab' leads to products display -->
+			  <li id="Mactab"><a href="./products_display.html?series=Mac">Mac</a></li>
+		</ul>
+		<ul class="nav navbar-nav navbar-right">
+		<ul class="nav navbar-nav">
+		<li class="active"><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
+		</ul>
+		<ul class="nav navbar-nav">
+		 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart &emsp;</a></li>
+		  </ul>
+		</ul> 
 	  </div>
+	  </nav>
 	</nav>
 
 <body>
@@ -1067,7 +1102,13 @@ app.get("/editaccount", function (request, response) {
 	<!-- displays errors for incorrect name or too short/long full name -->
 	<p style="color:#A74ADC"><b>${
 		typeof regErrors["wrong_name"] != "undefined" ? regErrors["wrong_name"] : ""
-	}${typeof regErrors["bad_userlength"] != "undefined" ? regErrors["bad_userlength"] : ""}${typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""}</b></p>
+	}${
+			typeof regErrors["bad_userlength"] != "undefined"
+				? regErrors["bad_userlength"]
+				: ""
+		}${
+			typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
+		}</b></p>
 
 	<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
 
@@ -1080,7 +1121,13 @@ app.get("/editaccount", function (request, response) {
 		typeof regErrors["taken_email"] != "undefined"
 			? regErrors["taken_email"]
 			: ""
-	}${typeof regErrors["wrong_email"] != "undefined" ? regErrors["wrong_email"] : ""}${typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""}</b></p>
+	}${
+			typeof regErrors["wrong_email"] != "undefined"
+				? regErrors["wrong_email"]
+				: ""
+		}${
+			typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
+		}</b></p>
 
 	<input type="text" id ="newusername" class="newusername" name="newusername" placeholder="Enter New Email" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
 
@@ -1093,7 +1140,11 @@ app.get("/editaccount", function (request, response) {
 	<!-- displays errors for wrong password name or too short/long password name -->
 	<p style="color:#A74ADC"><b>${
 		typeof regErrors["wrong_pass"] != "undefined" ? regErrors["wrong_pass"] : ""
-	}${typeof regErrors["bad_passlength"] != "undefined" ? regErrors["bad_passlength"] : ""}</b></p>
+	}${
+			typeof regErrors["bad_passlength"] != "undefined"
+				? regErrors["bad_passlength"]
+				: ""
+		}</b></p>
 
 	<input type="password" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
 
@@ -1104,7 +1155,15 @@ app.get("/editaccount", function (request, response) {
 	<!-- displays errors for incorrect password confirmation, doesn't match other password change box OR empty box -->
 	<p style="color:#A74ADC"><b>${
 		typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
-	}${typeof regErrors["nomatch_pass"] != "undefined" ? regErrors["nomatch_pass"] : ""}${typeof regErrors["contains_space"] != "undefined" ? regErrors["contains_space"] : ""}</b></p><BR>
+	}${
+			typeof regErrors["nomatch_pass"] != "undefined"
+				? regErrors["nomatch_pass"]
+				: ""
+		}${
+			typeof regErrors["contains_space"] != "undefined"
+				? regErrors["contains_space"]
+				: ""
+		}</b></p><BR>
 			
 <input type="submit" value='Submit Changes       ' id="button"; class="button" style="min-width:30%"></input></form><BR>
 
@@ -1115,6 +1174,7 @@ app.get("/editaccount", function (request, response) {
 
 	</body>
 	`);
+	}
 });
 
 // Code inspired by Assignment 2 Code Examples
@@ -1122,6 +1182,7 @@ app.get("/editaccount", function (request, response) {
 app.post("/editaccount", function (request, response) {
 	// POST for editing the account information
 	let params = new URLSearchParams(request.query); // grab params from url
+	active_user = request.cookies["activeuser"];
 
 	regErrors = {}; // reset errors array
 
@@ -1136,8 +1197,6 @@ app.post("/editaccount", function (request, response) {
 	new_pass = POST["newpassword"];
 	new_pass_2 = POST["newpasswordconfirm"];
 	changetonew = false; // assume that we are not changing the username/email
-
-	actusers["usernamechange"] = {}; // stores some information if the user decides to change their username/email
 
 	// if the current username/email exists
 	if (new_full_name == "") {
@@ -1156,15 +1215,17 @@ app.post("/editaccount", function (request, response) {
 		// if new full name box isn't empty
 		users[active_user].fullname = new_full_name; // set new full name to current full name
 	}
-
+	var encryptedPassword = encrypt(curr_pass);
 	// if the new password isn't blank and matches
 	if (new_pass == "") {
 		console.log("New Password is blank"); // status
 		// if password isn't blank
 	} else if (
-		users[active_user].password != encrypt(curr_pass) || // if the current password IS encrypted and isn't the same as the one typed in OR
-		(users[active_user].encrypt == false && // if the current password ISN'T encrypted and isn't the same as the one typed in
-			users[active_user].password != curr_pass)
+		!(
+			users[active_user].password == encryptedPassword ||
+			(!users[active_user].encrypted &&
+				users[active_user].password == curr_pass)
+		)
 	) {
 		console.log("Current Password is incorrect"); // status
 		regErrors["wrong_pass"] = `Current Password is incorrect!`; // pushes out this error in regErrors array if true
@@ -1172,10 +1233,7 @@ app.post("/editaccount", function (request, response) {
 		console.log("New Password Doesn't match"); // status
 		regErrors["nomatch_pass"] = `New password does not match!`; // pushes out this error in regErrors array if true
 	} else if (
-		// tests for requiring at least one special password and number
-		/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]/.test(
-			request.body.password
-		) == false
+		/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]/.test(new_pass) == false
 	) {
 		regErrors[
 			"bad_pass"
@@ -1188,6 +1246,9 @@ app.post("/editaccount", function (request, response) {
 		regErrors["contains_space"] = `Passwords should not contain spaces.`;
 	} else {
 		users[active_user].password = encrypt(new_pass); // set current password to new password; ENCRYPT NEW PASS HERE
+		if (!users[active_user].encrypted) {
+			users[active_user].encrypted = true;
+		}
 	}
 
 	if (new_user_name == "") {
@@ -1233,7 +1294,8 @@ app.post("/editaccount", function (request, response) {
 			delete actusers[active_user];
 			actusers[new_user_name] = {};
 			delete users[active_user];
-			request.cookies["activeuser"] = new_user_name; // renaming the cookie "activeuser" to the new username
+
+			response.cookie("activeuser", new_user_name); // renaming the cookie "activeuser" to the new username
 			active_user = request.cookies["activeuser"]; // changing the variable active_user to the new username
 		}
 	}
@@ -1450,9 +1512,9 @@ app.post("/register", function (request, response) {
 	}
 
 	// PASSWORD VALIDATION
-	// EC IR2 password must contain at least one special character and one number; regEx retrieved from stack overflow
+	// password must contain at least one special character and one number; regEx retrieved from stack overflow
 	if (
-		/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]/.test(
+		/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]/.test(
 			request.body.password
 		) == false
 	) {

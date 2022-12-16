@@ -47,6 +47,12 @@ Desc: This html page serves as a landing page for a user visiting the site. It f
   </style>
 </head>
 
+<script>
+      if (typeof document.cookie != "undefined" && document.cookie!= "") {
+					active_user = document.cookie;
+				}
+</script>
+
 
 
  <!-- navigation bar from w3 schools -->
@@ -80,8 +86,17 @@ Desc: This html page serves as a landing page for a user visiting the site. It f
     </ul>
     <ul class="nav navbar-nav navbar-right">
     <ul class="nav navbar-nav">
-    <!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
-   <li ><a href="./login">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;Login</a></li>
+      <script>
+        if (typeof active_user != "undefined") {
+          document.write(
+            `<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+          );
+        } else {
+          document.write(
+            `<li><a href="./login">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;Login&emsp;</a></li>`
+          );
+        }
+        </script>
     </ul>
     <ul class="nav navbar-nav">
       <!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
