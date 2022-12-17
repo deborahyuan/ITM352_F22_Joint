@@ -1019,7 +1019,7 @@ function scrollToTop() {
 		);
 	} else {
 		response.write(`
-		<form name='cart_form' action="/addtocart" method="POST">
+		<form name='cart_form' action="/recalculatecart" method="POST">
 		  <tr>
 			<th align="center">Image</th>
 			<th>Item</th>
@@ -1065,8 +1065,6 @@ function scrollToTop() {
 </tr>
 
 <script>
-
-
 
 setInputFilter(document.getElementById("cartquantitytextbox[${i}]_iPhone"), 
 function (value) {
@@ -1259,6 +1257,13 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 		  </tr>
 		  <tr>
 			<td style="text-align: center;" colspan="5" width="100%">
+			<input type="submit" id="button" value='Recalculate Cost' class="button"></input>
+		  </form>
+		   </td>
+		  </tr>
+		  <tr>
+			<td style="text-align: center;" colspan="5" width="100%">
+			<form name='confirm_purchase' action="/toinvoice" method="POST">
 			<input type="submit" id="button" value='Confirm Purchase' class="button"></input>
 		  </form>
 		   </td>
@@ -1326,10 +1331,61 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 	response.end();
 });
 
-// CARTCHECK POST.CART
+app.post("/recalculatecart", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+
+	if (typeof request.session.cart["iPhone"] != "undefined") {
+		series = "iPhone";
+		customerquantities = [];
+		request.session.cart[series];
+		for (i in request.session.cart[series]) {
+			customerquantities =
+				request.body["cartquantitytextbox[" + i + "]_iPhone"];
+			console.log("CARTFORM=" + customerquantities);
+		}
+	}
+});
+// CART CHECK POST.CART
 app.post("/cart", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log(params);
+	/*
+
+	if (typeof request.session.cart[iPhone] != "undefined") {
+		
+		customerquantities = [];
+		products = products_data["iPhone"];
+		for (i in request.session.cart[iPhone]) 
+		customerquantities = request.body["quantitytextbox"];
+		request.session.cart[iPhone];
+		
+		products = products_data[series];
+
+		for (let i in customerquantities) {
+			if (Number(customerquantities[i]) >= products[i]["quantity_available"]) {
+				continue;
+			} else {
+				products_data[series][i]["quantity_available"] -= Number(
+					customerquantities[i]
+				);
+				console.log(
+					"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
+				);
+				request.session.cart[series][i] =
+					Number(request.session.cart[series][i]) +
+					Number(customerquantities[i]);
+				console.log(
+					"request.session.cart" +
+						series +
+						[i] +
+						"=" +
+						request.session.cart[series][i]
+				);
+			}
+		}
+	}
+	}
 
 	if (typeof request.session.cart[series] == "undefined") {
 		// if shoppingCart series doesn't exist, then add series
@@ -1473,7 +1529,7 @@ app.post("/cart", function (request, response) {
 
 		shoppingCart = request.session.cart; //sync Cart
 		response.redirect("products_display?" + "series=" + series);
-	}
+	}*/
 });
 
 // POST LOGIN SUCCESS

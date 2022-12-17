@@ -144,3 +144,15 @@ function setInputFilter(textbox, inputFilter, prodQuantity) {
 		});
 	});
 }
+
+function extendedPriceListener(QuantityClass, CostClass, ExtendedCostClass) {
+	Quantity = document.querySelector("." + QuantityClass);
+	Cost = document.querySelector("." + CostClass);
+	ExtendedCost = document.querySelector("." + ExtendedCostClass);
+
+	Quantity.addEventListener("input", recalculateExtended);
+
+	function recalculateExtended() {
+		ExtendedCost.innerText = Number(Quantity.value) * Number(Cost.innerText);
+	}
+}
