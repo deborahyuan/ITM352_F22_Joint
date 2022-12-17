@@ -103,23 +103,3 @@
 		}
 	});
 </script>
-
-<script>
-	setInputFilter(
-		document.getElementById("quantitytextbox[${i}]"),
-		function (value) {
-			if (/^[1-9]\d*(\.\d+)?$/.test(value) == false) {
-				// must be a number
-				return /^[1-9]\d*(\.\d+)?$/.test(value);
-			} else if (/^-?\d*$/.test(value) == false) {
-				// must be an integer
-				return /^-?\d*$/.test(value);
-			} else if (/^\d*$/.test(value) == false) {
-				// must be a non negative integer
-				return /^\d*$/.test(value);
-			} else {
-				return true;
-			}
-		}
-	);
-</script>

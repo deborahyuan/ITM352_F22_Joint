@@ -133,6 +133,7 @@ app.all("*", function (request, response, next) {
 });
 
 app.get("/products_display", function (request, response) {
+	// gets products_display.html using the server through sendFile
 	let params = new URLSearchParams(request.query);
 	console.log(params);
 	response.sendFile(proddisplay);
@@ -155,9 +156,9 @@ app.post("/addtocart", function (request, response) {
 
 	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1&2
 	// process purchase request (validate quantities, check quantity available)
-	let validinput = true; // assume that all terms are valid
+	let validinput = 0; // assume that all terms are valid
 	let allblank = false; // assume that it ISN'T all blank
-	let instock = true; // if it is in stock
+	let instock = 0; // if it is in stock
 
 	ordered = ""; // have a variable called ordered with no value, purchased quantities will initially be in here
 
@@ -170,22 +171,22 @@ app.post("/addtocart", function (request, response) {
 			// assigning no value to certain models to avoid errors in invoice
 			ordered += model + "=" + qtys + "&";
 		} else if (
-			isNonNegativeInteger(qtys) &&
+			/^\d*$/.test(qtys) &&
 			Number(qtys) <= products[i].quantity_available
 		) {
 			// if qtys is true, added to ordered string
 			ordered += model + "=" + qtys + "&"; // appears in invoice's URL
 		} else if (qtys == -0) {
 			// if qtys is -0 block order
-			validinput = false;
+			validinput += 1;
 			ordered += model + "=" + qtys + "&"; // appears in invoice's URL
-		} else if (isNonNegativeInteger(qtys) != true) {
+		} else if (/^\d*$/.test(qtys) != true) {
 			// quantity is "Not a Number, Negative Value, or not an Integer"
-			validinput = false;
+			validinput += 1;
 			ordered += model + "=" + qtys + "&";
 		} else if (Number(qtys) >= products[i].quantity_available) {
 			// Existing stock is less than desired quantity
-			instock = false;
+			instock += 1;
 			ordered += model + "=" + qtys + "&";
 		} else {
 			// textbox has gone missing? or some other error
@@ -198,22 +199,20 @@ app.post("/addtocart", function (request, response) {
 		allblank = true;
 	}
 
-	if (!validinput || allblank || !instock) {
+	if (validinput > 0 || allblank || instock > 0) {
 		if (allblank) {
 			// if all boxes are blank, there is an error, pops up alert
 			console.log(allblank);
-			// ordered = "";
 			response.redirect(
-				"products_display" +
+				"products_display?" +
 					ordered +
 					"series=" +
 					series +
 					"&" +
 					"error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
 			);
-		} else if (!validinput) {
+		} else if (validinput > 0) {
 			// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
-			// ordered = "";
 			response.redirect(
 				"products_display?" +
 					ordered +
@@ -222,7 +221,7 @@ app.post("/addtocart", function (request, response) {
 					"&" +
 					"error=Invalid%20Quantity:%20Please%20Fix%20the%20Errors%20on%20the%20Order%20Page!"
 			);
-		} else if (!instock) {
+		} else if (instock > 0) {
 			// Existing stock is less than desired quantity, pops up alert
 			// ordered = "";
 			response.redirect(
@@ -254,9 +253,27 @@ app.post("/addtocart", function (request, response) {
 			request.session.cart[series] = customerquantities;
 			console.log("CARTSERIES=" + request.session.cart[series]);
 			console.log("sessioncartinfo=" + request.session.cart);
+			for (let i in customerquantities) {
+				// deducting stock, BUT ONLY TEMPORARILY! THIS IS FINALIZED UPON CHECKOUT
+				products_data[series][i]["quantity_available"] -= Number(
+					customerquantities[i]
+				);
+				console.log(
+					"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
+				);
+			}
 		} else if (typeof request.session.cart[series] == "undefined") {
 			// if shoppingCart series doesn't exist, then add series
 			request.session.cart[series] = customerquantities;
+			for (let i in customerquantities) {
+				// deducting stock, BUT ONLY TEMPORARILY! THIS IS FINALIZED UPON CHECKOUT
+				products_data[series][i]["quantity_available"] -= Number(
+					customerquantities[i]
+				);
+				console.log(
+					"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
+				);
+			}
 		} else {
 			for (let i in customerquantities) {
 				if (
@@ -264,6 +281,12 @@ app.post("/addtocart", function (request, response) {
 				) {
 					continue;
 				} else {
+					products_data[series][i]["quantity_available"] -= Number(
+						customerquantities[i]
+					);
+					console.log(
+						"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
+					);
 					request.session.cart[series][i] =
 						Number(request.session.cart[series][i]) +
 						Number(customerquantities[i]);
@@ -931,7 +954,7 @@ app.get("/cart", function (request, response) {
 
 	if (typeof active_user != "undefined") {
 		response.write(
-			`<li><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+			`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
 		);
 	} else {
 		response.write(
@@ -946,6 +969,42 @@ app.get("/cart", function (request, response) {
 		  </ul> 
 		</div>
 		</nav>
+	
+		<div class="top-btn"> <!-- code and css partially borrowed from https://codepen.io/rafi_kadir/pen/oNgOyZb --> 
+		<i class="fas fa-arrow-up">↑</i>
+  </div>
+  <script>
+// ARROW TO SCROLL TO TOP FUNCTIONALITY
+
+document.addEventListener("scroll", handleScroll); // code modified from (https://dev.to/ljcdev/scroll-to-top-button-in-vanilla-js-beginners-2nc)
+// get a reference to our predefined button
+var scrollToTopBtn = document.querySelector(".top-btn");
+
+function handleScroll() {
+  var scrollableHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var GOLDEN_RATIO = 0.5;
+
+  if ((document.documentElement.scrollTop / scrollableHeight ) > GOLDEN_RATIO) {
+    //show button
+    if(!scrollToTopBtn.classList.contains("showScrollBtn"))
+    scrollToTopBtn.classList.add("showScrollBtn")
+  } else {
+    //hide button
+    if(scrollToTopBtn.classList.contains("showScrollBtn"))
+    scrollToTopBtn.classList.remove("showScrollBtn")
+  }
+}
+
+scrollToTopBtn.addEventListener("click", scrollToTop);
+
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+  </script>
+	
 
 	<h1 class="invoiceheader" style="text-align: center;">${usernameCart} Cart</h1>
 	<BR>
@@ -960,6 +1019,7 @@ app.get("/cart", function (request, response) {
 		);
 	} else {
 		response.write(`
+		<form name='cart_form' action="/addtocart" method="POST">
 		  <tr>
 			<th align="center">Image</th>
 			<th>Item</th>
@@ -972,9 +1032,9 @@ app.get("/cart", function (request, response) {
 		// Compute subtotal
 		var subtotal = 0;
 
-		// Compute tax
-		var tax_rate = 0.0475;
-		var tax = tax_rate * subtotal;
+		response.write(`
+<script>
+</script>`);
 
 		if (typeof request.session.cart["iPhone"] != "undefined") {
 			quantities = request.session.cart["iPhone"];
@@ -988,21 +1048,54 @@ app.get("/cart", function (request, response) {
 					console.log(products[i].price);
 					// toFixed added to $ values to preserve cents
 					response.write(`
-	<tr>
-	  <td align="center"><img src="${
-			products[i].image
-		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
-	  <td>${products[i].name}</td>
-	  <td align="center">${quantities[i]}</td>
-	  <td align="center">$${products[i].price.toFixed(2)}</td>
-	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
-	</tr>
-	  `);
+<tr>
+<td align="center"><img src="${
+						products[i].image
+					}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+<td>${products[i].name}</td>
+<td align="center"><input type="number" name="cartquantitytextbox[${i}]_iPhone" id ="cartquantitytextbox[${i}]_iPhone" min="0" max="${
+						Number(products[i].quantity_available) + Number(quantities[i])
+					}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox[${i}]_iPhone_msg"></p></td>
+<td align="center" class="cartquantityPrice[${i}]_iPhone"">$${products[
+						i
+					].price.toFixed(2)}</td>
+<td class="cartquantityExtendedPrice[${i}]_iPhone">$${(
+						quantities[i] * products[i].price
+					).toFixed(2)}</td>
+</tr>
+
+<script>
+
+
+
+setInputFilter(document.getElementById("cartquantitytextbox[${i}]_iPhone"), 
+function (value) {
+if (/^(\s*|\d+)$/
+.test(value) == false) {
+// must be a number
+return /^(\s*|\d+)$/.test(value);
+} else if (/^-?\d*$/.test(value) == false) {
+// must be an integer
+return /^-?\d*$/.test(value);
+} else if (/^\d*$/.test(value) == false) {
+// must be a non negative integer
+return /^\d*$/.test(value);
+} else if (value > ${
+						Number(products[i].quantity_available) + Number(quantities[i])
+					}){ // requesting for more than current stock
+	return false;
+} else {
+return true;
+}
+}, 
+${Number(products[i].quantity_available) + Number(quantities[i])})
+</script>`);
 					subtotal += extended_price;
 					console.log(products[i].price);
 				}
 			}
 		}
+
 		if (typeof request.session.cart["iPad"] != "undefined") {
 			quantities = request.session.cart["iPad"];
 			products = products_data["iPad"];
@@ -1020,16 +1113,41 @@ app.get("/cart", function (request, response) {
 			products[i].image
 		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 	  <td>${products[i].name}</td>
-	  <td align="center">${quantities[i]}</td>
+	  <td align="center"><input type="number" name="cartquantitytextbox[${i}]_iPad" id ="cartquantitytextbox[${i}]_iPad" min="0" max="${
+						Number(products[i].quantity_available) + Number(quantities[i])
+					}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox[${i}]_iPad_msg"></p></td>
 	  <td align="center">$${products[i].price.toFixed(2)}</td>
 	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
 	</tr>
-	  `);
+	<script>
+	setInputFilter(document.getElementById("cartquantitytextbox[${i}]_iPad"), 
+		function (value) {
+		if (/^(\s*|\d+)$/
+		.test(value) == false) {
+		// must be a number
+		return /^(\s*|\d+)$/.test(value);
+		} else if (/^-?\d*$/.test(value) == false) {
+		// must be an integer
+		return /^-?\d*$/.test(value);
+		} else if (/^\d*$/.test(value) == false) {
+		// must be a non negative integer
+		return /^\d*$/.test(value);
+		} else if (value > ${
+			Number(products[i].quantity_available) + Number(quantities[i])
+		}){ // requesting for more than current stock
+			return false;
+		} else {
+		return true;
+		}
+		}, 
+		${Number(products[i].quantity_available) + Number(quantities[i])})
+	</script>`);
 					subtotal += extended_price;
 					console.log(products[i].price);
 				}
 			}
 		}
+
 		if (typeof request.session.cart["Mac"] != "undefined") {
 			quantities = request.session.cart["Mac"];
 			products = products_data["Mac"];
@@ -1047,19 +1165,315 @@ app.get("/cart", function (request, response) {
 			products[i].image
 		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 	  <td>${products[i].name}</td>
-	  <td align="center" contenteditable="true">${quantities[i]}</td>
+	  <td align="center"><input type="number" name="cartquantitytextbox[${i}]_Mac" id ="cartquantitytextbox[${i}]_Mac" min="0" max="${
+						Number(products[i].quantity_available) + Number(quantities[i])
+					}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox[${i}]__Mac_msg"></p></td>
 	  <td align="center">$${products[i].price.toFixed(2)}</td>
 	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
 	</tr>
-	  `);
+	<script>
+	setInputFilter(document.getElementById("cartquantitytextbox[${i}]_Mac"), 
+		function (value) {
+		if (/^(\s*|\d+)$/
+		.test(value) == false) {
+		// must be a number
+		return /^(\s*|\d+)$/.test(value);
+		} else if (/^-?\d*$/.test(value) == false) {
+		// must be an integer
+		return /^-?\d*$/.test(value);
+		} else if (/^\d*$/.test(value) == false) {
+		// must be a non negative integer
+		return /^\d*$/.test(value);
+		} else if (value > ${
+			Number(products[i].quantity_available) + Number(quantities[i])
+		}){ // requesting for more than current stock
+			return false;
+		} else {
+		return true;
+		}
+		}, 
+		${Number(products[i].quantity_available) + Number(quantities[i])})
+	</script>`);
 					subtotal += extended_price;
 					console.log(products[i].price);
 				}
 			}
 		}
+
+		// Compute shipping
+		var shipping;
+		if (subtotal < 1000) {
+			shipping = 5;
+		} else if (subtotal >= 1000 && subtotal < 1500) {
+			shipping = 10;
+		} else if (subtotal >= 1500) {
+			shipping = subtotal * 0.02;
+		}
+
+		// Compute tax
+		var tax_rate = 0.0475;
+		var tax = tax_rate * subtotal;
+
+		// Compute grand total
+		var total = tax + subtotal + shipping;
+
+		response.write(`
+		  <!-- table formatting, with some inline css -->
+		  <tr>
+			<td colspan="5" width="100%">&nbsp;</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: right;" colspan="4" width="67%">Sub-total</td>
+			<td width="54%">$
+			  ${subtotal.toFixed(2)}
+			</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: right;" colspan="4" width="67%">Tax @ 4.75%</span></td>
+			<td width="54%">$
+			${tax.toFixed(2)}
+			</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: right;" colspan="4" width="67%">Shipping</td>
+			<td width="54%">$
+			${shipping.toFixed(2)}
+			</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: right;" colspan="4" width="67%"><strong>Total</strong></td>
+			<td width="54%"><strong>$
+			${total.toFixed(2)}
+			  </strong></td>
+		  </tr>
+		  <tr>
+			<td style="text-align: center;" colspan="5" width="100%">
+			  <b> <!-- shipping policy info -->
+				Shipping Policy:
+				<BR>
+				Orders with subtotals of $0 - $999.99 will be charged $5 for shipping.
+				<BR>
+				Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
+				<BR>Orders with subtotals of $1500 and over will be charged 2% of the subtotal amount.</b>
+			</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: center;" colspan="5" width="100%">
+			<input type="submit" id="button" value='Confirm Purchase' class="button"></input>
+		  </form>
+		   </td>
+		  </tr>
+		</tbody>
+	  </table>
+	</main>
+	</body>
+	`);
+		if (typeof request.session.cart["iPhone"] != "undefined") {
+			quantities = request.session.cart["iPhone"];
+			products = products_data["iPhone"];
+			response.write(`<script>`);
+			for (let i in quantities) {
+				if (quantities[i] == 0 || quantities[i] == "") {
+					// adding textbox error messages based on inputted value
+					continue;
+				} else {
+					response.write(`
+	cart_form["cartquantitytextbox[${i}]_iPhone"].value = ${quantities[i]}
+	`);
+				}
+			}
+			response.write(`</script>`);
+		}
+
+		if (typeof request.session.cart["iPad"] != "undefined") {
+			quantities = request.session.cart["iPad"];
+			products = products_data["iPad"];
+			response.write(`<script>`);
+			for (let i in quantities) {
+				if (quantities[i] == 0 || quantities[i] == "") {
+					// adding textbox error messages based on inputted value
+					continue;
+				} else {
+					response.write(`
+		cart_form["cartquantitytextbox[${i}]_iPad"].value = ${quantities[i]}
+		`);
+				}
+			}
+			response.write(`</script>`);
+		}
+
+		if (typeof request.session.cart["Mac"] != "undefined") {
+			quantities = request.session.cart["Mac"];
+			products = products_data["Mac"];
+			response.write(`<script>`);
+			for (let i in quantities) {
+				if (quantities[i] == 0 || quantities[i] == "") {
+					// adding textbox error messages based on inputted value
+					continue;
+				} else {
+					response.write(`
+		cart_form["cartquantitytextbox[${i}]_Mac"].value = ${quantities[i]}
+		`);
+				}
+			}
+			response.write(`</script>`);
+		}
+
+		response.write(`
+	</html>`);
 	}
 
 	response.end();
+});
+
+// CARTCHECK POST.CART
+app.post("/cart", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+
+	if (typeof request.session.cart[series] == "undefined") {
+		// if shoppingCart series doesn't exist, then add series
+		request.session.cart[series] = customerquantities;
+		for (let i in customerquantities) {
+			// deducting stock, BUT ONLY TEMPORARILY! THIS IS FINALIZED UPON CHECKOUT
+			products_data[series][i]["quantity_available"] -= Number(
+				customerquantities[i]
+			);
+			console.log(
+				"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
+			);
+		}
+	} else {
+		for (let i in customerquantities) {
+			if (Number(customerquantities[i]) >= products[i]["quantity_available"]) {
+				continue;
+			} else {
+				products_data[series][i]["quantity_available"] -= Number(
+					customerquantities[i]
+				);
+				console.log(
+					"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
+				);
+				request.session.cart[series][i] =
+					Number(request.session.cart[series][i]) +
+					Number(customerquantities[i]);
+				console.log(
+					"request.session.cart" +
+						series +
+						[i] +
+						"=" +
+						request.session.cart[series][i]
+				);
+			}
+		}
+	}
+	series = request.body["series"]; // get the product series sent from the form post
+	customerquantities = [];
+
+	customerquantities = request.body["quantitytextbox"];
+
+	console.log("QUANTITIES=" + customerquantities);
+	console.log("2QUANTITIES=" + customerquantities[1]);
+	console.log("helloseries=" + series);
+
+	products = products_data[series];
+
+	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1&2
+	// process purchase request (validate quantities, check quantity available)
+	let validinput = 0; // assume that all terms are valid
+	let allblank = false; // assume that it ISN'T all blank
+	let instock = 0; // if it is in stock
+
+	ordered = ""; // have a variable called ordered with no value, purchased quantities will initially be in here
+
+	for (let i in customerquantities) {
+		// Iterate over all text boxes in the form.
+		qtys = customerquantities[i];
+
+		let model = products[i]["name"];
+		if (qtys == 0) {
+			// assigning no value to certain models to avoid errors in invoice
+			ordered += model + "=" + qtys + "&";
+		} else if (
+			/^\d*$/.test(qtys) &&
+			Number(qtys) <= products[i].quantity_available
+		) {
+			// if qtys is true, added to ordered string
+			ordered += model + "=" + qtys + "&"; // appears in invoice's URL
+		} else if (qtys == -0) {
+			// if qtys is -0 block order
+			validinput += 1;
+			ordered += model + "=" + qtys + "&"; // appears in invoice's URL
+		} else if (/^\d*$/.test(qtys) != true) {
+			// quantity is "Not a Number, Negative Value, or not an Integer"
+			validinput += 1;
+			ordered += model + "=" + qtys + "&";
+		} else if (Number(qtys) >= products[i].quantity_available) {
+			// Existing stock is less than desired quantity
+			instock += 1;
+			ordered += model + "=" + qtys + "&";
+		} else {
+			// textbox has gone missing? or some other error
+			othererrors = true;
+		}
+	}
+
+	if (customerquantities.join("") == 0) {
+		// if the array customerquantities adds up to 0, that means there are no quantities typed in
+		allblank = true;
+	}
+
+	if (validinput > 0 || allblank || instock > 0) {
+		if (allblank) {
+			// if all boxes are blank, there is an error, pops up alert
+			console.log(allblank);
+			response.redirect(
+				"products_display?" +
+					ordered +
+					"series=" +
+					series +
+					"&" +
+					"error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
+			);
+		} else if (validinput > 0) {
+			// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
+			response.redirect(
+				"products_display?" +
+					ordered +
+					"series=" +
+					series +
+					"&" +
+					"error=Invalid%20Quantity:%20Please%20Fix%20the%20Errors%20on%20the%20Order%20Page!"
+			);
+		} else if (instock > 0) {
+			// Existing stock is less than desired quantity, pops up alert
+			// ordered = "";
+			response.redirect(
+				"products_display?" +
+					ordered +
+					"series=" +
+					series +
+					"&" +
+					"error=Invalid%20Quantity:%20Requested%20Quantity%20Exceeds%20Stock"
+			);
+		} else {
+			// textbox has gone missing? or some other error, pops up alert
+			// ordered = "";
+			response.redirect(
+				"products_display?" +
+					ordered +
+					"series=" +
+					series +
+					"&" +
+					"error=Invalid%20Quantity:%20Unknown%20Error%20has%20occured"
+			);
+		}
+	} else {
+		shoppingCart = request.session.cart; // create shopping cart session
+
+		shoppingCart = request.session.cart; //sync Cart
+		response.redirect("products_display?" + "series=" + series);
+	}
 });
 
 // POST LOGIN SUCCESS

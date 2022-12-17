@@ -4,8 +4,8 @@
 			"name": "iPhone 14 Pro",
 			"price": 999,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/iPhone14pro.jpeg",
-			"quantity_available": 48,
-			"quantity_sold": 2
+			"quantity_available": 50,
+			"quantity_sold": 0
 		},
 		{
 			"name": "iPhone 14 Pro Max",
