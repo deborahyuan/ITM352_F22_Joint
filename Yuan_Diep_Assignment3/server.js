@@ -254,26 +254,11 @@ app.post("/addtocart", function (request, response) {
 			console.log("CARTSERIES=" + request.session.cart[series]);
 			console.log("sessioncartinfo=" + request.session.cart);
 			for (let i in customerquantities) {
-				// deducting stock, BUT ONLY TEMPORARILY! THIS IS FINALIZED UPON CHECKOUT
-				products_data[series][i]["quantity_available"] -= Number(
-					customerquantities[i]
-				);
-				console.log(
-					"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
-				);
+				continue;
 			}
 		} else if (typeof request.session.cart[series] == "undefined") {
 			// if shoppingCart series doesn't exist, then add series
 			request.session.cart[series] = customerquantities;
-			for (let i in customerquantities) {
-				// deducting stock, BUT ONLY TEMPORARILY! THIS IS FINALIZED UPON CHECKOUT
-				products_data[series][i]["quantity_available"] -= Number(
-					customerquantities[i]
-				);
-				console.log(
-					"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
-				);
-			}
 		} else {
 			for (let i in customerquantities) {
 				if (
@@ -281,12 +266,6 @@ app.post("/addtocart", function (request, response) {
 				) {
 					continue;
 				} else {
-					products_data[series][i]["quantity_available"] -= Number(
-						customerquantities[i]
-					);
-					console.log(
-						"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
-					);
 					request.session.cart[series][i] =
 						Number(request.session.cart[series][i]) +
 						Number(customerquantities[i]);
@@ -1003,6 +982,7 @@ function scrollToTop() {
     behavior: "smooth"
   });
 }
+
   </script>
 	
 
@@ -1011,7 +991,14 @@ function scrollToTop() {
 	  <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
 		<tbody>
 		  <thead>`);
-	if (typeof request.session.cart == "undefined") {
+
+	var totalItems = 0;
+
+	for (series in request.session.cart) {
+		totalItems += request.session.cart[series].reduce((a, b) => a + b); // adds the quantities so this can be used to display # of items in cart
+	}
+
+	if (typeof request.session.cart == "undefined" || totalItems == 0) {
 		response.write(
 			`<tr><th style= "text-align: center;"><h1>Your cart is empty.</h1></th></tr>
 			</thead>
@@ -1053,9 +1040,9 @@ function scrollToTop() {
 						products[i].image
 					}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 <td>${products[i].name}</td>
-<td align="center"><input type="number" name="cartquantitytextbox[${i}]_iPhone" id ="cartquantitytextbox[${i}]_iPhone" min="0" max="${
-						Number(products[i].quantity_available) + Number(quantities[i])
-					}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox[${i}]_iPhone_msg"></p></td>
+<td align="center"><input type="number" name='cartquantitytextbox_iPhone+${i}' id ='cartquantitytextbox_iPhone+${i}' min="0" max="${Number(
+						products[i].quantity_available
+					)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_iPhone+${i}_msg"></p></td>
 <td align="center" class="cartquantityPrice[${i}]_iPhone"">$${products[
 						i
 					].price.toFixed(2)}</td>
@@ -1066,7 +1053,7 @@ function scrollToTop() {
 
 <script>
 
-setInputFilter(document.getElementById("cartquantitytextbox[${i}]_iPhone"), 
+setInputFilter(document.getElementById('cartquantitytextbox_iPhone+${i}'), 
 function (value) {
 if (/^(\s*|\d+)$/
 .test(value) == false) {
@@ -1111,14 +1098,14 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 			products[i].image
 		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 	  <td>${products[i].name}</td>
-	  <td align="center"><input type="number" name="cartquantitytextbox[${i}]_iPad" id ="cartquantitytextbox[${i}]_iPad" min="0" max="${
-						Number(products[i].quantity_available) + Number(quantities[i])
-					}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox[${i}]_iPad_msg"></p></td>
+	  <td align="center"><input type="number" name="cartquantitytextbox_iPad+${i}" id ="cartquantitytextbox_iPad+${i}" min="0" max="${Number(
+						products[i].quantity_available
+					)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_iPad+${i}_msg"></p></td>
 	  <td align="center">$${products[i].price.toFixed(2)}</td>
 	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
 	</tr>
 	<script>
-	setInputFilter(document.getElementById("cartquantitytextbox[${i}]_iPad"), 
+	setInputFilter(document.getElementById("cartquantitytextbox_iPad+${i}"), 
 		function (value) {
 		if (/^(\s*|\d+)$/
 		.test(value) == false) {
@@ -1163,14 +1150,14 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 			products[i].image
 		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 	  <td>${products[i].name}</td>
-	  <td align="center"><input type="number" name="cartquantitytextbox[${i}]_Mac" id ="cartquantitytextbox[${i}]_Mac" min="0" max="${
-						Number(products[i].quantity_available) + Number(quantities[i])
-					}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox[${i}]__Mac_msg"></p></td>
+	  <td align="center"><input type="number" name="cartquantitytextbox_Mac+${i}" id ="cartquantitytextbox_Mac+${i}" min="0" max="${Number(
+						products[i].quantity_available
+					)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_Mac+${i}_msg"></p></td>
 	  <td align="center">$${products[i].price.toFixed(2)}</td>
 	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
 	</tr>
 	<script>
-	setInputFilter(document.getElementById("cartquantitytextbox[${i}]_Mac"), 
+	setInputFilter(document.getElementById("cartquantitytextbox_Mac+${i}"), 
 		function (value) {
 		if (/^(\s*|\d+)$/
 		.test(value) == false) {
@@ -1283,7 +1270,7 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 					continue;
 				} else {
 					response.write(`
-	cart_form["cartquantitytextbox[${i}]_iPhone"].value = ${quantities[i]}
+	cart_form['cartquantitytextbox_iPhone+${i}'].value = ${quantities[i]}
 	`);
 				}
 			}
@@ -1300,7 +1287,7 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 					continue;
 				} else {
 					response.write(`
-		cart_form["cartquantitytextbox[${i}]_iPad"].value = ${quantities[i]}
+		cart_form["cartquantitytextbox_iPad+${i}"].value = ${quantities[i]}
 		`);
 				}
 			}
@@ -1317,7 +1304,7 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 					continue;
 				} else {
 					response.write(`
-		cart_form["cartquantitytextbox[${i}]_Mac"].value = ${quantities[i]}
+		cart_form["cartquantitytextbox_Mac+${i}"].value = ${quantities[i]}
 		`);
 				}
 			}
@@ -1331,205 +1318,292 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 	response.end();
 });
 
-app.post("/recalculatecart", function (request, response) {
-	let params = new URLSearchParams(request.query);
-	console.log(params);
-
-	if (typeof request.session.cart["iPhone"] != "undefined") {
-		series = "iPhone";
-		customerquantities = [];
-		request.session.cart[series];
-		for (i in request.session.cart[series]) {
-			customerquantities =
-				request.body["cartquantitytextbox[" + i + "]_iPhone"];
-			console.log("CARTFORM=" + customerquantities);
-		}
-	}
-});
-// CART CHECK POST.CART
-app.post("/cart", function (request, response) {
-	let params = new URLSearchParams(request.query);
-	console.log(params);
-	/*
-
-	if (typeof request.session.cart[iPhone] != "undefined") {
-		
-		customerquantities = [];
+app.post("/recalculatecart", function (request, response, next) {
+	for (series in request.session.cart) {
 		products = products_data["iPhone"];
-		for (i in request.session.cart[iPhone]) 
-		customerquantities = request.body["quantitytextbox"];
-		request.session.cart[iPhone];
-		
+		console.log("SERIES=" + series);
+		console.log("CURR REQ CART=" + request.session.cart[series]);
+
+		for (i in request.session.cart[series]) {
+			if (
+				typeof request.body[`cartquantitytextbox_${series}+${i}`] == "undefined"
+			) {
+				continue;
+			} else {
+				request.session.cart[series][i] = Number(
+					request.body[`cartquantitytextbox_${series}+${i}`]
+				);
+			}
+			console.log("REQBOD=" + request.session.cart[series]);
+		}
+	}
+	console.log(request.session);
+	response.redirect("./cart");
+});
+
+app.post("/toinvoice", function (request, response, next) {
+	if (
+		typeof request.cookies["activeuser"] != "undefined" &&
+		request.cookies["activeuser"] != ""
+	) {
+		active_user = request.cookies["activeuser"];
+	}
+
+	response.write(`
+<!DOCTYPE html>
+<html lang="en">
+<!-- 
+Invoice for Assignment3
+Author: Deborah Yuan
+Date: 11/14/22
+Desc: This html page produces an cart for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+-->
+
+<!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
+
+<head>
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Invoice</title>
+
+<!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<!-- google fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- my own stylesheet (products-style.css) -->
+<link href="products-style.css" rel="stylesheet">
+
+<script src="../user_registration_info.json" type="application/json
+"></script> <!-- loading in user data from user_registration_info.json -->
+<script src="./functions.js"></script>
+<style>
+/* Remove the navbar's default rounded borders and increase the bottom margin */
+.navbar {
+  margin-bottom: 50px;
+  border-radius: 0;
+}
+
+/* Remove the jumbotron's default bottom margin */
+.jumbotron {
+  margin-top: 0;
+  margin-bottom: 0;
+  position: relative;
+
+}
+
+/* Add a gray background color and some padding to the footer */
+footer {
+  background-color: rgba(0, 0, 0, 0);
+}
+</style>
+</head>
+<body>
+  <main>
+
+  <!-- navigation bar from w3 schools -->
+  <nav class="navbar navbar-inverse">  
+	<div class="container-fluid">
+	  <div class="navbar-header">
+	  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+		<span class="icon-bar"></span>
+		<span class="icon-bar"></span>
+		<span class="icon-bar"></span>
+	  </button>
+	  <a class="navbar-brand active" href="./">
+		 <!-- corner navbar Apple icon -->
+		<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+	  </div>
+	  <div class="collapse navbar-collapse" id="myNavbar">
+	  <ul class="nav navbar-nav">
+		<li><a href="./products_display">Home</a></li>
+	  </ul>
+	  <ul class="nav navbar-nav">
+		<!-- clicking this 'tab' leads to products display -->
+		<li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>
+	  </ul>
+	  <ul class="nav navbar-nav">
+		<!-- clicking this 'tab' leads to products display -->
+		<li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>
+	  </ul>
+	  <ul class="nav navbar-nav">
+		<!-- clicking this 'tab' leads to products display -->
+			<li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
+	  </ul>
+	  <ul class="nav navbar-nav navbar-right">
+	  <ul class="nav navbar-nav">
+	<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
+	  </ul>
+	  <ul class="nav navbar-nav">
+	   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart &emsp;</a></li>
+		</ul>
+	  </ul> 
+	</div>
+	</nav>
+
+	<div class="top-btn"> <!-- code and css partially borrowed from https://codepen.io/rafi_kadir/pen/oNgOyZb --> 
+	<i class="fas fa-arrow-up">↑</i>
+</div>
+<script>
+// ARROW TO SCROLL TO TOP FUNCTIONALITY
+
+document.addEventListener("scroll", handleScroll); // code modified from (https://dev.to/ljcdev/scroll-to-top-button-in-vanilla-js-beginners-2nc)
+// get a reference to our predefined button
+var scrollToTopBtn = document.querySelector(".top-btn");
+
+function handleScroll() {
+var scrollableHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+var GOLDEN_RATIO = 0.5;
+
+if ((document.documentElement.scrollTop / scrollableHeight ) > GOLDEN_RATIO) {
+//show button
+if(!scrollToTopBtn.classList.contains("showScrollBtn"))
+scrollToTopBtn.classList.add("showScrollBtn")
+} else {
+//hide button
+if(scrollToTopBtn.classList.contains("showScrollBtn"))
+scrollToTopBtn.classList.remove("showScrollBtn")
+}
+}
+
+scrollToTopBtn.addEventListener("click", scrollToTop);
+
+function scrollToTop() {
+window.scrollTo({
+top: 0,
+behavior: "smooth"
+});
+}
+
+</script>
+
+<h1 class="invoiceheader" style="text-align: center">${users[active_user].fullname}'s Invoice</h1>
+<h2 style="text-align: center">A copy of the email has been sent to ${users[active_user].username}!</h2>
+<BR>
+  <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
+	<tbody>
+	  <thead>
+	  <tr>
+		<th align="center">Image</th>
+		<th>Item</th>
+		<th>Quantity</th>
+		<th>Cost of Item</th>
+		<th>Extended Price</th>
+	  </tr>
+	</thead>
+`);
+	// Compute subtotal
+	var subtotal = 0;
+
+	for (series in request.session.cart) {
+		quantities = request.session.cart[series];
 		products = products_data[series];
-
-		for (let i in customerquantities) {
-			if (Number(customerquantities[i]) >= products[i]["quantity_available"]) {
+		for (let i in quantities) {
+			if (quantities[i] == "" || quantities[i] == 0) {
+				// if quantities = 0, then skip the row
 				continue;
 			} else {
-				products_data[series][i]["quantity_available"] -= Number(
-					customerquantities[i]
-				);
-				console.log(
-					"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
-				);
-				request.session.cart[series][i] =
-					Number(request.session.cart[series][i]) +
-					Number(customerquantities[i]);
-				console.log(
-					"request.session.cart" +
-						series +
-						[i] +
-						"=" +
-						request.session.cart[series][i]
-				);
+				var extended_price = quantities[i] * products[i].price;
+				console.log(products[i].price);
+				// toFixed added to $ values to preserve cents
+				response.write(`
+<tr>
+<td align="center"><img src="${
+					products[i].image
+				}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+<td>${products[i].name}</td>
+<td align="center">${quantities[i]}</td>
+<td align="center">$${products[i].price.toFixed(2)}</td>
+<td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
+</tr>
+`);
+				subtotal += extended_price;
+				console.log(products[i].price);
 			}
 		}
 	}
+
+	// Compute shipping
+	var shipping;
+	if (subtotal < 1000) {
+		shipping = 5;
+	} else if (subtotal >= 1000 && subtotal < 1500) {
+		shipping = 10;
+	} else if (subtotal >= 1500) {
+		shipping = subtotal * 0.02;
 	}
 
-	if (typeof request.session.cart[series] == "undefined") {
-		// if shoppingCart series doesn't exist, then add series
-		request.session.cart[series] = customerquantities;
-		for (let i in customerquantities) {
-			// deducting stock, BUT ONLY TEMPORARILY! THIS IS FINALIZED UPON CHECKOUT
-			products_data[series][i]["quantity_available"] -= Number(
-				customerquantities[i]
-			);
-			console.log(
-				"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
-			);
-		}
-	} else {
-		for (let i in customerquantities) {
-			if (Number(customerquantities[i]) >= products[i]["quantity_available"]) {
-				continue;
-			} else {
-				products_data[series][i]["quantity_available"] -= Number(
-					customerquantities[i]
-				);
-				console.log(
-					"NEWQUANTAVAIL=" + products_data[series][i]["quantity_available"]
-				);
-				request.session.cart[series][i] =
-					Number(request.session.cart[series][i]) +
-					Number(customerquantities[i]);
-				console.log(
-					"request.session.cart" +
-						series +
-						[i] +
-						"=" +
-						request.session.cart[series][i]
-				);
-			}
-		}
-	}
-	series = request.body["series"]; // get the product series sent from the form post
-	customerquantities = [];
+	// Compute tax
+	var tax_rate = 0.0475;
+	var tax = tax_rate * subtotal;
 
-	customerquantities = request.body["quantitytextbox"];
+	// Compute grand total
+	var total = tax + subtotal + shipping;
 
-	console.log("QUANTITIES=" + customerquantities);
-	console.log("2QUANTITIES=" + customerquantities[1]);
-	console.log("helloseries=" + series);
+	response.write(`
+	  <!-- table formatting, with some inline css -->
+	  <tr>
+		<td colspan="5" width="100%">&nbsp;</td>
+	  </tr>
+	  <tr>
+		<td style="text-align: right;" colspan="4" width="67%">Sub-total</td>
+		<td width="54%">$
+		  ${subtotal.toFixed(2)}
+		</td>
+	  </tr>
+	  <tr>
+		<td style="text-align: right;" colspan="4" width="67%">Tax @ 4.75%</span></td>
+		<td width="54%">$
+		${tax.toFixed(2)}
+		</td>
+	  </tr>
+	  <tr>
+		<td style="text-align: right;" colspan="4" width="67%">Shipping</td>
+		<td width="54%">$
+		${shipping.toFixed(2)}
+		</td>
+	  </tr>
+	  <tr>
+		<td style="text-align: right;" colspan="4" width="67%"><strong>Total</strong></td>
+		<td width="54%"><strong>$
+		${total.toFixed(2)}
+		  </strong></td>
+	  </tr>
+	  <tr>
+		<td style="text-align: center;" colspan="5" width="100%">
+		  <b> <!-- shipping policy info -->
+			Shipping Policy:
+			<BR>
+			Orders with subtotals of $0 - $999.99 will be charged $5 for shipping.
+			<BR>
+			Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
+			<BR>Orders with subtotals of $1500 and over will be charged 2% of the subtotal amount.</b>
+		</td>
+	  </tr>
+	  <tr>
+		<td style="text-align: center;" colspan="5" width="100%">
+	  </form>
+	   </td>
+	  </tr>
+	  <tr>
+		<td style="text-align: center;" colspan="5" width="100%">
+	   </td>
+	  </tr>
+	</tbody>
+  </table>
+</main>
+</body>
+</script>
+</html>`);
 
-	products = products_data[series];
-
-	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1&2
-	// process purchase request (validate quantities, check quantity available)
-	let validinput = 0; // assume that all terms are valid
-	let allblank = false; // assume that it ISN'T all blank
-	let instock = 0; // if it is in stock
-
-	ordered = ""; // have a variable called ordered with no value, purchased quantities will initially be in here
-
-	for (let i in customerquantities) {
-		// Iterate over all text boxes in the form.
-		qtys = customerquantities[i];
-
-		let model = products[i]["name"];
-		if (qtys == 0) {
-			// assigning no value to certain models to avoid errors in invoice
-			ordered += model + "=" + qtys + "&";
-		} else if (
-			/^\d*$/.test(qtys) &&
-			Number(qtys) <= products[i].quantity_available
-		) {
-			// if qtys is true, added to ordered string
-			ordered += model + "=" + qtys + "&"; // appears in invoice's URL
-		} else if (qtys == -0) {
-			// if qtys is -0 block order
-			validinput += 1;
-			ordered += model + "=" + qtys + "&"; // appears in invoice's URL
-		} else if (/^\d*$/.test(qtys) != true) {
-			// quantity is "Not a Number, Negative Value, or not an Integer"
-			validinput += 1;
-			ordered += model + "=" + qtys + "&";
-		} else if (Number(qtys) >= products[i].quantity_available) {
-			// Existing stock is less than desired quantity
-			instock += 1;
-			ordered += model + "=" + qtys + "&";
-		} else {
-			// textbox has gone missing? or some other error
-			othererrors = true;
-		}
-	}
-
-	if (customerquantities.join("") == 0) {
-		// if the array customerquantities adds up to 0, that means there are no quantities typed in
-		allblank = true;
-	}
-
-	if (validinput > 0 || allblank || instock > 0) {
-		if (allblank) {
-			// if all boxes are blank, there is an error, pops up alert
-			console.log(allblank);
-			response.redirect(
-				"products_display?" +
-					ordered +
-					"series=" +
-					series +
-					"&" +
-					"error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
-			);
-		} else if (validinput > 0) {
-			// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
-			response.redirect(
-				"products_display?" +
-					ordered +
-					"series=" +
-					series +
-					"&" +
-					"error=Invalid%20Quantity:%20Please%20Fix%20the%20Errors%20on%20the%20Order%20Page!"
-			);
-		} else if (instock > 0) {
-			// Existing stock is less than desired quantity, pops up alert
-			// ordered = "";
-			response.redirect(
-				"products_display?" +
-					ordered +
-					"series=" +
-					series +
-					"&" +
-					"error=Invalid%20Quantity:%20Requested%20Quantity%20Exceeds%20Stock"
-			);
-		} else {
-			// textbox has gone missing? or some other error, pops up alert
-			// ordered = "";
-			response.redirect(
-				"products_display?" +
-					ordered +
-					"series=" +
-					series +
-					"&" +
-					"error=Invalid%20Quantity:%20Unknown%20Error%20has%20occured"
-			);
-		}
-	} else {
-		shoppingCart = request.session.cart; // create shopping cart session
-
-		shoppingCart = request.session.cart; //sync Cart
-		response.redirect("products_display?" + "series=" + series);
-	}*/
+	response.end();
 });
 
 // POST LOGIN SUCCESS
@@ -1852,6 +1926,7 @@ app.post("/editaccount", function (request, response) {
 		if (Object.keys(regErrors).length == 0) {
 			users[new_user_name] = {}; // makes empty object for the user's new account
 			users[new_user_name].password = users[active_user].password; // copies over current password
+			users[new_user_name].new_user_name = new_user_name; // copies over current password
 			users[new_user_name].loginstatus = users[active_user].loginstatus; // copies over current login status
 			users[new_user_name].amtlogin = users[active_user].amtlogin; // copies over the amount of times logged in
 			users[new_user_name].fullname = users[active_user].fullname; // copies over user's full name
@@ -2122,7 +2197,7 @@ app.post("/register", function (request, response) {
 		actusers[user_name] = {};
 		actusers[user_name] = users[user_name];
 
-		response.cookie("activeuser", inputusername); // sets the cookie's active user as the username if credentials are correct
+		response.cookie("activeuser", user_name); // sets the cookie's active user as the username if credentials are correct
 		active_user = request.cookies["activeuser"]; // active user cookie set to active_user variable
 
 		let data = JSON.stringify(users);

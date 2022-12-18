@@ -165,7 +165,7 @@ h2.underlinecss:hover:after {
 
 /* table row bottom border line */
 .invoice-table tbody tr:last-of-type,
-.invoice-table tbody tr:nth-last-of-type(7) {
+.invoice-table tbody tr:nth-last-of-type(8) {
 	border-bottom: 2px solid black;
 }
 /* table row bottom border line */

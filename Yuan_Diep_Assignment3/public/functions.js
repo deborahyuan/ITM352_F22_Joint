@@ -137,9 +137,6 @@ function setInputFilter(textbox, inputFilter, prodQuantity) {
 				}
 				this.setCustomValidity(errMsg);
 				this.reportValidity();
-			} else {
-				// Rejected value - nothing to restore
-				this.value = "";
 			}
 		});
 	});

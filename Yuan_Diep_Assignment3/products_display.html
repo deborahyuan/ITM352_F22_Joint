@@ -232,6 +232,18 @@ Desc: This html page pulls data from a separate products file (products.json) an
 					}
 				</script>
 			</ul>
+			<ul class="nav navbar-nav">
+				<!-- clicking this 'tab' leads to products display -->
+				<script>
+					if (typeof active_user != "undefined" && series == "Mac") {
+						document.write(`
+      <li class="active" id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>`);
+					} else {
+						document.write(`
+          <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>`);
+					}
+				</script>
+			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				<ul class="nav navbar-nav">
 					<script>
@@ -361,8 +373,6 @@ function scrollToTop() {
 <h3 style="padding: 10px;">
   <B>Apple Online Store</B>
 </h3>
-
-</footer>
 `)
 
 if (params.has(`error`)) {
@@ -378,7 +388,9 @@ for (i = 0; i < products_S.length; i++) {
 					quantity_form["quantitytextbox["+i+"]"].value = stickyUser;
 				}
 			}
-
+document.write(`
+<div style="color: transparent">
+	`)
 for (i in products_S) { // adding textbox error messages based on inputted value
 document.write(`
 ${setInputFilter(document.getElementById("quantitytextbox["+i+"]"), 
@@ -399,7 +411,14 @@ return /^\d*$/.test(value);
 return true;
 }
 }, 
-products_S[i].quantity_available)}`)}
+products_S[i].quantity_available)}`)
+}
+document.write(`
+</div>
+
+</footer>
+`)
+
 		} else {
 			document.write(`
 <div class="container text-center" style="padding-bottom: 50px;">
