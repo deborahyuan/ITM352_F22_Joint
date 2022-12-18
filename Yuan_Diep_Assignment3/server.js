@@ -14,6 +14,12 @@ var cookieParser = require("cookie-parser");
 // require products data // ASSIGNMENT 3 EXAMPLE CODE
 products_data = require("./products.json");
 
+// require products data // ASSIGNMENT 3 EXAMPLE CODE
+user_data = require("./user_registration_info.json");
+
+// require nodemailer to email invoices
+const nodemailer = require("nodemailer");
+
 app.use(express.static(__dirname + "/public")); // route all other GET/POST requests to files in public
 app.use("/css", express.static(__dirname + "/public")); // calls css for everything in server
 app.use(express.urlencoded({ extended: true }));
@@ -40,6 +46,9 @@ var fname = "user_registration_info.json";
 var prodname = __dirname + "/products.json";
 var actname = __dirname + "/active_users.json";
 var proddisplay = __dirname + "/products_display.html";
+var index = __dirname + "/index.html";
+var manageUser = __dirname + "/manageusers.html";
+var manageProd = __dirname + "/manageproducts.html";
 
 if (fs.existsSync(fname)) {
 	// file syncing/rewriting for user registration info
@@ -125,6 +134,11 @@ app.post("/get_products_data", function (request, response) {
 	response.json(products_data);
 });
 
+// TAKEN FROM ASSIGNMENT 3 SAMPLE CODE
+app.post("/get_user_data", function (request, response) {
+	response.json(user_data);
+});
+
 // monitor all requests
 app.all("*", function (request, response, next) {
 	console.log(request.method + " to " + request.path);
@@ -133,10 +147,85 @@ app.all("*", function (request, response, next) {
 });
 
 app.get("/products_display", function (request, response) {
+	if (
+		typeof request.session.invoice != "undefined" ||
+		request.session.invoice == true
+	) {
+		request.session.destroy(); // ends session
+	}
 	// gets products_display.html using the server through sendFile
 	let params = new URLSearchParams(request.query);
 	console.log(params);
 	response.sendFile(proddisplay);
+});
+
+// GOES TO INDEX
+app.get("/", function (request, response) {
+	// gets products_display.html using the server through sendFile
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	response.sendFile(index);
+});
+
+app.get("/index", function (request, response) {
+	if (
+		typeof request.session.invoice != "undefined" ||
+		request.session.invoice == true
+	) {
+		request.session.destroy(); // ends session
+	}
+	// gets products_display.html using the server through sendFile
+	let params = new URLSearchParams(request.query);
+	console.log(params);
+	response.sendFile(index);
+});
+
+// GOES TO MANAGE USERS IF ADMIN
+app.get("/manageusers", function (request, response) {
+	if (
+		typeof request.session.invoice != "undefined" ||
+		request.session.invoice == true
+	) {
+		request.session.destroy(); // ends session
+	}
+
+	if (
+		typeof request.cookies["activeuser"] == "undefined" ||
+		request.cookies["activeuser"] == ""
+	) {
+		response.redirect("/products_display");
+	} else {
+		active_user = request.cookies["activeuser"];
+		if (users[active_user].admin == true) {
+			response.sendFile(manageUser);
+		} else {
+			response.redirect("/products_display");
+		}
+	}
+});
+
+// GOES TO MANAGE USERS IF ADMIN
+app.get("/manageproducts", function (request, response) {
+	if (
+		typeof request.session.invoice != "undefined" ||
+		request.session.invoice == true
+	) {
+		request.session.destroy(); // ends session
+	}
+
+	if (
+		typeof request.cookies["activeuser"] == "undefined" ||
+		request.cookies["activeuser"] == ""
+	) {
+		response.redirect("/products_display");
+	} else {
+		active_user = request.cookies["activeuser"];
+		if (users[active_user].admin == true) {
+			response.sendFile(manageProd);
+		} else {
+			response.redirect("/products_display");
+		}
+	}
 });
 
 // ADDING TO CART FUNCTIONALITY
@@ -164,7 +253,7 @@ app.post("/addtocart", function (request, response) {
 
 	for (let i in customerquantities) {
 		// Iterate over all text boxes in the form.
-		qtys = customerquantities[i];
+		qtys = Number(customerquantities[i]);
 
 		let model = products[i]["name"];
 		if (qtys == 0) {
@@ -246,6 +335,10 @@ app.post("/addtocart", function (request, response) {
 		}
 	} else {
 		shoppingCart = request.session.cart; // create shopping cart session
+
+		for (i in customerquantities) {
+			customerquantities[i] = Number(customerquantities[i]);
+		}
 
 		if (typeof request.session.cart == "undefined") {
 			// if shoppingCart session doesn't exist, then make a session object called shoppingCart
@@ -437,9 +530,7 @@ app.get("/login", function (request, response) {
 	console.log(params.toString());
 	ordered = "";
 	if (typeof request.cookies["activeuser"] != "undefined") {
-		active_user = ""; // active_variable is set to empty
-		response.clearCookie(["activeuser"]); // destroys cookie
-		response.redirect("./"); // FIX: IS IT SUPPOSED TO GO BACK TO INDEX?
+		response.redirect("./products_display");
 	} else {
 		response.send(`
 	<!-- 
@@ -660,6 +751,12 @@ app.post("/login", function (request, response) {
 
 // GET LOGIN SUCCESS : the page you get sent to if login is successful
 app.get("/loginsuccess", function (request, response) {
+	if (
+		typeof request.session.invoice != "undefined" ||
+		request.session.invoice == true
+	) {
+		request.session.destroy(); // ends session
+	}
 	//
 	if (typeof request.cookies["activeuser"] == "undefined") {
 		response.redirect("./");
@@ -814,6 +911,9 @@ app.get("/loginsuccess", function (request, response) {
 	<form name='gotoinvoice' action='/cart' method="GET">
 	<input type="submit" value='Go To Invoice      ' id="button2"; class="button" style="min-width: 20%"></input>
 	</form>
+	<form name='logoutbutton' action='/logout' method="GET">
+	<input type="submit" value='Logout       ' id="button3"; class="button" style="min-width: 20%"></input>
+	</form>
 	</div>`);
 	}
 	response.end();
@@ -821,6 +921,12 @@ app.get("/loginsuccess", function (request, response) {
 
 // GO TO CART
 app.get("/cart", function (request, response) {
+	if (
+		typeof request.session.invoice != "undefined" ||
+		request.session.invoice == true
+	) {
+		request.session.destroy(); // ends session
+	}
 	if (typeof request.session.cart == "undefined") {
 		console.log(`Your cart is empty.`);
 	} else {
@@ -992,13 +1098,13 @@ function scrollToTop() {
 		<tbody>
 		  <thead>`);
 
-	var totalItems = 0;
+	var cartTotalItems = 0;
 
 	for (series in request.session.cart) {
-		totalItems += request.session.cart[series].reduce((a, b) => a + b); // adds the quantities so this can be used to display # of items in cart
+		cartTotalItems += request.session.cart[series].reduce((a, b) => a + b); // adds the quantities so this can be used to display # of items in cart
 	}
 
-	if (typeof request.session.cart == "undefined" || totalItems == 0) {
+	if (typeof request.session.cart == "undefined" || cartTotalItems == 0) {
 		response.write(
 			`<tr><th style= "text-align: center;"><h1>Your cart is empty.</h1></th></tr>
 			</thead>
@@ -1320,7 +1426,6 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 
 app.post("/recalculatecart", function (request, response, next) {
 	for (series in request.session.cart) {
-		products = products_data["iPhone"];
 		console.log("SERIES=" + series);
 		console.log("CURR REQ CART=" + request.session.cart[series]);
 
@@ -1504,28 +1609,32 @@ behavior: "smooth"
 
 	for (series in request.session.cart) {
 		quantities = request.session.cart[series];
-		products = products_data[series];
+		// products = products_data[series];
 		for (let i in quantities) {
 			if (quantities[i] == "" || quantities[i] == 0) {
 				// if quantities = 0, then skip the row
 				continue;
 			} else {
-				var extended_price = quantities[i] * products[i].price;
-				console.log(products[i].price);
+				var extended_price = quantities[i] * products_data[series][i].price;
+				console.log(products_data[series][i].price);
 				// toFixed added to $ values to preserve cents
 				response.write(`
 <tr>
 <td align="center"><img src="${
-					products[i].image
+					products_data[series][i].image
 				}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
-<td>${products[i].name}</td>
-<td align="center">${quantities[i]}</td>
-<td align="center">$${products[i].price.toFixed(2)}</td>
-<td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
+<td>${products_data[series][i].name}</td>
+<td align="center">${request.session.cart[series][i]}</td>
+<td align="center">$${products_data[series][i].price.toFixed(2)}</td>
+<td>$${(quantities[i] * products_data[series][i].price).toFixed(2)}</td>
 </tr>
 `);
 				subtotal += extended_price;
-				console.log(products[i].price);
+
+				products_data[series][i].quantity_available -= Number(quantities[i]); // Stock, or quantity_available is subtracted by the order quantity
+				products_data[series][i].quantity_sold =
+					Number(products_data[series][i].quantity_sold) +
+					Number(quantities[i]); //Total amount sold, or quantity_sold increases by the order quantity
 			}
 		}
 	}
@@ -1589,11 +1698,16 @@ behavior: "smooth"
 	  </tr>
 	  <tr>
 		<td style="text-align: center;" colspan="5" width="100%">
+	  <form name='gotoreview' action='/toreview' method="GET">
+	  <input type="submit" value='Review Products      ' id="button1"; class="button" style="min-width: 20%"></input>
 	  </form>
 	   </td>
 	  </tr>
 	  <tr>
 		<td style="text-align: center;" colspan="5" width="100%">
+		<form name='returntoproducts' action='/products_display' method="GET">
+	<input type="submit" value='Return to Home      ' id="button2"; class="button" style="min-width: 20%"></input>
+	</form>
 	   </td>
 	  </tr>
 	</tbody>
@@ -1602,8 +1716,264 @@ behavior: "smooth"
 </body>
 </script>
 </html>`);
-
+	products = products_data;
+	let proddata = JSON.stringify(products);
+	fs.writeFileSync(prodname, proddata, "utf-8");
+	request.session.invoice = true;
 	response.end();
+});
+
+// REVIEWING PRODUCTS
+app.get("/toreview", function (request, response) {
+	if (typeof request.session.invoice == "undefined") {
+		response.redirect("/products_display");
+	} else {
+		if (
+			typeof request.cookies["activeuser"] != "undefined" &&
+			request.cookies["activeuser"] != ""
+		) {
+			active_user = request.cookies["activeuser"];
+		}
+
+		response.write(`
+	<!DOCTYPE html>
+	<html lang="en">
+	<!-- 
+	Review Page for Assignment3
+	Author: Deborah Yuan
+	Date: 11/14/22
+	Desc: This html page produces an cart for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+	-->
+	
+	<!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
+	
+	<head>
+	<meta charset="utf-8">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>Invoice</title>
+	
+	<!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	
+	<!-- google fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+	
+	<!-- my own stylesheet (products-style.css) -->
+	<link href="products-style.css" rel="stylesheet">
+
+	<script src="../user_registration_info.json" type="application/json
+	"></script> <!-- loading in user data from user_registration_info.json -->
+	<script src="./functions.js"></script>
+	<style>
+	/* Remove the navbar's default rounded borders and increase the bottom margin */
+	.navbar {
+	  margin-bottom: 50px;
+	  border-radius: 0;
+	}
+	
+	/* Remove the jumbotron's default bottom margin */
+	.jumbotron {
+	  margin-top: 0;
+	  margin-bottom: 0;
+	  position: relative;
+	
+	}
+	
+	/* Add a gray background color and some padding to the footer */
+	footer {
+	  background-color: rgba(0, 0, 0, 0);
+	}
+	</style>
+	</head>
+	<body>
+	  <main>
+	
+	  <!-- navigation bar from w3 schools -->
+	  <nav class="navbar navbar-inverse">  
+		<div class="container-fluid">
+		  <div class="navbar-header">
+		  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand active" href="./">
+			 <!-- corner navbar Apple icon -->
+			<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+		  </div>
+		  <div class="collapse navbar-collapse" id="myNavbar">
+		  <ul class="nav navbar-nav">
+			<li><a href="./products_display">Home</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav">
+			<!-- clicking this 'tab' leads to products display -->
+			<li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav">
+			<!-- clicking this 'tab' leads to products display -->
+			<li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav">
+			<!-- clicking this 'tab' leads to products display -->
+				<li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav navbar-right">
+		  <ul class="nav navbar-nav">
+		<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav">
+		   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart &emsp;</a></li>
+			</ul>
+		  </ul> 
+		</div>
+		</nav>
+	
+		<div class="top-btn"> <!-- code and css partially borrowed from https://codepen.io/rafi_kadir/pen/oNgOyZb --> 
+		<i class="fas fa-arrow-up">↑</i>
+	</div>
+	<script>
+	// ARROW TO SCROLL TO TOP FUNCTIONALITY
+	
+	document.addEventListener("scroll", handleScroll); // code modified from (https://dev.to/ljcdev/scroll-to-top-button-in-vanilla-js-beginners-2nc)
+	// get a reference to our predefined button
+	var scrollToTopBtn = document.querySelector(".top-btn");
+	
+	function handleScroll() {
+	var scrollableHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+	var GOLDEN_RATIO = 0.5;
+	
+	if ((document.documentElement.scrollTop / scrollableHeight ) > GOLDEN_RATIO) {
+	//show button
+	if(!scrollToTopBtn.classList.contains("showScrollBtn"))
+	scrollToTopBtn.classList.add("showScrollBtn")
+	} else {
+	//hide button
+	if(scrollToTopBtn.classList.contains("showScrollBtn"))
+	scrollToTopBtn.classList.remove("showScrollBtn")
+	}
+	}
+	
+	scrollToTopBtn.addEventListener("click", scrollToTop);
+	
+	function scrollToTop() {
+	window.scrollTo({
+	top: 0,
+	behavior: "smooth"
+	});
+	}
+	
+	</script>
+	
+	<h1 class="invoiceheader" style="text-align: center">${users[active_user].fullname}'s Product Review Page</h1>
+	<h2 style="text-align: center">Leave a review for the products you just purchased!</h2>
+	<BR>
+	<form name='postreview' action='/toreview' method="POST">
+	  <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
+		<tbody>
+		  <thead>
+		  <tr>
+			<th align="center">Image</th>
+			<th>Item</th>
+			<th>Quantity</th>
+			<th>Rating</th>
+		  </tr>
+		</thead>
+	`);
+		// Compute subtotal
+		var subtotal = 0;
+
+		for (series in request.session.cart) {
+			quantities = request.session.cart[series];
+			products = products_data[series];
+			for (let i in quantities) {
+				if (quantities[i] == "" || quantities[i] == 0) {
+					// if quantities = 0, then skip the row
+					continue;
+				} else {
+					var extended_price = quantities[i] * products[i].price;
+					console.log(products[i].price);
+					// toFixed added to $ values to preserve cents
+					response.write(`
+	<tr>
+	<td align="center"><img src="${products[i].image}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+	<td>${products[i].name}</td>
+	<td align="center">${quantities[i]}</td>
+	<td>
+	<div class="rating">
+  <input type="radio" name="rating_${series}+${i}" value="5" id="5_${series}+${i}"><label for="5_${series}+${i}">☆</label>
+  <input type="radio" name="rating_${series}+${i}" value="4" id="4_${series}+${i}"><label for="4_${series}+${i}">☆</label>
+  <input type="radio" name="rating_${series}+${i}" value="3" id="3_${series}+${i}"><label for="3_${series}+${i}">☆</label>
+  <input type="radio" name="rating_${series}+${i}" value="2" id="2_${series}+${i}"><label for="2_${series}+${i}">☆</label>
+  <input type="radio" name="rating_${series}+${i}" value="1" id="1_${series}+${i}"><label for="1_${series}+${i}">☆</label>
+</div>
+</td>
+</tr>`);
+				}
+			}
+		}
+		response.write(`
+		  <tr>
+			<td style="text-align: center;" colspan="5" width="100%">
+		  <input type="submit" value='Submit Review    ' id="button1"; class="button" style="min-width: 20%"></input>
+		  </form>
+		   </td>
+		  </tr>
+		  <tr>
+		  </tr>
+		</tbody>
+	  </table>
+	</main>
+	</body>
+	</script>
+	</html>`);
+		response.end();
+	}
+});
+
+// POST LOGIN SUCCESS
+app.post("/toreview", function (request, response) {
+	// redirects to edit account page
+
+	for (series in request.session.cart) {
+		console.log("SERIES=" + series);
+		console.log("CURR REQ CART=" + request.session.cart[series]);
+
+		for (i in request.session.cart[series]) {
+			if (typeof request.body[`rating_${series}+${i}`] == "undefined") {
+				continue;
+			} else {
+				products_data[series][i].rating += Number(
+					request.body[`rating_${series}+${i}`]
+				);
+				products_data[series][i].reviewers++;
+			}
+			console.log("REQBOD=" + request.session.cart[series]);
+		}
+	}
+	console.log(request.session);
+
+	products_data[series][i].quantity_available -= Number(
+		request.body[`rating_${series}+${i}`]
+	); // Stock, or quantity_available is subtracted by the order quantity
+	products_data[series][i].quantity_sold =
+		Number(products_data[series][i].quantity_sold) +
+		Number(request.body[`rating_${series}+${i}`]); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
+
+	products = products_data;
+	let proddata = JSON.stringify(products);
+	fs.writeFileSync(prodname, proddata, "utf-8");
+
+	// COME HERE
+
+	request.session.destroy(); // ends session
+
+	response.redirect("products_display");
 });
 
 // POST LOGIN SUCCESS
@@ -2510,17 +2880,17 @@ app.post("/goodbye", function (request, response) {
 
 // GET LOGOUT, officially logs out user and removes them from active user list
 app.get("/logout", function (request, response) {
-	let params = new URLSearchParams(request.query); // grab params from url
-
 	ordered = "";
 	users[active_user].loginstatus = false;
 	delete actusers[active_user];
-
+	response.clearCookie(["active_user"]);
+	active_user = null;
+	// CHANGE LAST PAGE VISITED IN SESSIONS TO HOMEPAGE
 	let data = JSON.stringify(users);
 	let actdata = JSON.stringify(actusers);
 	fs.writeFileSync(fname, data, "utf-8");
 	fs.writeFileSync(actname, actdata, "utf-8");
-	response.redirect("/login");
+	response.redirect("/");
 });
 
 // start server

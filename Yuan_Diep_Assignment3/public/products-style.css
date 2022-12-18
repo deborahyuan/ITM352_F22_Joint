@@ -226,3 +226,69 @@ h2.underlinecss:hover:after {
 #myBtn:hover {
 	box-shadow: 0 0 15px 1px white;
 }
+
+/* star rating review css BORROWED FROM (https://bbbootstrap.com/snippets/star-rating-pure-css-19646372)*/
+
+.rating {
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: center;
+}
+
+.rating > input {
+	display: none;
+}
+
+.rating > label {
+	position: relative;
+	width: 1em;
+	font-size: 2em;
+	color: #ffd600;
+	cursor: pointer;
+}
+.rating > label::before {
+	content: "\2605";
+	position: absolute;
+	opacity: 0;
+}
+.rating > label:hover:before,
+.rating > label:hover ~ label:before {
+	opacity: 1 !important;
+}
+
+.rating > input:checked ~ label:before {
+	opacity: 1;
+}
+
+.rating:hover > input:checked ~ label:before {
+	opacity: 0.4;
+}
+
+/* STAR PRODUCTS DISPLAY CSS */
+.stars-outer {
+	position: relative;
+	display: inline-block;
+}
+
+.stars-inner {
+	position: absolute;
+	top: 0;
+	left: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	width: 0;
+}
+
+.stars-outer::before {
+	content: "\f005 \f005 \f005 \f005 \f005";
+	font-family: "Font Awesome 5 Free";
+	font-weight: 900;
+	color: #ccc;
+}
+
+.stars-inner::before {
+	content: "\f005 \f005 \f005 \f005 \f005";
+	font-family: "Font Awesome 5 Free";
+	font-weight: 900;
+	color: #f8ce0b;
+}

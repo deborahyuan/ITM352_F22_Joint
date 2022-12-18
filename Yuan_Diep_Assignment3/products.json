@@ -4,43 +4,55 @@
 			"name": "iPhone 14 Pro",
 			"price": 999,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/iPhone14pro.jpeg",
-			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_available": 36,
+			"quantity_sold": 14,
+			"rating": 14,
+			"reviewers": 4
 		},
 		{
 			"name": "iPhone 14 Pro Max",
 			"price": 1099,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/iPhone14promax.jpeg",
-			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_available": 47,
+			"quantity_sold": 3,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "iPhone 14",
 			"price": 799,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/iPhone14.jpeg",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "iPhone 14 Plus",
 			"price": 899,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/iPhone14plus.jpeg",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "iPhone 13",
 			"price": 699,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/iPhone13.jpeg",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "iPhone 13 Mini",
 			"price": 599,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/iPhone13mini.jpeg",
-			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_available": null,
+			"quantity_sold": null,
+			"rating": 4,
+			"reviewers": 2
 		}
 	],
 	"iPad": [
@@ -48,43 +60,55 @@
 			"name": "iPad Pro (11-inch)",
 			"price": 799,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/iPad/iPadPro11.png",
-			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_available": 48,
+			"quantity_sold": 2,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "iPad Pro (12.9-inch)",
 			"price": 1099,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/iPad/iPadPro13.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "iPad Air",
 			"price": 599,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/iPad/iPadAir.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "iPad Mini",
 			"price": 499,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/iPad/iPadMini.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "iPad (10th generation)",
 			"price": 449,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/iPad/iPad2022.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "iPad (9th generation)",
 			"price": 329,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/iPad/iPad2021.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		}
 	],
 	"Mac": [
@@ -93,42 +117,54 @@
 			"price": 1999,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/Mac/MacbookPro14.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "Macbook Pro (16-inch)",
 			"price": 2499,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/Mac/MacbookPro16.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "Macbook Pro (13-inch)",
 			"price": 1299,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/Mac/MacbookPro13.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "Macbook Air (2022)",
 			"price": 1199,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/Mac/MacbookAir2022.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "Macbook Air (2021)",
 			"price": 999,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/Mac/MacbookAir2021.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		},
 		{
 			"name": "iMac (24-inch)",
 			"price": 1299,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/Mac/iMac24.png",
 			"quantity_available": 50,
-			"quantity_sold": 0
+			"quantity_sold": 0,
+			"rating": 4,
+			"reviewers": 2
 		}
 	]
 }
