@@ -76,8 +76,6 @@ Desc: This html page pulls data from a separate products file (products.json) an
 				totalItems = Number(totalItems)+cart_info[series].reduce((a, b) => Number(a) + Number(b)); // adds the quantities so this can be used to display # of items in cart                
 			}
 			}
-			
-		
 			});
 
 		loadJSON("get_products_data", function (response) {
