@@ -40,6 +40,8 @@ Desc: This html page pulls data from a separate products file (products.json) an
 		></script>
 		<!-- loading in user data from user_registration_info.json -->
 		<script src="./functions.js"></script>
+
+		<!-- Code modified from Assignment 3 Examples by Dan Port -->        
 		<style>
 			/* Remove the navbar's default rounded borders and increase the bottom margin */
 			.navbar {
@@ -64,6 +66,20 @@ Desc: This html page pulls data from a separate products file (products.json) an
 	
 
 	<script>
+      
+		// Code modified from Assignment 3 Examples by Dan Port    
+		loadJSON('get_cart', function (response) {
+			if (typeof JSON.parse(response) != "undefined"){
+				cart_info = JSON.parse(response);
+				totalItems = "";
+				for (series in cart_info) {
+				totalItems = Number(totalItems)+cart_info[series].reduce((a, b) => Number(a) + Number(b)); // adds the quantities so this can be used to display # of items in cart                
+			}
+			}
+			
+		
+			});
+
 		loadJSON("get_products_data", function (response) {
 			// Parsing JSON string into object
 			products = JSON.parse(response);
@@ -293,7 +309,11 @@ Desc: This html page pulls data from a separate products file (products.json) an
 					<li>
 						<a href="./cart"
 							>&emsp;<span class="glyphicon glyphicon-shopping-cart"></span
-							>&emsp;Cart&emsp;</a
+							>&emsp;Cart (<script>if (typeof totalItems != "undefined") {
+								document.write(totalItems)
+							} else {
+								document.write(`0`)
+							};</script>)&emsp;</a
 						>
 					</li>
 				</ul>

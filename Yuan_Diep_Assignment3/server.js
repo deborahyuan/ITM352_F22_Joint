@@ -25,7 +25,7 @@ app.use("/css", express.static(__dirname + "/public")); // calls css for everyth
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
-	session({ secret: "MySecretKey", resave: true, saveUninitialized: true })
+	session({ secret: "ihateassignment3", resave: true, saveUninitialized: true })
 );
 // Code modified from https://stackoverflow.com/questions/60369148/how-do-i-replace-deprecated-crypto-createcipher-in-node-js#:~:text=according%20to%20the%20deprecation%20docs,salt)%20and%20static%20initialization%20vectors and https://stackoverflow.com/questions/51280576/trying-to-add-data-in-unsupported-state-at-cipher-update
 
@@ -82,6 +82,8 @@ if (fs.existsSync(actname)) {
 }
 var regErrors = {}; // empty error object for errors in edit account and register pages
 
+var totalItems = 0;
+
 /* FUNCTIONS */
 
 // date function
@@ -129,6 +131,11 @@ function isNonNegativeInteger(queryString, returnErrors = false) {
 	}
 }
 
+// REQUIREMENT: get cart item count from sessions
+app.post("/get_cart", function (request, response) {
+	response.json(request.session.cart);
+});
+
 // TAKEN FROM ASSIGNMENT 3 SAMPLE CODE
 app.post("/get_products_data", function (request, response) {
 	response.json(products_data);
@@ -147,20 +154,49 @@ app.all("*", function (request, response, next) {
 });
 
 app.get("/products_display", function (request, response) {
+	let params = new URLSearchParams(request.query);
+	console.log("HERE " + params);
+
+	// IR1: maintain the last product page visited
+	if (params.has(`series`) && params.get(`series`) == `iPhone`) {
+		request.session.lastPageVisited = "products_display?series=iPhone";
+		console.log("#1" + request.session.lastPageVisited);
+	} else if (params.has(`series`) && params.get(`series`) == `iPad`) {
+		request.session.lastPageVisited = "products_display?series=iPad";
+		console.log("#2" + request.session.lastPageVisited);
+	} else if (params.has(`series`) && params.get(`series`) == `Mac`) {
+		request.session.lastPageVisited = "products_display?series=Mac";
+		console.log("#3" + request.session.lastPageVisited);
+	} else {
+		request.session.lastPageVisited = "products_display";
+		console.log("#4" + request.session.lastPageVisited);
+	}
+
 	if (
 		typeof request.session.invoice != "undefined" ||
 		request.session.invoice == true
 	) {
 		request.session.destroy(); // ends session
 	}
-	// gets products_display.html using the server through sendFile
-	let params = new URLSearchParams(request.query);
-	console.log(params);
+
 	response.sendFile(proddisplay);
 });
 
 // GOES TO INDEX
 app.get("/", function (request, response) {
+	if (
+		typeof request.session.invoice != "undefined" ||
+		request.session.invoice == true
+	) {
+		request.session.destroy(); // ends session
+	}
+	if (
+		typeof request.cookies["activeuser"] != "undefined" &&
+		typeof request.session.lastPageVisited != "undefined"
+	) {
+		// IR1: if the cookie exists, take user (must be logged in) to last page visited if they leave the site and come back
+		response.redirect(request.session.lastPageVisited);
+	}
 	// gets products_display.html using the server through sendFile
 	let params = new URLSearchParams(request.query);
 	console.log(params);
@@ -173,6 +209,13 @@ app.get("/index", function (request, response) {
 		request.session.invoice == true
 	) {
 		request.session.destroy(); // ends session
+	}
+	if (
+		typeof request.cookies["activeuser"] != "undefined" &&
+		typeof request.session.lastPageVisited != "undefined"
+	) {
+		// IR1: if the cookie exists, take user (must be logged in) to last page visited if they leave the site and come back
+		response.redirect(request.session.lastPageVisited);
 	}
 	// gets products_display.html using the server through sendFile
 	let params = new URLSearchParams(request.query);
@@ -344,6 +387,7 @@ app.post("/addtocart", function (request, response) {
 			// if shoppingCart session doesn't exist, then make a session object called shoppingCart
 			request.session.cart = {};
 			request.session.cart[series] = customerquantities;
+
 			console.log("CARTSERIES=" + request.session.cart[series]);
 			console.log("sessioncartinfo=" + request.session.cart);
 			for (let i in customerquantities) {
@@ -362,6 +406,7 @@ app.post("/addtocart", function (request, response) {
 					request.session.cart[series][i] =
 						Number(request.session.cart[series][i]) +
 						Number(customerquantities[i]);
+
 					console.log(
 						"request.session.cart" +
 							series +
@@ -371,6 +416,12 @@ app.post("/addtocart", function (request, response) {
 					);
 				}
 			}
+		}
+		totalItems = 0;
+		for (series in request.session.cart) {
+			totalItems =
+				Number(totalItems) +
+				request.session.cart[series].reduce((a, b) => Number(a) + Number(b)); // adds the quantities so this can be used to display # of items in cart
 		}
 		shoppingCart = request.session.cart; //sync Cart
 		response.redirect("products_display?" + "series=" + series);
@@ -532,7 +583,7 @@ app.get("/login", function (request, response) {
 	if (typeof request.cookies["activeuser"] != "undefined") {
 		response.redirect("./products_display");
 	} else {
-		response.send(`
+		response.write(`
 	<!-- 
 		Login Page for Assignment3
 		Author: Deborah Yuan & Evon Diep
@@ -643,7 +694,8 @@ app.get("/login", function (request, response) {
 		<li class="active"><a href="./login">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;Login&emsp;</a></li>
 		</ul>
 		<ul class="nav navbar-nav">
-		 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart&emsp;</a></li>
+		 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
+		 
 		  </ul>
 		</ul> 
 	  </div>
@@ -689,6 +741,7 @@ app.get("/login", function (request, response) {
 </form><BR>
 	
 </html>`);
+		response.end();
 	}
 });
 
@@ -733,7 +786,12 @@ app.post("/login", function (request, response) {
 			let actdata = JSON.stringify(actusers); // rewrites active user file
 			fs.writeFileSync(fname, data, "utf-8"); // syncs user reg. file
 			fs.writeFileSync(actname, actdata, "utf-8"); // syncs active user file
-			response.redirect("loginsuccess"); //
+			if (typeof request.session.lastPageVisited != "undefined") {
+				//IR 1: redirect to last page visited after logging in
+				response.redirect(request.session.lastPageVisited);
+			} else {
+				response.redirect("/products_display"); // IR1: if products display hasn't been visited before, then redirect them to products_display
+			}
 		} else {
 			// if the password was incorrect, then keep the user on the login page, with their inputted username kept as a sticky
 			response.redirect(
@@ -890,7 +948,7 @@ app.get("/loginsuccess", function (request, response) {
 		response.write(`
 			</ul>
 			<ul class="nav navbar-nav">
-			 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart &emsp;</a></li>
+			 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
 			  </ul>
 			</ul> 
 		  </div>
@@ -940,7 +998,10 @@ app.get("/cart", function (request, response) {
 	) {
 		active_user = request.cookies["activeuser"];
 	}
-	if (typeof active_user != "undefined") {
+	if (
+		typeof active_user != "undefined" &&
+		request.cookies["activeuser"] != ""
+	) {
 		usernameCart = users[active_user].fullname + "'s";
 	} else {
 		usernameCart = "Your";
@@ -1049,7 +1110,7 @@ app.get("/cart", function (request, response) {
 	response.write(`
 		  </ul>
 		  <ul class="nav navbar-nav">
-		   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart &emsp;</a></li>
+		   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
 			</ul>
 		  </ul> 
 		</div>
@@ -1442,6 +1503,13 @@ app.post("/recalculatecart", function (request, response, next) {
 			console.log("REQBOD=" + request.session.cart[series]);
 		}
 	}
+
+	totalItems = 0;
+	for (series in request.session.cart) {
+		totalItems =
+			Number(totalItems) +
+			request.session.cart[series].reduce((a, b) => Number(a) + Number(b)); // adds the quantities so this can be used to display # of items in cart
+	}
 	console.log(request.session);
 	response.redirect("./cart");
 });
@@ -1453,7 +1521,143 @@ app.post("/toinvoice", function (request, response, next) {
 	) {
 		active_user = request.cookies["activeuser"];
 	}
+	// Modified code from Assignment 3 Examples (Dan Port)
+	var invoice_str = `Thank you ${users[active_user].fullname} for your order!
 
+	<BR>
+	
+<table border>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>Quantity</th>
+  <th>Cost of Item</th>
+  <th>Extended Price</th>
+  </tr>
+</thead>`;
+
+	// Compute subtotal
+	var subtotal = 0;
+
+	// Compute shipping
+	var shipping;
+
+	var shopping_cart = request.session.cart;
+	for (series in products_data) {
+		for (i = 0; i < products_data[series].length; i++) {
+			if (typeof shopping_cart[series] == "undefined") continue;
+			qty = shopping_cart[series][i];
+			if (qty > 0) {
+				invoice_str += `
+			<tr>
+	  <td>${products_data[series][i].name}</td>
+	  <td align="center">${qty}</td>
+	  <td align="center">$${products_data[series][i].price.toFixed(2)}</td>
+	  <td>$${qty * products_data[series][i].price.toFixed(2)}</td>
+	</tr>
+	`;
+				subtotal += qty * products_data[series][i].price;
+				console.log("ello " + typeof subtotal);
+			}
+		}
+	}
+
+	if (subtotal < 1000) {
+		shipping = 5;
+	} else if (subtotal >= 1000 && subtotal < 1500) {
+		shipping = 10;
+	} else if (subtotal >= 1500) {
+		shipping = subtotal * 0.02;
+	}
+
+	// Compute tax
+	var tax_rate = 0.0475;
+	var tax = tax_rate * subtotal;
+
+	for (let i in quantities) {
+		if (quantities[i] == 0) {
+			// if quantities = 0, then skip the row
+			continue;
+		} else {
+			let extended_price = quantities[i] * products[i].price;
+		}
+	}
+
+	// Compute grand total
+	var total = tax + subtotal + shipping;
+
+	invoice_str += `
+
+<tr>
+<td colspan="5" width="100%">&nbsp;</td>
+</tr>
+<tr>
+<td style="text-align: right;" colspan="4" width="67%">Sub-total</td>
+<td width="54%">$
+${subtotal.toFixed(2)}
+</td>
+</tr>
+<tr>
+<td style="text-align: right;" colspan="4" width="67%">Tax @ 4.75%</span></td>
+<td width="54%">$
+${tax.toFixed(2)}
+</td>
+</tr>
+<tr>
+<td style="text-align: right;" colspan="4" width="67%">Shipping</td>
+<td width="54%">$
+${shipping.toFixed(2)}
+</td>
+</tr>
+<tr>
+<td style="text-align: right;" colspan="4" width="67%"><strong>Total</strong></td>
+<td width="54%"><strong>$
+${total.toFixed(2)}
+</strong></td>
+
+<tr>
+<td style="text-align: center;" colspan="5" width="100%">
+<b> <!-- shipping policy info -->
+Shipping Policy:
+<BR>
+Orders with subtotals of $0 - $999.99 will be charged $5 for shipping.
+<BR>
+Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
+<BR>Orders with subtotals of $1500 and over will be charged 2% of the subtotal amount.</b>
+</td>
+</tr>
+`;
+
+	invoice_str += "</table>";
+	// send invoice as email
+	// Set up mail server
+	var transporter = nodemailer.createTransport({
+		service: "gmail",
+		auth: {
+			user: "evondebitm352@gmail.com",
+			pass: "gtbxyhzujipcpnla",
+		},
+	});
+
+	var user_email = request.cookies["activeuser"];
+	var mailOptions = {
+		from: "phoney_store@bogus.com", // change or leave this email to something related to our store?
+		to: user_email,
+		subject: "Thank you for your purchase!",
+		html: invoice_str,
+	};
+
+	var errorMsg = "";
+
+	transporter.sendMail(mailOptions, function (error, info) {
+		if (error) {
+			return console.log(error);
+		}
+		console.log("Message sent: %s", info.messageId);
+		console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+
+		response.redirect("/goodbye");
+	});
 	response.write(`
 <!DOCTYPE html>
 <html lang="en">
@@ -1547,7 +1751,7 @@ footer {
 	<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
 	  </ul>
 	  <ul class="nav navbar-nav">
-	   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart &emsp;</a></li>
+	   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
 		</ul>
 	  </ul> 
 	</div>
@@ -1590,7 +1794,7 @@ behavior: "smooth"
 </script>
 
 <h1 class="invoiceheader" style="text-align: center">${users[active_user].fullname}'s Invoice</h1>
-<h2 style="text-align: center">A copy of the email has been sent to ${users[active_user].username}!</h2>
+<h2 style="text-align: center">A copy of the Invoice has been sent to ${users[active_user].username}!</h2>
 <BR>
   <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
 	<tbody>
@@ -1716,6 +1920,7 @@ behavior: "smooth"
 </body>
 </script>
 </html>`);
+	totalItems = 0;
 	products = products_data;
 	let proddata = JSON.stringify(products);
 	fs.writeFileSync(prodname, proddata, "utf-8");
@@ -1828,7 +2033,7 @@ app.get("/toreview", function (request, response) {
 		<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
 		  </ul>
 		  <ul class="nav navbar-nav">
-		   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart &emsp;</a></li>
+		   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
 			</ul>
 		  </ul> 
 		</div>
@@ -2092,7 +2297,7 @@ app.get("/editaccount", function (request, response) {
 		<li class="active"><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
 		</ul>
 		<ul class="nav navbar-nav">
-		 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart &emsp;</a></li>
+		 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
 		  </ul>
 		</ul> 
 	  </div>
@@ -2576,7 +2781,12 @@ app.post("/register", function (request, response) {
 		fs.writeFileSync(fname, data, "utf-8");
 		fs.writeFileSync(actname, actdata, "utf-8");
 
-		response.redirect("./loginsuccess");
+		if (typeof request.session.lastPageVisited != "undefined") {
+			//IR 1: redirect to last page visited after logging in
+			response.redirect(request.session.lastPageVisited);
+		} else {
+			response.redirect("/products_display"); // IR1: if products display hasn't been visited before, then redirect them to products_display
+		}
 	} else {
 		response.redirect(
 			"./register?" +
@@ -2883,7 +3093,7 @@ app.get("/logout", function (request, response) {
 	ordered = "";
 	users[active_user].loginstatus = false;
 	delete actusers[active_user];
-	response.clearCookie(["active_user"]);
+	response.clearCookie(["activeuser"]);
 	active_user = null;
 	// CHANGE LAST PAGE VISITED IN SESSIONS TO HOMEPAGE
 	let data = JSON.stringify(users);

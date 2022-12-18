@@ -28,6 +28,13 @@ Desc: This html page serves as a landing page for a user visiting the site. It f
   <link href="products-style.css" rel="stylesheet">
   <script src="../user_registration_info.json" type="application/json
   "></script> <!-- loading in user data from user_registration_info.json -->
+
+
+		<!-- loading in user data from user_registration_info.json -->
+		<script src="./functions.js"></script>
+		<!-- Code modified from Assignment 3 Examples by Dan Port -->        
+
+
   <style>
     /* Remove the navbar's default rounded borders and increase the bottom margin */
     .navbar {
@@ -48,6 +55,17 @@ Desc: This html page serves as a landing page for a user visiting the site. It f
 </head>
 
 <script>
+		// Code modified from Assignment 3 Examples by Dan Port    
+		loadJSON('get_cart', function (response) {
+			if (typeof JSON.parse(response) != "undefined"){
+				cart_info = JSON.parse(response);
+				totalItems = "";
+				for (series in cart_info) {
+				totalItems = Number(totalItems)+cart_info[series].reduce((a, b) => Number(a) + Number(b)); // adds the quantities so this can be used to display # of items in cart                
+			}
+			}
+    })
+
       if (typeof document.cookie != "undefined" && document.cookie!= "") {
 					active_user = document.cookie;
 				}
@@ -100,7 +118,14 @@ Desc: This html page serves as a landing page for a user visiting the site. It f
     </ul>
     <ul class="nav navbar-nav">
       <!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
-     <li ><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart&emsp;</a></li>
+     <li ><a href="./cart"
+      >&emsp;<span class="glyphicon glyphicon-shopping-cart"></span
+      >&emsp;Cart (<script>if (typeof totalItems != "undefined") {
+        document.write(totalItems)
+      } else {
+        document.write(`0`)
+      };</script>)&emsp;</a
+    ></li>
       </ul>
     </ul> 
   </div>
