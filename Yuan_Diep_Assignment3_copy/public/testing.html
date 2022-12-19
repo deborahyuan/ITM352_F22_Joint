@@ -1,0 +1,43 @@
+<div class="converter">
+	<div class="converter-row">
+		<label>Multiplied by:</label>
+		<input class="iPhone1" type="number" value="0" />
+	</div>
+
+	<div class="converter-row">
+		<label>Multiplied by:</label>
+		<input
+			class="iPhone_Price1"
+			type="number"
+			value="234"
+			style="
+				border-top-style: hidden;
+				border-right-style: hidden;
+				border-left-style: hidden;
+				border-bottom-style: hidden;
+				background-color: rgba(255, 255, 255, 0);
+				outline: none;
+			"
+			readonly
+		/>
+	</div>
+
+	<div class="converter-row">
+		<p>Equals: <span class="extendedprice">0</span></p>
+	</div>
+</div>
+
+<script>
+	const iPhone1 = document.querySelector(".iPhone1");
+	const Price1 = document.querySelector(".iPhone_Price1");
+	const extendedPriceiPhone1 = document.querySelector(".extendedprice");
+
+	iPhone1.addEventListener("input", recalculate);
+
+	function recalculate() {
+		if (Number(iPhone1.value) * Number(Price1.value) >= 10000) {
+			extendedPriceiPhone1.innerText =
+				Number(iPhone1.value) * Number(Price1.value);
+		}
+	}
+</script>
