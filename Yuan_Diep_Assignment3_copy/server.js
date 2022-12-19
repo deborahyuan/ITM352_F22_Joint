@@ -1,8 +1,8 @@
 /* 
 Server for Assignment3
 Author: Deborah Yuan & Evon Diep
-Date: 11/18/22
-Desc: This server, server.js, provides validation for the data submitted by the form on products display, responding with the appropriate response depending on whether the quantities inputted are valid or invalid. In case of valid quantities, the user will be sent to the login. With invalid quantities, the user will be sent an error and be returned to the products display page. This server also contains almost all the pages for this Assignment, minus the index, invoice, and products display.
+Date: 12/18/22
+Desc: This server, server.js, provides validation for the data submitted by the form on products display, responding with the appropriate response depending on whether the quantities inputted are valid or invalid. In case of valid quantities, the user will be sent to the login. With invalid quantities, the user will be sent an error and be returned to the products display page. This server also contains almost all the pages for this Assignment. The products display html and other htmls are routed through our server, so it's not apparent that we have html filed.
 */
 
 var express = require("express"); // requires node's express
@@ -967,7 +967,7 @@ app.get("/loginsuccess", function (request, response) {
 	<input type="submit" value='Edit Account Information      ' id="button"; class="button" style="min-width: 20%"></input>
 	</form>
 	<form name='gotoinvoice' action='/cart' method="GET">
-	<input type="submit" value='Go To Invoice      ' id="button2"; class="button" style="min-width: 20%"></input>
+	<input type="submit" value='Go To Cart      ' id="button2"; class="button" style="min-width: 20%"></input>
 	</form>
 	<form name='logoutbutton' action='/logout' method="GET">
 	<input type="submit" value='Logout       ' id="button3"; class="button" style="min-width: 20%"></input>

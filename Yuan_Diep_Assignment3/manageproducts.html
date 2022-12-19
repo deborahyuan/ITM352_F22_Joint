@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <!-- 
-Invoice for Assignment3
+Manage Products for Assignment3
 Author: Deborah Yuan
-Date: 11/14/22
-Desc: This html page produces an cart for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+Date: 12/18/22
+Desc: This html page is exclusively accessible to those with admin status. Here, they can manage products.
 -->
 
 <!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
@@ -54,6 +54,12 @@ footer {
 </style>
 
 <script>
+
+if (typeof getCookie("activeuser") != "undefined") {
+		if (getCookie("activeuser") != "") {
+		active_user = getCookie("activeuser")
+				}}
+
     // HEAVILY MODIFIED, inspired by emkey08's response (https://stackoverflow.com/questions/469357/html-text-input-allow-only-numeric-input)
 function setProductInputFilter(textbox, inputFilter) {
 	["focusout", "blur"].forEach(function (event) {
@@ -102,6 +108,49 @@ function setProductInputFilter(textbox, inputFilter) {
 		});
 	});
 }
+
+ // HEAVILY MODIFIED, inspired by emkey08's response (https://stackoverflow.com/questions/469357/html-text-input-allow-only-numeric-input)
+ function setPriceInputFilter(textbox, inputFilter) {
+	["focusout", "blur"].forEach(function (event) {
+		textbox.addEventListener(event, function (e) {
+			this.setCustomValidity("");
+		});
+	});
+	[
+		"input",
+		"keydown",
+		"keyup",
+		"mousedown",
+		"mouseup",
+		"change",
+		"contextmenu",
+		"drop",
+		"focusin",
+	].forEach(function (event) {
+		textbox.addEventListener(event, function (e) {
+			if (inputFilter(this.value) || this.value == "") {
+				// Accepted value
+				if (["onclick", "keydown", "mousedown", "keyup"].indexOf(e.type) >= 0) {
+					this.classList.remove("input-error");
+					this.setCustomValidity("");
+				}
+				this.oldValue = this.value;
+			} else if (this.hasOwnProperty("oldValue")) {
+				// Rejected value
+				this.classList.add("input-error");
+				if (/^\d*(\.\d{0,2})?$/.test(this.value) == false) {
+					// must be a number
+					errMsg = "Not a valid price!";
+				}  else {
+					errMsg = "";
+					this.classList.remove("input-error");
+				}
+				this.setCustomValidity(errMsg);
+				this.reportValidity();
+			}
+		});
+	});
+}
 </script>
 
 </head>
@@ -123,11 +172,15 @@ loadJSON("get_products_data", function (response) {
 			// Parsing JSON string into object
 			products = JSON.parse(response);
 		});
+
+loadJSON("get_user_data", function (response) {
+			// Parsing JSON string into object
+			userdata = JSON.parse(response);
+		});
 </script>
 <body>
   <main>
 
-  <!-- navigation bar from w3 schools -->
 	<!-- navigation bar from w3 schools -->
 	<nav class="navbar navbar-inverse">
 		<div class="container-fluid">
@@ -156,48 +209,23 @@ loadJSON("get_products_data", function (response) {
 			</ul>
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
-				<script>
-					if (typeof series != "undefined" && series == "iPhone") {
-						document.write(
-							`<li class="active" id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>`
-						);
-					} else {
-						document.write(
-							`<li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>`
-						);
-					}
-				</script>
+							<li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>
 			</ul>
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
-				<script>
-					if (typeof series != "undefined" && series == "iPad") {
-						document.write(`
-      <li class="active" id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>`);
-					} else {
-						document.write(`
-      <li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>`);
-					}
-				</script>
+
+      <li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>
 			</ul>
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
-				<script>
-					if (typeof series != "undefined" && series == "Mac") {
-						document.write(`
-      <li class="active" id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>`);
-					} else {
-						document.write(`
-          <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>`);
-					}
-				</script>
+          <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>;
 			</ul>
 			<script>
 				if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
 					document.write(`
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
-      <li id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
+      <li class="active" id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
 	</ul>`);
 					}
 				if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
@@ -213,7 +241,7 @@ loadJSON("get_products_data", function (response) {
 					<script>
 						if (typeof active_user != "undefined") {
 							document.write(
-								`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+								`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;${userdata[active_user].fullname}&emsp;</a></li>`
 							);
 						} else {
 							document.write(
@@ -317,7 +345,7 @@ if (params.has(`series`)) {
 		<th>Item Name</th>
 		<th>Current Stock</th>
         <th>Quantity Sold</th>
-		<th>Cost of Item</th>
+		<th>Cost of Item ($)</th>
 	  </tr>
 	</thead>
 <form name='manage_products_form' action="/manageproducts" method="POST">
@@ -334,12 +362,13 @@ for (i in products_S) {
 <td align="center"><img src="${
     products_S[i].image
 				}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
-<td>${products_S[i].name}</td>
+<td><input type="text" name='manageproducts_name_${series}+${i}' id ='manageproducts_name_${series}+${i}' value="${products_S[i].name}"></input></td>
 <td align="center"><input type="number" name='manageproducts_quantAvail_${series}+${i}' id ='manageproducts_quantAvail_${series}+${i}' min="0"
 					)}" step="1" value="${products_S[i].quantity_available}""></input></td>
 <td align="center"><input type="number" name='manageproducts_quantSold_${series}+${i}' id ='manageproducts_quantSold_${series}+${i}' min="0"
-					)}" step="1"></input></td>
-<td align="left">$${products_S[i].price.toFixed(2)}</td>
+					)}" step="1" value="${products_S[i].quantity_sold}"></input></td>
+<td align="left"><input type="number" name='manageproducts_price_${series}+${i}' id ='manageproducts_price_${series}+${i}' min="0"
+					)}" step=".01" value="${products_S[i].price}"></input></td>
 </tr>`)
 
 setProductInputFilter(document.getElementById('manageproducts_quantAvail_'+series+'+'+i), 
@@ -359,30 +388,55 @@ return true;
 }
 }, 
 Number(products_S[i].quantity_available))
-}}
-</script>
-	  <!-- table formatting, with some inline css -->
-	  <tr>
+
+setProductInputFilter(document.getElementById('manageproducts_quantSold_'+series+'+'+i), 
+function (value) {
+if (/^(\s*|\d+)$/
+.test(value) == false) {
+// must be a number
+return /^(\s*|\d+)$/.test(value);
+} else if (/^-?\d*$/.test(value) == false) {
+// must be an integer
+return /^-?\d*$/.test(value);
+} else if (/^\d*$/.test(value) == false) {
+// must be a non negative integer
+return /^\d*$/.test(value);
+} else {
+return true;
+}
+})
+
+setPriceInputFilter(document.getElementById('manageproducts_price_'+series+'+'+i), 
+function (value) {
+if (/^\d*(\.\d{0,2})?$/
+.test(value) == false) {
+// must be a number
+return /^\d*(\.\d{0,2})?$/.test(value);
+} else {
+return true;
+}
+})
+}
+
+
+
+
+document.write(`
+<tr>
 		<td style="text-align: center;" colspan="5" width="100%">
 	  <input type="submit" value='   Update' id="button2"; class="button" style="min-width: 20%"></input>
 	  </form>
 	   </td>
-	  </tr>
-	  <tr>
-	  </tr>
+	  </tr>`)
+}
+
+
+
+
+
+</script>
 	</tbody>
   </table>
 </main>
 </body>
-<script>
-    // CURRENT STOCK STICKY
-    if (typeof series != "undefined") {
-            products_S = products[series];
-            for (i in products_S) {
-					document.write(`
-                    manage_products_form["manageproducts_quantAvail_${series}+${i}"].value = ${products_S[i].quantity_available}
-		`);
-				}
-			}
-</script>
 </html>

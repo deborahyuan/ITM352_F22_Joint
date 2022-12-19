@@ -66,9 +66,11 @@ Desc: This html page serves as a landing page for a user visiting the site. It f
     }
   })
 
-  if (typeof document.cookie != "undefined" && document.cookie != "") {
-    active_user = document.cookie;
-  }
+  if (typeof getCookie("activeuser") != "undefined") {
+		if (getCookie("activeuser") != "") {
+		active_user = getCookie("activeuser")
+				}}
+	
 </script>
 
 

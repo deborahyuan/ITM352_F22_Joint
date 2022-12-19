@@ -292,3 +292,35 @@ h2.underlinecss:hover:after {
 	font-weight: 900;
 	color: #f8ce0b;
 }
+
+/* DROPDOWN ON MANAGE PRODUCTS CSS // MODIFIED FROM (https://blog.hubspot.com/website/html-dropdown)*/
+
+.dropdown-outer {
+	display: flex;
+	justify-content: center;
+}
+
+.dropdown {
+	display: inline-block;
+	position: relative;
+}
+.dropdown-content {
+	display: none;
+	position: relative;
+	width: 100%;
+	overflow: auto;
+	box-shadow: 0px 10px 10px 0px rgba(0, 0, 0, 0.4);
+}
+.dropdown:hover .dropdown-content {
+	display: block;
+}
+.dropdown-content a {
+	display: block;
+	color: #000000;
+	padding: 5px;
+	text-decoration: none;
+}
+.dropdown-content a:hover {
+	color: #ffffff;
+	background-color: #00a4bd;
+}
