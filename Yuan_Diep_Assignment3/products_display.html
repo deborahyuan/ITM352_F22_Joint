@@ -294,7 +294,7 @@ Desc: This html page pulls data from a separate products file (products.json) an
 					<script>
 						if (typeof active_user != "undefined") {
 							document.write(
-								`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+								`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;${userdata[active_user].fullname}&emsp;</a></li>`
 							);
 						} else {
 							document.write(

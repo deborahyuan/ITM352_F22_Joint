@@ -24,15 +24,15 @@ Desc: This html page serves as a landing page for a user visiting the site. It f
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
 
-   <!-- my own stylesheet (products-style.css) -->
+  <!-- my own stylesheet (products-style.css) -->
   <link href="products-style.css" rel="stylesheet">
   <script src="../user_registration_info.json" type="application/json
   "></script> <!-- loading in user data from user_registration_info.json -->
 
 
-		<!-- loading in user data from user_registration_info.json -->
-		<script src="./functions.js"></script>
-		<!-- Code modified from Assignment 3 Examples by Dan Port -->        
+  <!-- loading in user data from user_registration_info.json -->
+  <script src="./functions.js"></script>
+  <!-- Code modified from Assignment 3 Examples by Dan Port -->
 
 
   <style>
@@ -55,106 +55,107 @@ Desc: This html page serves as a landing page for a user visiting the site. It f
 </head>
 
 <script>
-		// Code modified from Assignment 3 Examples by Dan Port    
-		loadJSON('get_cart', function (response) {
-			if (typeof JSON.parse(response) != "undefined"){
-				cart_info = JSON.parse(response);
-				totalItems = "";
-				for (series in cart_info) {
-				totalItems = Number(totalItems)+cart_info[series].reduce((a, b) => Number(a) + Number(b)); // adds the quantities so this can be used to display # of items in cart                
-			}
-			}
-    })
+  // Code modified from Assignment 3 Examples by Dan Port    
+  loadJSON('get_cart', function (response) {
+    if (typeof JSON.parse(response) != "undefined") {
+      cart_info = JSON.parse(response);
+      totalItems = "";
+      for (series in cart_info) {
+        totalItems = Number(totalItems) + cart_info[series].reduce((a, b) => Number(a) + Number(b)); // adds the quantities so this can be used to display # of items in cart                
+      }
+    }
+  })
 
-      if (typeof document.cookie != "undefined" && document.cookie!= "") {
-					active_user = document.cookie;
-				}
+  if (typeof document.cookie != "undefined" && document.cookie != "") {
+    active_user = document.cookie;
+  }
 </script>
 
 
 
- <!-- navigation bar from w3 schools -->
-<nav class="navbar navbar-inverse">  
+<!-- navigation bar from w3 schools -->
+<nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
-    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand" href="#">
-       <!-- corner navbar Apple icon -->
-      <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">
+        <!-- corner navbar Apple icon -->
+        <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png"
+          width="20" alt=""></a>
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
-    <ul class="nav navbar-nav">
-      <li id="hometab"><a href="./products_display">Home</a></li>
-    </ul>
-    <ul class="nav navbar-nav">
-      <!-- clicking this 'tab' leads to products display -->
-      <li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>
-    </ul>
-    <ul class="nav navbar-nav">
-      <!-- clicking this 'tab' leads to products display -->
-      <li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>
-    </ul>
-    <ul class="nav navbar-nav">
-      <!-- clicking this 'tab' leads to products display -->
-      <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
-    </ul>
-    <ul class="nav navbar-nav navbar-right">
-    <ul class="nav navbar-nav">
-      <script>
-        if (typeof active_user != "undefined") {
-          document.write(
-            `<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
-          );
-        } else {
-          document.write(
-            `<li><a href="./login">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;Login&emsp;</a></li>`
-          );
-        }
-        </script>
-    </ul>
-    <ul class="nav navbar-nav">
-      <!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
-     <li ><a href="./cart"
-      >&emsp;<span class="glyphicon glyphicon-shopping-cart"></span
-      >&emsp;Cart (<script>if (typeof totalItems != "undefined") {
-        document.write(totalItems)
-      } else {
-        document.write(`0`)
-      };</script>)&emsp;</a
-    ></li>
+      <ul class="nav navbar-nav">
+        <li id="hometab"><a href="./products_display">Home</a></li>
       </ul>
-    </ul> 
-  </div>
-  </nav>
+      <ul class="nav navbar-nav">
+        <!-- clicking this 'tab' leads to products display -->
+        <li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>
+      </ul>
+      <ul class="nav navbar-nav">
+        <!-- clicking this 'tab' leads to products display -->
+        <li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>
+      </ul>
+      <ul class="nav navbar-nav">
+        <!-- clicking this 'tab' leads to products display -->
+        <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <ul class="nav navbar-nav">
+          <script>
+            if (typeof active_user != "undefined") {
+              document.write(
+                `<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+              );
+            } else {
+              document.write(
+                `<li><a href="./login">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;Login&emsp;</a></li>`
+              );
+            }
+          </script>
+        </ul>
+        <ul class="nav navbar-nav">
+          <!-- click the text to redirect to edit account page, learned from (https://stackoverflow.com/questions/23672139/how-to-submit-a-form-by-clicking-a-link-javascript) -->
+          <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (
+              <script>if (typeof totalItems != "undefined") {
+                  document.write(totalItems)
+                } else {
+                  document.write(`0`)
+                };</script>)&emsp;
+            </a></li>
+        </ul>
+      </ul>
+    </div>
+</nav>
 <main>
 
-<!-- The video, pulled from the iPhone 14 Pro page on apple.com, learned about setting a video as a background from w3 schools -->
-<video autoplay muted loop id="myVideo">
-  <source src="https://www.apple.com/105/media/us/iphone-14-pro/2022/a3e991f3-071e-454c-b714-1b2319bb97a8/anim/hero/medium_2x.mp4#t=5" type="video/mp4">
-</video>
+  <!-- The video, pulled from the iPhone 14 Pro page on apple.com, learned about setting a video as a background from w3 schools -->
+  <video autoplay muted loop id="myVideo">
+    <source
+      src="https://www.apple.com/105/media/us/iphone-14-pro/2022/a3e991f3-071e-454c-b714-1b2319bb97a8/anim/hero/medium_2x.mp4#t=5"
+      type="video/mp4">
+  </video>
 
 
-<!-- Store description -->
-<div class="content">
-  <h1>Think Different</h1><BR>
+  <!-- Store description -->
+  <div class="content">
+    <h1>Think Different</h1><BR>
 
-<!-- Button that leads to products display -->
-<form action="/products_display">
-    <input type="submit" id="myBtn" value='Enter' style="font-size:large"></button>
-</form>
-</div>
+    <!-- Button that leads to products display -->
+    <form action="/products_display">
+      <input type="submit" id="myBtn" value='Enter' style="font-size:large"></button>
+    </form>
+  </div>
 
 </main>
 
 <footer class="container-fluid text-center"> <!-- footer -->
 
 </footer>
-  
+
 </body>
-  
+
 </html>
-  

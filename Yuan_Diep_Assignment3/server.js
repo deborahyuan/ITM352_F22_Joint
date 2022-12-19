@@ -153,6 +153,7 @@ app.all("*", function (request, response, next) {
 	next();
 });
 
+// Gets all products_display for each series and maintains last visited in sessions
 app.get("/products_display", function (request, response) {
 	let params = new URLSearchParams(request.query);
 	console.log("HERE " + params);
@@ -178,7 +179,7 @@ app.get("/products_display", function (request, response) {
 	) {
 		request.session.destroy(); // ends session
 	}
-
+	// gets products_display.html using the server through sendFile
 	response.sendFile(proddisplay);
 });
 
@@ -197,7 +198,7 @@ app.get("/", function (request, response) {
 		// IR1: if the cookie exists, take user (must be logged in) to last page visited if they leave the site and come back
 		response.redirect(request.session.lastPageVisited);
 	}
-	// gets products_display.html using the server through sendFile
+	// gets index using the server through sendFile
 	let params = new URLSearchParams(request.query);
 	console.log(params);
 	response.sendFile(index);
@@ -217,7 +218,7 @@ app.get("/index", function (request, response) {
 		// IR1: if the cookie exists, take user (must be logged in) to last page visited if they leave the site and come back
 		response.redirect(request.session.lastPageVisited);
 	}
-	// gets products_display.html using the server through sendFile
+	// gets index using the server through sendFile
 	let params = new URLSearchParams(request.query);
 	console.log(params);
 	response.sendFile(index);
@@ -337,43 +338,43 @@ app.post("/addtocart", function (request, response) {
 			console.log(allblank);
 			response.redirect(
 				"products_display?" +
-					ordered +
-					"series=" +
-					series +
-					"&" +
-					"error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
+				ordered +
+				"series=" +
+				series +
+				"&" +
+				"error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
 			);
 		} else if (validinput > 0) {
 			// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
 			response.redirect(
 				"products_display?" +
-					ordered +
-					"series=" +
-					series +
-					"&" +
-					"error=Invalid%20Quantity:%20Please%20Fix%20the%20Errors%20on%20the%20Order%20Page!"
+				ordered +
+				"series=" +
+				series +
+				"&" +
+				"error=Invalid%20Quantity:%20Please%20Fix%20the%20Errors%20on%20the%20Order%20Page!"
 			);
 		} else if (instock > 0) {
 			// Existing stock is less than desired quantity, pops up alert
 			// ordered = "";
 			response.redirect(
 				"products_display?" +
-					ordered +
-					"series=" +
-					series +
-					"&" +
-					"error=Invalid%20Quantity:%20Requested%20Quantity%20Exceeds%20Stock"
+				ordered +
+				"series=" +
+				series +
+				"&" +
+				"error=Invalid%20Quantity:%20Requested%20Quantity%20Exceeds%20Stock"
 			);
 		} else {
 			// textbox has gone missing? or some other error, pops up alert
 			// ordered = "";
 			response.redirect(
 				"products_display?" +
-					ordered +
-					"series=" +
-					series +
-					"&" +
-					"error=Invalid%20Quantity:%20Unknown%20Error%20has%20occured"
+				ordered +
+				"series=" +
+				series +
+				"&" +
+				"error=Invalid%20Quantity:%20Unknown%20Error%20has%20occured"
 			);
 		}
 	} else {
@@ -409,15 +410,15 @@ app.post("/addtocart", function (request, response) {
 
 					console.log(
 						"request.session.cart" +
-							series +
-							[i] +
-							"=" +
-							request.session.cart[series][i]
+						series +
+						[i] +
+						"=" +
+						request.session.cart[series][i]
 					);
 				}
 			}
 		}
-		totalItems = 0;
+		totalItems = 0; // initializes totalItems to 0
 		for (series in request.session.cart) {
 			totalItems =
 				Number(totalItems) +
@@ -427,8 +428,6 @@ app.post("/addtocart", function (request, response) {
 		response.redirect("products_display?" + "series=" + series);
 	}
 });
-
-// THIS IS FOR LOGIN AND REGISTER
 
 app.post("/purchase", function (request, response) {
 	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1&2
@@ -539,32 +538,32 @@ app.post("/purchase", function (request, response) {
 		// ordered = "";
 		response.redirect(
 			"products_display?" +
-				ordered +
-				"error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
+			ordered +
+			"error=Invalid%20Quantity:%20No%20Quantities%20Selected!%20Please%20type%20in%20values!"
 		);
 	} else if (!validinput) {
 		// quantity is "Not a Number, Negative Value, or not an Integer", pops up alert
 		// ordered = "";
 		response.redirect(
 			"products_display?" +
-				ordered +
-				"error=Invalid%20Quantity:%20Please%20Fix%20the%20Errors%20on%20the%20Order%20Page!"
+			ordered +
+			"error=Invalid%20Quantity:%20Please%20Fix%20the%20Errors%20on%20the%20Order%20Page!"
 		);
 	} else if (!instock) {
 		// Existing stock is less than desired quantity, pops up alert
 		// ordered = "";
 		response.redirect(
 			"products_display?" +
-				ordered +
-				"error=Invalid%20Quantity:%20Requested%20Quantity%20Exceeds%20Stock"
+			ordered +
+			"error=Invalid%20Quantity:%20Requested%20Quantity%20Exceeds%20Stock"
 		);
 	} else if (othererrors) {
 		// textbox has gone missing? or some other error, pops up alert
 		// ordered = "";
 		response.redirect(
 			"products_display?" +
-				ordered +
-				"error=Invalid%20Quantity:%20Unknown%20Error%20has%20occured"
+			ordered +
+			"error=Invalid%20Quantity:%20Unknown%20Error%20has%20occured"
 		);
 	} else {
 		// If everything is good, redirect to the invoice page.
@@ -709,28 +708,25 @@ app.get("/login", function (request, response) {
 	<h1 style="font-size: 4em; color:white">Login</h1>
 	<p style="font-size: 1.5em; color:white">Enter your Account Information Below to Log In</p>
 	<!-- This login form's action involves splitting "username" off of the params, if it exists. Sticky forms were implemented, using "username" in the params to make it stick. This code just makes sure that this sticky does not move onto the next page -->
-	<form name='login' action="?${
-		params.toString().split("username")[0]
-	}" method="POST">
+	<form name='login' action="?${params.toString().split("username")[0]
+			}" method="POST">
 	<BR>
 
 	<span id="usernamelabel" name="usernamelabel" style="color: white;"><p style="font-family: 'Source Sans Pro', sans-serif;"><B>Enter a username</B></p></span>
 	<input type="text" id ="username" class="username" name="username" placeholder="Username" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif" ></input><BR>
 	<!-- error message if user doesn't exist -->
-	<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
-		typeof loginError["nonexistuser"] != "undefined"
-			? loginError["nonexistuser"]
-			: ""
-	}</b></p><BR><BR>
+	<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${typeof loginError["nonexistuser"] != "undefined"
+				? loginError["nonexistuser"]
+				: ""
+			}</b></p><BR><BR>
 
 	<span id="passwordlabel" name="passwordlabel" style="color: white;"><p style="font-family: 'Source Sans Pro', sans-serif;"><B>Enter a password</B></p></span>
 	<input type="password" id ="password" class="userpasswordname" name="password" placeholder="Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
 	<!-- error message if the password is incorrect -->
-	<p style="color:#c4c4ff; "><b>${
-		typeof loginError["badloginpass"] != "undefined"
-			? loginError["badloginpass"]
-			: ""
-	}</b></p><BR>
+	<p style="color:#c4c4ff; "><b>${typeof loginError["badloginpass"] != "undefined"
+				? loginError["badloginpass"]
+				: ""
+			}</b></p><BR>
 
 <BR>
 <input type="submit" value='Login        ' id="button" style="min-width:20%;" class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input>
@@ -766,7 +762,7 @@ app.post("/login", function (request, response) {
 	var encryptedPassword = encrypt(inputpassword); // variable to encrypt the inputted password
 
 	if (typeof users[inputusername] != "undefined") {
-		//
+		// if the passwords match
 		if (
 			users[inputusername].password == encryptedPassword ||
 			(!users[inputusername].encrypted &&
@@ -868,10 +864,10 @@ app.get("/loginsuccess", function (request, response) {
 		response.write(
 			`
 		<!-- 
-		Login/Registration Success for Assignment2
+		Login/Registration Success for Assignment3
 		Author: Deborah Yuan & Evon Diep
-		Date: 11/16=8/22
-		Desc: This page serves as welcome page for users who have either JUST logged in or JUST registered. From this page, users can edit their account by clicking the button, or they can check out by going to their invoice. The buttons in the right corner are also functioning.
+		Date: 12/10/22
+		Desc: This page displays the user's full name, the number of people currently logged in at the moment, the number of times the user has logged in, and the last day and time they were logged in. This page will be displayed when a user clicked on their name in the navigation bar. From this page, users can edit their account by clicking the button, or they can check out by going to their invoice. This is also where they will be able to logout of their account at any time. The buttons in the right corner are also functioning.
 		-->
 		
 		<head>
@@ -933,12 +929,13 @@ app.get("/loginsuccess", function (request, response) {
 				  <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
-			<ul class="nav navbar-nav">`
+			<ul class="nav navbar-nav">
+			`
 		);
 
 		if (typeof active_user != "undefined") {
 			response.write(
-				`<li><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+				`<li><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;${users[active_user].fullname}&emsp;</a></li>`
 			);
 		} else {
 			response.write(
@@ -979,32 +976,33 @@ app.get("/loginsuccess", function (request, response) {
 
 // GO TO CART
 app.get("/cart", function (request, response) {
+	// if the session exists for invoice
 	if (
 		typeof request.session.invoice != "undefined" ||
 		request.session.invoice == true
 	) {
-		request.session.destroy(); // ends session
+		request.session.destroy(); // end the session
 	}
-	if (typeof request.session.cart == "undefined") {
+	if (typeof request.session.cart == "undefined") { // if the session doesn't exist for cart
 		console.log(`Your cart is empty.`);
 	} else {
 		console.log(
 			`iPhone = ${request.session.cart["iPhone"]} <BR> iPad = ${request.session.cart["iPad"]} <BR> Mac = ${request.session.cart["Mac"]}`
-		);
+		); // logs a message to the console that includes the quantity of each item in the cart
 	}
 	if (
 		typeof request.cookies["activeuser"] != "undefined" &&
-		request.cookies["activeuser"] != ""
+		request.cookies["activeuser"] != "" // if the "activeuser" cookie is defined and not an empty string
 	) {
-		active_user = request.cookies["activeuser"];
+		active_user = request.cookies["activeuser"]; // sets variable to the value of the "activeuser" cookie
 	}
 	if (
 		typeof active_user != "undefined" &&
-		request.cookies["activeuser"] != ""
+		request.cookies["activeuser"] != "" // if there is an active user and the cookie for it isn't empty/does exist
 	) {
-		usernameCart = users[active_user].fullname + "'s";
+		usernameCart = users[active_user].fullname + "'s"; // displays their full name on the page
 	} else {
-		usernameCart = "Your";
+		usernameCart = "Your"; // if the active user or cookie doesn't exist (user is not logged in), it displays "Your Cart" instead
 	}
 
 	response.write(`
@@ -1100,7 +1098,7 @@ app.get("/cart", function (request, response) {
 
 	if (typeof active_user != "undefined") {
 		response.write(
-			`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+			`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;${users[active_user].fullname}&emsp;</a></li>`
 		);
 	} else {
 		response.write(
@@ -1165,13 +1163,14 @@ function scrollToTop() {
 		cartTotalItems += request.session.cart[series].reduce((a, b) => a + b); // adds the quantities so this can be used to display # of items in cart
 	}
 
+	// if there is no cart session or if there are no items in the cart
 	if (typeof request.session.cart == "undefined" || cartTotalItems == 0) {
 		response.write(
 			`<tr><th style= "text-align: center;"><h1>Your cart is empty.</h1></th></tr>
 			</thead>
 			<tr><td style= "text-align: center;"><h2 class="underlinecss"><a href="/products_display" style = "color: black; text-decoration: none;">Return to shopping</a></h2></td></tr>`
 		);
-	} else {
+	} else { // if there are items in the cart
 		response.write(`
 		<form name='cart_form' action="/recalculatecart" method="POST">
 		  <tr>
@@ -1190,6 +1189,7 @@ function scrollToTop() {
 <script>
 </script>`);
 
+		// if a user has any iPhones in their cart, then calculate the prices
 		if (typeof request.session.cart["iPhone"] != "undefined") {
 			quantities = request.session.cart["iPhone"];
 			products = products_data["iPhone"];
@@ -1203,19 +1203,18 @@ function scrollToTop() {
 					// toFixed added to $ values to preserve cents
 					response.write(`
 <tr>
-<td align="center"><img src="${
-						products[i].image
-					}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+<td align="center"><img src="${products[i].image
+						}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 <td>${products[i].name}</td>
 <td align="center"><input type="number" name='cartquantitytextbox_iPhone+${i}' id ='cartquantitytextbox_iPhone+${i}' min="0" max="${Number(
-						products[i].quantity_available
-					)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_iPhone+${i}_msg"></p></td>
+							products[i].quantity_available
+						)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_iPhone+${i}_msg"></p></td>
 <td align="center" class="cartquantityPrice[${i}]_iPhone"">$${products[
-						i
-					].price.toFixed(2)}</td>
+							i
+						].price.toFixed(2)}</td>
 <td class="cartquantityExtendedPrice[${i}]_iPhone">$${(
-						quantities[i] * products[i].price
-					).toFixed(2)}</td>
+							quantities[i] * products[i].price
+						).toFixed(2)}</td>
 </tr>
 
 <script>
@@ -1232,22 +1231,21 @@ return /^-?\d*$/.test(value);
 } else if (/^\d*$/.test(value) == false) {
 // must be a non negative integer
 return /^\d*$/.test(value);
-} else if (value > ${Number(
-						products[i].quantity_available
-					)}){ // requesting for more than current stock
+} else if (value > ${Number(products[i].quantity_available) + Number(quantities[i])
+						}){ // requesting for more than current stock
 	return false;
 } else {
 return true;
 }
 }, 
-${Number(products[i].quantity_available)})
+${Number(products[i].quantity_available) + Number(quantities[i])})
 </script>`);
 					subtotal += extended_price;
 					console.log(products[i].price);
 				}
 			}
 		}
-
+		// if a user has any iPads in their cart, then calculate the prices
 		if (typeof request.session.cart["iPad"] != "undefined") {
 			quantities = request.session.cart["iPad"];
 			products = products_data["iPad"];
@@ -1261,13 +1259,12 @@ ${Number(products[i].quantity_available)})
 					// toFixed added to $ values to preserve cents
 					response.write(`
 	<tr>
-	  <td align="center"><img src="${
-			products[i].image
-		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+	  <td align="center"><img src="${products[i].image
+						}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 	  <td>${products[i].name}</td>
 	  <td align="center"><input type="number" name="cartquantitytextbox_iPad+${i}" id ="cartquantitytextbox_iPad+${i}" min="0" max="${Number(
-						products[i].quantity_available
-					)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_iPad+${i}_msg"></p></td>
+							products[i].quantity_available
+						)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_iPad+${i}_msg"></p></td>
 	  <td align="center">$${products[i].price.toFixed(2)}</td>
 	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
 	</tr>
@@ -1284,15 +1281,14 @@ ${Number(products[i].quantity_available)})
 		} else if (/^\d*$/.test(value) == false) {
 		// must be a non negative integer
 		return /^\d*$/.test(value);
-		} else if (value > ${Number(
-			products[i].quantity_available
-		)}){ // requesting for more than current stock
+		} else if (value > ${Number(products[i].quantity_available) + Number(quantities[i])
+						}){ // requesting for more than current stock
 			return false;
 		} else {
 		return true;
 		}
 		}, 
-		${Number(products[i].quantity_available)})
+		${Number(products[i].quantity_available) + Number(quantities[i])})
 	</script>`);
 					subtotal += extended_price;
 					console.log(products[i].price);
@@ -1300,6 +1296,7 @@ ${Number(products[i].quantity_available)})
 			}
 		}
 
+		// if a user has any Macs in their cart, then calculate the prices
 		if (typeof request.session.cart["Mac"] != "undefined") {
 			quantities = request.session.cart["Mac"];
 			products = products_data["Mac"];
@@ -1313,13 +1310,12 @@ ${Number(products[i].quantity_available)})
 					// toFixed added to $ values to preserve cents
 					response.write(`
 	<tr>
-	  <td align="center"><img src="${
-			products[i].image
-		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+	  <td align="center"><img src="${products[i].image
+						}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 	  <td>${products[i].name}</td>
 	  <td align="center"><input type="number" name="cartquantitytextbox_Mac+${i}" id ="cartquantitytextbox_Mac+${i}" min="0" max="${Number(
-						products[i].quantity_available
-					)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_Mac+${i}_msg"></p></td>
+							products[i].quantity_available
+						)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_Mac+${i}_msg"></p></td>
 	  <td align="center">$${products[i].price.toFixed(2)}</td>
 	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
 	</tr>
@@ -1336,15 +1332,14 @@ ${Number(products[i].quantity_available)})
 		} else if (/^\d*$/.test(value) == false) {
 		// must be a non negative integer
 		return /^\d*$/.test(value);
-		} else if (value > ${Number(
-			products[i].quantity_available
-		)}){ // requesting for more than current stock
+		} else if (value > ${Number(products[i].quantity_available) + Number(quantities[i])
+						}){ // requesting for more than current stock
 			return false;
 		} else {
 		return true;
 		}
 		}, 
-		${Number(products[i].quantity_available)})
+		${Number(products[i].quantity_available) + Number(quantities[i])})
 	</script>`);
 					subtotal += extended_price;
 					console.log(products[i].price);
@@ -1427,18 +1422,19 @@ ${Number(products[i].quantity_available)})
 	</main>
 	</body>
 	`);
+
 		if (typeof request.session.cart["iPhone"] != "undefined") {
 			quantities = request.session.cart["iPhone"];
 			products = products_data["iPhone"];
 			response.write(`<script>`);
 			for (let i in quantities) {
-				if (quantities[i] == 0 || quantities[i] == "") {
+				if (quantities[i] == 0 || quantities[i] == "") { // check if the quantities are 0 or empty string
 					// adding textbox error messages based on inputted value
 					continue;
 				} else {
 					response.write(`
 	cart_form['cartquantitytextbox_iPhone+${i}'].value = ${quantities[i]}
-	`);
+	`); // sets value of the textbox to quantities
 				}
 			}
 			response.write(`</script>`);
@@ -1449,13 +1445,13 @@ ${Number(products[i].quantity_available)})
 			products = products_data["iPad"];
 			response.write(`<script>`);
 			for (let i in quantities) {
-				if (quantities[i] == 0 || quantities[i] == "") {
+				if (quantities[i] == 0 || quantities[i] == "") { // check if the quantities are 0 or empty string
 					// adding textbox error messages based on inputted value
 					continue;
 				} else {
 					response.write(`
 		cart_form["cartquantitytextbox_iPad+${i}"].value = ${quantities[i]}
-		`);
+		`); // sets value of the textbox to quantities
 				}
 			}
 			response.write(`</script>`);
@@ -1466,13 +1462,13 @@ ${Number(products[i].quantity_available)})
 			products = products_data["Mac"];
 			response.write(`<script>`);
 			for (let i in quantities) {
-				if (quantities[i] == 0 || quantities[i] == "") {
+				if (quantities[i] == 0 || quantities[i] == "") { // check if the quantities are 0 or empty string
 					// adding textbox error messages based on inputted value
 					continue;
 				} else {
 					response.write(`
 		cart_form["cartquantitytextbox_Mac+${i}"].value = ${quantities[i]}
-		`);
+		`); // sets value of the textbox to quantities
 				}
 			}
 			response.write(`</script>`);
@@ -1490,6 +1486,7 @@ app.post("/recalculatecart", function (request, response, next) {
 		console.log("SERIES=" + series);
 		console.log("CURR REQ CART=" + request.session.cart[series]);
 
+		// Iterates over the properties of the request.session.cart, and for each series, it is updating the corresponding item in the cart by setting the value of the current property of request.session.cart[series]  to the value of  cartquantitytextbox_${series}+${i}
 		for (i in request.session.cart[series]) {
 			if (
 				typeof request.body[`cartquantitytextbox_${series}+${i}`] == "undefined"
@@ -1504,6 +1501,7 @@ app.post("/recalculatecart", function (request, response, next) {
 		}
 	}
 
+	// for the cart counter
 	totalItems = 0;
 	for (series in request.session.cart) {
 		totalItems =
@@ -1515,6 +1513,7 @@ app.post("/recalculatecart", function (request, response, next) {
 });
 
 app.post("/toinvoice", function (request, response, next) {
+	// check if a cookie with the name "activeuser" exists; if it does, set a variable named active_user to the value of that cookie
 	if (
 		typeof request.cookies["activeuser"] != "undefined" &&
 		request.cookies["activeuser"] != ""
@@ -1542,6 +1541,7 @@ app.post("/toinvoice", function (request, response, next) {
 	// Compute shipping
 	var shipping;
 
+	// iterates over the products in the products_data and builds a string that represents an invoice, including the name, quantity, price, and extended price of each item in the shopping cart; also calculates the subtotal of the invoice by adding the extended price of each item in the cart
 	var shopping_cart = request.session.cart;
 	for (series in products_data) {
 		for (i = 0; i < products_data[series].length; i++) {
@@ -1562,6 +1562,7 @@ app.post("/toinvoice", function (request, response, next) {
 		}
 	}
 
+	// compute rates
 	if (subtotal < 1000) {
 		shipping = 5;
 	} else if (subtotal >= 1000 && subtotal < 1500) {
@@ -1631,6 +1632,7 @@ Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
 	invoice_str += "</table>";
 	// send invoice as email
 	// Set up mail server
+	// With modifications from https://www.youtube.com/watch?v=nF9g1825mwk and https://stackoverflow.com/questions/45478293/username-and-password-not-accepted-when-using-nodemailer
 	var transporter = nodemailer.createTransport({
 		service: "gmail",
 		auth: {
@@ -1639,6 +1641,7 @@ Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
 		},
 	});
 
+	// With reference to Assignment 3 Code Examples by Dan Port
 	var user_email = request.cookies["activeuser"];
 	var mailOptions = {
 		from: "phoney_store@bogus.com", // change or leave this email to something related to our store?
@@ -1647,8 +1650,6 @@ Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
 		html: invoice_str,
 	};
 
-	var errorMsg = "";
-
 	transporter.sendMail(mailOptions, function (error, info) {
 		if (error) {
 			return console.log(error);
@@ -1656,6 +1657,7 @@ Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
 		console.log("Message sent: %s", info.messageId);
 		console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 	});
+
 	totalItems = 0;
 
 	response.write(`
@@ -1663,9 +1665,9 @@ Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
 <html lang="en">
 <!-- 
 Invoice for Assignment3
-Author: Deborah Yuan
-Date: 11/14/22
-Desc: This html page produces an cart for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+Author: Deborah Yuan and Evon Diep
+Date: 12/10/22
+Desc: This html page produces an invoice after the customer has confirmed their purchase. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a Review Products button, which gives users the opportunity to rate the product. The second button on the page is a Return to Home button, which redirects the user back to the home or products_display page (IR1: after checkout, the last page visited becomes the home page)
 -->
 
 <!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
@@ -1748,7 +1750,7 @@ footer {
 	  </ul>
 	  <ul class="nav navbar-nav navbar-right">
 	  <ul class="nav navbar-nav">
-	<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
+	<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;${users[active_user].fullname}&emsp;</a></li>
 	  </ul>
 	  <ul class="nav navbar-nav">
 	   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
@@ -1811,6 +1813,7 @@ behavior: "smooth"
 	// Compute subtotal
 	var subtotal = 0;
 
+	// iterates over the items in the shopping cart stored in the request.session.cart, and for each item, it is calculating the extended price based on the quantity of the item and its price
 	for (series in request.session.cart) {
 		quantities = request.session.cart[series];
 		// products = products_data[series];
@@ -1824,9 +1827,8 @@ behavior: "smooth"
 				// toFixed added to $ values to preserve cents
 				response.write(`
 <tr>
-<td align="center"><img src="${
-					products_data[series][i].image
-				}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+<td align="center"><img src="${products_data[series][i].image
+					}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 <td>${products_data[series][i].name}</td>
 <td align="center">${request.session.cart[series][i]}</td>
 <td align="center">$${products_data[series][i].price.toFixed(2)}</td>
@@ -1920,7 +1922,6 @@ behavior: "smooth"
 </body>
 </script>
 </html>`);
-
 	products = products_data;
 	let proddata = JSON.stringify(products);
 	fs.writeFileSync(prodname, proddata, "utf-8");
@@ -1928,9 +1929,9 @@ behavior: "smooth"
 	response.end();
 });
 
-// REVIEWING PRODUCTS
+// IR5: REVIEWING PRODUCTS
 app.get("/toreview", function (request, response) {
-	if (typeof request.session.invoice == "undefined") {
+	if (typeof request.session.invoice == "undefined") { // if there is no invoice session then they won't be allowed to rate and therefore, redirects to products_display
 		response.redirect("/products_display");
 	} else {
 		if (
@@ -1946,8 +1947,8 @@ app.get("/toreview", function (request, response) {
 	<!-- 
 	Review Page for Assignment3
 	Author: Deborah Yuan
-	Date: 11/14/22
-	Desc: This html page produces an cart for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+	Date: 12/10/22
+	Desc: This page displays a table of the products that were just purchased in a given order. The product image, item, and quantity are displayed. In the last column of the table, there is an option to leave a rating out of 5 stars. Once the user selects the number of stars for the rating and submits the form (using the Submit Review button on the page), it will redirect them back to the products_display page. When the user goes back to view the products_display for the product purchased, the new rating under the product will show an average of all the ratings given.
 	-->
 	
 	<!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
@@ -2030,7 +2031,7 @@ app.get("/toreview", function (request, response) {
 		  </ul>
 		  <ul class="nav navbar-nav navbar-right">
 		  <ul class="nav navbar-nav">
-		<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
+		<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;${users[active_user].fullname}&emsp;</a></li>
 		  </ul>
 		  <ul class="nav navbar-nav">
 		   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
@@ -2093,6 +2094,7 @@ app.get("/toreview", function (request, response) {
 		// Compute subtotal
 		var subtotal = 0;
 
+		// iterates over the items in the shopping cart stored in the request.session.cart, and for each item, it is calculating the extended price based on the quantity of the item and its price
 		for (series in request.session.cart) {
 			quantities = request.session.cart[series];
 			products = products_data[series];
@@ -2141,14 +2143,14 @@ app.get("/toreview", function (request, response) {
 	}
 });
 
-// POST LOGIN SUCCESS
+// IR5: PRODUCT RATINGS
 app.post("/toreview", function (request, response) {
-	// redirects to edit account page
 
 	for (series in request.session.cart) {
 		console.log("SERIES=" + series);
 		console.log("CURR REQ CART=" + request.session.cart[series]);
 
+		// iterates over the items in the shopping cart stored in the request.session.cart, and for each item, it updates the rating and number of reviewers for the corresponding product in the products_data based on the value of the request.body[rating_${series}+${i}]
 		for (i in request.session.cart[series]) {
 			if (typeof request.body[`rating_${series}+${i}`] == "undefined") {
 				continue;
@@ -2173,8 +2175,6 @@ app.post("/toreview", function (request, response) {
 	products = products_data;
 	let proddata = JSON.stringify(products);
 	fs.writeFileSync(prodname, proddata, "utf-8");
-
-	// COME HERE
 
 	request.session.destroy(); // ends session
 
@@ -2294,7 +2294,7 @@ app.get("/editaccount", function (request, response) {
 		</ul>
 		<ul class="nav navbar-nav navbar-right">
 		<ul class="nav navbar-nav">
-		<li class="active"><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
+		<li class="active"><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;${users[active_user].fullname}&emsp;</a></li>
 		</ul>
 		<ul class="nav navbar-nav">
 		 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
@@ -2310,9 +2310,8 @@ app.get("/editaccount", function (request, response) {
 
 <form name='editaccount' action='?${params.toString()}' method="POST">
 
-	<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">Hi ${
-		users[active_user].fullname
-	},</h1></span><BR>
+	<span id="accountpageinstruction" name="accountpageinstruction"><h1 style="font-size: 6em; margin: 0px;">Hi ${users[active_user].fullname
+			},</h1></span><BR>
 	<p style="font-size: 2em;">Edit your account information here:</p>
 	<p style="font-size: 1.5em;">Only enter information into the following textboxes if you want to change these pieces of information. Otherwise, leave the box blank.<p>
 
@@ -2320,15 +2319,12 @@ app.get("/editaccount", function (request, response) {
 
 	<input type="text" id ="currentfullname" class="currentfullname" name="currentfullname" placeholder="Enter Current Full Name" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
 	<!-- displays errors for incorrect name or too short/long full name -->
-	<p style="color:#A74ADC"><b>${
-		typeof regErrors["wrong_name"] != "undefined" ? regErrors["wrong_name"] : ""
-	}${
-			typeof regErrors["bad_userlength"] != "undefined"
+	<p style="color:#A74ADC"><b>${typeof regErrors["wrong_name"] != "undefined" ? regErrors["wrong_name"] : ""
+			}${typeof regErrors["bad_userlength"] != "undefined"
 				? regErrors["bad_userlength"]
 				: ""
-		}${
-			typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
-		}</b></p>
+			}${typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
+			}</b></p>
 
 	<input type="text" id ="newfullname" class="newfullname" name="newfullname" placeholder="Enter New Full Name" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
 
@@ -2337,17 +2333,14 @@ app.get("/editaccount", function (request, response) {
 
 	<input type="text" id ="currentusername" class="currentusername" name="currentusername" placeholder="Enter Current Email"  style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif""></input><BR><BR>	
 	<!-- displays errors for a taken email or incorrect email -->
-	<p style="color:#A74ADC"><b>${
-		typeof regErrors["taken_email"] != "undefined"
-			? regErrors["taken_email"]
-			: ""
-	}${
-			typeof regErrors["wrong_email"] != "undefined"
+	<p style="color:#A74ADC"><b>${typeof regErrors["taken_email"] != "undefined"
+				? regErrors["taken_email"]
+				: ""
+			}${typeof regErrors["wrong_email"] != "undefined"
 				? regErrors["wrong_email"]
 				: ""
-		}${
-			typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
-		}</b></p>
+			}${typeof regErrors["bad_email"] != "undefined" ? regErrors["bad_email"] : ""
+			}</b></p>
 
 	<input type="text" id ="newusername" class="newusername" name="newusername" placeholder="Enter New Email" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
 
@@ -2358,13 +2351,11 @@ app.get("/editaccount", function (request, response) {
 
 	<input type="password" id ="currentpassword" class="currentpassword" name="currentpassword" placeholder="Enter Current Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>	
 	<!-- displays errors for wrong password name or too short/long password name -->
-	<p style="color:#A74ADC"><b>${
-		typeof regErrors["wrong_pass"] != "undefined" ? regErrors["wrong_pass"] : ""
-	}${
-			typeof regErrors["bad_passlength"] != "undefined"
+	<p style="color:#A74ADC"><b>${typeof regErrors["wrong_pass"] != "undefined" ? regErrors["wrong_pass"] : ""
+			}${typeof regErrors["bad_passlength"] != "undefined"
 				? regErrors["bad_passlength"]
 				: ""
-		}</b></p>
+			}</b></p>
 
 	<input type="password" id ="newpassword" class="newpassword" name="newpassword" placeholder="Enter New Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
 
@@ -2373,17 +2364,14 @@ app.get("/editaccount", function (request, response) {
 	<span id="passwordconfirmlabel" name="passwordconfirmlabel"><p style="font-size: 1em;"><B>Confirm your new password by typing it again</B></p></span>
 	<input type="password" id ="newpasswordconfirm" class="newpasswordconfirm" name="newpasswordconfirm" placeholder="Enter New Password Again" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif"></input><BR><BR>
 	<!-- displays errors for incorrect password confirmation, doesn't match other password change box OR empty box -->
-	<p style="color:#A74ADC"><b>${
-		typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
-	}${
-			typeof regErrors["nomatch_pass"] != "undefined"
+	<p style="color:#A74ADC"><b>${typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
+			}${typeof regErrors["nomatch_pass"] != "undefined"
 				? regErrors["nomatch_pass"]
 				: ""
-		}${
-			typeof regErrors["contains_space"] != "undefined"
+			}${typeof regErrors["contains_space"] != "undefined"
 				? regErrors["contains_space"]
 				: ""
-		}</b></p><BR>
+			}</b></p><BR>
 			
 <input type="submit" value='Submit Changes       ' id="button"; class="button" style="min-width:30%"></input></form><BR>
 
@@ -2534,15 +2522,15 @@ app.post("/editaccount", function (request, response) {
 		response.redirect(
 			// otherwise use sticky forms and have the user correct the error
 			"./editaccount?" +
-				params.toString() +
-				"&currentfullname=" +
-				curr_full_name +
-				"&newfullname=" +
-				new_full_name +
-				"&currentusername=" +
-				curr_user_name +
-				"&newusername=" +
-				new_user_name
+			params.toString() +
+			"&currentfullname=" +
+			curr_full_name +
+			"&newfullname=" +
+			new_full_name +
+			"&currentusername=" +
+			curr_user_name +
+			"&newusername=" +
+			new_user_name
 		); // puts the textbox input into search params to make forms sticky
 	}
 });
@@ -2611,66 +2599,57 @@ app.get("/register", function (request, response) {
 			<form method ="POST" action ="?${params.toString().split("fullname")[0]}">
 			<!-- if the boxes are empty, then return error -->
 			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;">
-			<b>${
-				typeof regErrors["empty_boxes"] != "undefined"
-					? regErrors["empty_boxes"]
-					: ""
-			}</b></p>
+			<b>${typeof regErrors["empty_boxes"] != "undefined"
+			? regErrors["empty_boxes"]
+			: ""
+		}</b></p>
 			
 			<span id="fullnamelabel" name="fullnamelabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter your full name</B></span><BR>
 			<input type="text" id ="fullname" class="fullname" name="fullname" placeholder="First Name Last Name" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
 			<!-- if full name length is incorrect or if it is empty -->
 			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;">
-			<b>${
-				typeof regErrors["bad_userlength"] != "undefined"
-					? regErrors["bad_userlength"]
-					: ""
-			}<BR>
-			${
-				typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
-			}</b></p><BR>
+			<b>${typeof regErrors["bad_userlength"] != "undefined"
+			? regErrors["bad_userlength"]
+			: ""
+		}<BR>
+			${typeof regErrors["bad_user"] != "undefined" ? regErrors["bad_user"] : ""
+		}</b></p><BR>
 		
 			<span id="usernamelabel" name="usernamelabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter an email</B></span><BR>
 			<input type="text" id ="username" class="username" name="username" placeholder="example@example.com" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
 			<!-- if the email is taken or email doesn't have @ -->
-			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${
-				typeof regErrors["bad_email"] != "undefined"
-					? regErrors["bad_email"]
-					: ""
-			}<BR>
-			${
-				typeof regErrors["username_taken"] != "undefined"
-					? regErrors["username_taken"]
-					: ""
-			}</b></p><BR>
+			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;"><b>${typeof regErrors["bad_email"] != "undefined"
+			? regErrors["bad_email"]
+			: ""
+		}<BR>
+			${typeof regErrors["username_taken"] != "undefined"
+			? regErrors["username_taken"]
+			: ""
+		}</b></p><BR>
 		
 			<span id="passwordlabel" name="passwordlabel" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Enter a password</B></span><BR>
 			<input type="password" id ="password" class="password" name="password" placeholder="Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
 			<!-- checks password -->
 			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;">
-			<b>${
-				typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
-			}</b><BR>
-			<b>${
-				typeof regErrors["bad_passlength"] != "undefined"
-					? regErrors["bad_passlength"]
-					: ""
-			}
-			${
-				typeof regErrors["contains_space"] != "undefined"
-					? regErrors["contains_space"]
-					: ""
-			}</b></p><BR>
+			<b>${typeof regErrors["bad_pass"] != "undefined" ? regErrors["bad_pass"] : ""
+		}</b><BR>
+			<b>${typeof regErrors["bad_passlength"] != "undefined"
+			? regErrors["bad_passlength"]
+			: ""
+		}
+			${typeof regErrors["contains_space"] != "undefined"
+			? regErrors["contains_space"]
+			: ""
+		}</b></p><BR>
 				
 		
 			<span id="passwordlabelconfirm" name="passwordlabelconfirm" style="color: white; font-family: 'Source Sans Pro', sans-serif;"><B>Repeat password</B></span><BR>
 			<input type="password" id ="passwordconfirm" class="passwordconfirm" name="passwordconfirm" placeholder="Password" style="border-radius: 5px; font-family: 'Source Sans Pro', sans-serif;"></input><BR>
 			<p style="color:#c4c4ff; font-family: 'Source Sans Pro', sans-serif;">
-			<b>${
-				typeof regErrors["password_mismatch"] != "undefined"
-					? regErrors["password_mismatch"]
-					: ""
-			}</b></p><BR><BR>
+			<b>${typeof regErrors["password_mismatch"] != "undefined"
+			? regErrors["password_mismatch"]
+			: ""
+		}</b></p><BR><BR>
 				
 			<input type="submit" value='Register        ' id="submitbutton" class="button" name="submitbutton" style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input>
 			</form>
@@ -2790,11 +2769,11 @@ app.post("/register", function (request, response) {
 	} else {
 		response.redirect(
 			"./register?" +
-				params.toString() +
-				"&fullname=" +
-				request.body.fullname +
-				"&email=" +
-				request.body.username
+			params.toString() +
+			"&fullname=" +
+			request.body.fullname +
+			"&email=" +
+			request.body.username
 		); // keeps name and email input in URL to make form sticky
 		console.log("errors=" + regErrors);
 	}
@@ -2895,9 +2874,8 @@ app.post("/invoice", function (request, response) {
 			// toFixed added to $ values to preserve cents
 			response.write(`
 	<tr>
-	  <td align="center"><img src="${
-			products[i].image
-		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+	  <td align="center"><img src="${products[i].image
+				}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 	  <td>${products[i].name}</td>
 	  <td align="center">${quantities[i]}</td>
 	  <td align="center">$${products[i].price.toFixed(2)}</td>
