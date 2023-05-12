@@ -102,7 +102,8 @@ if (fs.existsSync(recordname)) {
 	// file syncing/rewriting for sale_records
 	recorddata = fs.readFileSync(recordname, "utf-8");
 	records = JSON.parse(recorddata);
-	console.log("HELLO" + records);
+	console.log(records);
+	console.log("RECORDS LENGTH" + records.length);
 } else {
 	console.log("Sorry file " + recordname + " does not exist.");
 	records = {};
@@ -132,45 +133,6 @@ function getCurrentDate() {
 		minutes +
 		time; // creates a variable called new_date, which combines month, day, year, hours, minutes, then AM/PM
 	return new_date; // calling on the function returns the current date + time
-}
-
-//formatDate function
-
-function formatDate(input) {
-	const dateTime = input.split(" ");
-	const date = dateTime[0].split("/");
-	const time = dateTime[1].replace(/(AM|PM)/, "").split(":");
-
-	const formattedDate = date[0].padStart(2, "0") + date[1] + date[2].slice(-2);
-	const formattedTime = time[0].padStart(2, "0") + time[1];
-
-	return formattedDate + formattedTime;
-}
-
-// function calculating hours elapsed between dates
-
-function calculateTimeDifference(start, end) {
-	const startDate = new Date(
-		parseInt(start.slice(4, 8)),
-		parseInt(start.slice(0, 2)) - 1,
-		parseInt(start.slice(2, 4)),
-		parseInt(start.slice(8, 10)),
-		parseInt(start.slice(10))
-	);
-	const endDate = new Date(
-		parseInt(end.slice(4, 8)),
-		parseInt(end.slice(0, 2)) - 1,
-		parseInt(end.slice(2, 4)),
-		parseInt(end.slice(8, 10)),
-		parseInt(end.slice(10))
-	);
-
-	const timeDifference = endDate.getTime() - startDate.getTime();
-	const hoursDifference = Math.round(timeDifference / (1000 * 60 * 60));
-	const daysDifference = Math.floor(hoursDifference / 24);
-	const remainingHours = hoursDifference % 24;
-
-	return `${daysDifference} day(s) and ${remainingHours} hour(s)`;
 }
 
 // isNonNegativeInteger tests the input for errors, then returns error messages if any, REUSED FROM ASSIGNMENT 1
@@ -207,11 +169,6 @@ app.post("/get_products_data", function (request, response) {
 // TAKEN FROM ASSIGNMENT 3 SAMPLE CODE
 app.post("/get_user_data", function (request, response) {
 	response.json(user_data);
-});
-
-// TAKEN FROM ASSIGNMENT 3 SAMPLE CODE
-app.post("/get_salesrecord_data", function (request, response) {
-	response.json(salesrecord_data);
 });
 
 // Gets all products_display for each series and maintains last visited in sessions
@@ -1033,13 +990,6 @@ app.get("/loginsuccess", function (request, response) {
 <li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
 </ul>`);
 		}
-		if (typeof active_user != "undefined" && users[active_user].admin == true) {
-			response.write(`
-		  <ul class="nav navbar-nav">
-			  <!-- clicking this 'tab' leads to products display -->
-			  <li id="PricingModuletab"><a href="./pricingmodule">Pricing Module</a></li>
-	  </ul>`);
-		}
 		response.write(`
 			<ul class="nav navbar-nav navbar-right">
 			<ul class="nav navbar-nav">
@@ -1109,94 +1059,32 @@ app.post("/manageproducts", function (request, response) {
 
 	response.redirect("/manageproducts");
 });
-
 // ADMIN PAGES, PRICING MODULE
 app.post("/pricingmodule", function (request, response) {
 	series = request.body[`series`];
 	console.log("SERIES=" + series);
-	var dynamic_pricing = false;
-	var discount_percent = request.body[`pricingmodule_discount`];
-	var reset_check = request.body[`pricingmodule_reset`];
-
-	console.log("discount_percent =" + request.body[`pricingmodule_discount`]);
-	console.log("dynamic? =" + request.body[`pricingmodule_dynamic`]);
-	console.log("reset? =" + request.body[`pricingmodule_reset`]);
-
-	if (request.body[`pricingmodule_dynamic`] == undefined) {
-		dynamic_pricing = false;
-	} else {
-		dynamic_pricing = true;
-	}
-
 	for (i in products_data[series]) {
 		console.log(
 			"dynprice=" + request.body[`pricingmodule_select_${series}+${i}`]
 		);
-
+		let testing = request.body[`pricingmodule_selectall_${series}+${i}`];
+		console.log(testing);
+		console.log(
+			"selectall=" + request.body[`pricingmodule_selectall_${series}`]
+		);
 		if (
-			dynamic_pricing == false &&
-			discount_percent != undefined &&
-			reset_check == undefined
+			request.body[`pricingmodule_select_${series}+${i}`] == undefined ||
+			request.body[`pricingmodule_select_${series}+${i}`] == false
 		) {
-			// if there is a discount_percent
-			if (request.body[`pricingmodule_select_${series}+${i}`] == undefined) {
-				// discount was whatever it was before
-				console.log(
-					"no discount" + products_data[series][i].discount_percentage
-				);
-				products_data[series][i].discount_percentage =
-					products_data[series][i].discount_percentage;
-			} else {
-				products_data[series][i].discount_percentage = discount_percent; // saves the percent to product file
-				products_data[series][i].sale_price =
-					products_data[series][i].price * ((100 - discount_percent) / 100);
-				products_data[series][i].dynamic_pricing = false;
-				console.log(
-					"yes discount" + products_data[series][i].discount_percentage
-				);
-			} // saves dynamic pricing true/false
-		} else if (dynamic_pricing == true) {
-			if (
-				request.body[`pricingmodule_select_${series}+${i}`] == undefined ||
-				request.body[`pricingmodule_select_${series}+${i}`] == false
-			) {
-				products_data[series][i].dynamic_pricing =
-					products_data[series][i].dynamic_pricing;
-			} else {
-				// if there is dynamic pricing checked off for the product
-				products_data[series][i].dynamic_pricing = Boolean(
-					request.body[`pricingmodule_select_${series}+${i}`]
-				);
-
-				products_data[series][i].sale_price = // ** SET PRICE FUNCTION GOES HERE
-					products_data[series][i].price - 100;
-
-				let product_id_selected = products_data[series][i].product_id;
-				console.log("CURRENT PRODUCT ID=" + product_id_selected);
-				if (records.hasOwnProperty(product_id_selected)) {
-					for (let innerKey in records[product_id_selected]) {
-						console.log(innerKey); // get the recorded timestamp of purchase for the products
-					}
-				}
-
-				products_data[series][i].discount_percentage = 0;
-			} // saves dynamic pricing true/false
-		} else if (reset_check != undefined) {
-			if (
-				request.body[`pricingmodule_select_${series}+${i}`] == undefined ||
-				request.body[`pricingmodule_select_${series}+${i}`] == false
-			) {
-				products_data[series][i].dynamic_pricing =
-					products_data[series][i].dynamic_pricing;
-				products_data[series][i].discount_percent =
-					products_data[series][i].discount_percent;
-			} else {
-				// if there is dynamic pricing checked off for the product
-				products_data[series][i].dynamic_pricing = false;
-				products_data[series][i].discount_percentage = 0;
-			} // saves dynamic pricing true/false
+			products_data[series][i].dynamic_pricing = false;
 		} else {
-			console.log("errors");
+			products_data[series][i].dynamic_pricing = Boolean(
+				request.body[`pricingmodule_select_${series}+${i}`]
+			);
+		} // saves dynamic pricing true/false
+
+		if (products_data[series][i].dynamic_pricing == true) {
+			products_data[series][i].sale_price = products_data[series][i].price; // ** you would insert function set price here
 		}
 		// blahblah = products_data[series][i]
 		// function ()
@@ -1442,14 +1330,6 @@ app.get("/cart", function (request, response) {
   <li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
   </ul>`);
 	}
-
-	if (typeof active_user != "undefined" && users[active_user].admin == true) {
-		response.write(`
-	  <ul class="nav navbar-nav">
-		  <!-- clicking this 'tab' leads to products display -->
-		  <li id="PricingModuletab"><a href="./pricingmodule">Pricing Module</a></li>
-  </ul>`);
-	}
 	response.write(`
 		  <ul class="nav navbar-nav navbar-right">
 		  <ul class="nav navbar-nav">`);
@@ -1552,14 +1432,6 @@ function scrollToTop() {
 		if (typeof request.session.cart["iPhone"] != "undefined") {
 			quantities = request.session.cart["iPhone"];
 			products = products_data["iPhone"];
-			display_price = "";
-			if (products[i].dynamic_pricing == true) {
-				display_price = products[i].sale_price.toFixed(2);
-			} else if (products[i].discount_percentage != 0) {
-				display_price = products[i].sale_price.toFixed(2);
-			} else {
-				display_price = products[i].price.toFixed(2);
-			}
 			for (let i in quantities) {
 				if (quantities[i] == 0) {
 					// if quantities = 0, then skip the row
@@ -1577,9 +1449,11 @@ function scrollToTop() {
 <td align="center"><input type="number" name='cartquantitytextbox_iPhone+${i}' id ='cartquantitytextbox_iPhone+${i}' min="0" max="${Number(
 						products[i].quantity_available
 					)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_iPhone+${i}_msg"></p></td>
-<td align="center" class="cartquantityPrice[${i}]_iPhone">$${display_price}</td>
+<td align="center" class="cartquantityPrice[${i}]_iPhone"">$${products[
+						i
+					].price.toFixed(2)}</td>
 <td class="cartquantityExtendedPrice[${i}]_iPhone">$${(
-						quantities[i] * display_price
+						quantities[i] * products[i].price
 					).toFixed(2)}</td>
 </tr>
 
@@ -1895,17 +1769,12 @@ app.post("/toinvoice", function (request, response, next) {
 		response.redirect("/login");
 	} else {
 		active_user = request.cookies["activeuser"];
+		var active_user = request.cookies["activeuser"];
 		console.log("there is an active user");
-		// Whenever logged in customer makes purchase record the cart's prod_data to sales_record.json
 
 		var shopping_cart = request.session.cart;
 		var series = request.body["series"];
-		if (records.length === 0) {
-			// code to execute if the records array is empty
-			records = {}; // makes empty object
-		} else {
-			records = records;
-		}
+		var records = {}; // makes empty object
 
 		for (series in products_data) {
 			console.log("Series: " + series);
@@ -1916,22 +1785,16 @@ app.post("/toinvoice", function (request, response, next) {
 				if (typeof shopping_cart[series] == "undefined") continue;
 				console.log(series + "in cart");
 				qty = shopping_cart[series][i];
-				currentDate = getCurrentDate();
-				console.log("DATE" + formatDate(currentDate));
-				soldTime = formatDate(currentDate);
 				if (qty > 0) {
 					console.log("Items in cart");
 
 					var product_id = products_data[series][i].product_id;
-					records[product_id] = records[product_id] || {};
-
-					records[product_id][soldTime] = {};
-					var productbyDateSold = records[product_id][soldTime];
-					productbyDateSold.product_id = product_id;
-					productbyDateSold.quantity =
+					records[product_id] = {}; // create a new object for each product_id in the records object
+					records[product_id].item_id = products_data[series][i].product_id;
+					records[product_id].quantity =
 						products_data[series][i].quantity_available;
-					productbyDateSold.date_sold = getCurrentDate();
-					productbyDateSold.customer_id = active_user;
+					records[product_id].date_sold = getCurrentDate();
+					records[product_id].customer_id = active_user;
 					console.log("Whats in the obj Records:" + records[product_id]);
 
 					var dynamic_pricing = products_data[series][i].dynamic_pricing;
@@ -1956,7 +1819,7 @@ app.post("/toinvoice", function (request, response, next) {
 			}
 		}
 
-		// var subtotal = 0; NOT NECESSARY?
+		var subtotal = 0;
 
 		// Modified code from Assignment 3 Examples (Dan Port)
 		var invoice_str = `Thank you ${users[active_user].fullname} for your order!
@@ -2379,19 +2242,18 @@ behavior: "smooth"
 </body>
 </script>
 </html>`);
-
 		products = products_data;
 		let proddata = JSON.stringify(products);
 		fs.writeFileSync(prodname, proddata, "utf-8");
 		request.session.invoice = true;
-
-		let recorddata = JSON.stringify(records); // modify this line to use the records object
-		console.log("records: " + records);
-		console.log("recorddata: " + recorddata);
-		fs.writeFileSync(recordname, recorddata, "utf-8");
-		console.log("LOOOK HEERRRREEEEE_004");
 		response.end();
 	}
+
+	let recorddata = JSON.stringify(records); // modify this line to use the records object
+	console.log("records: " + records);
+	console.log("recorddata: " + recorddata);
+	fs.writeFileSync(recordname, recorddata, "utf-8");
+	console.log("LOOOK HEERRRREEEEE_004");
 });
 
 // IR5: REVIEWING PRODUCTS
