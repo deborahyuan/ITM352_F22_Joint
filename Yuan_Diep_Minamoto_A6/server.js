@@ -148,29 +148,30 @@ function formatDate(input) {
 }
 
 // function calculating hours elapsed between dates
-
 function calculateTimeDifference(start, end) {
 	const startDate = new Date(
-		parseInt(start.slice(4, 8)),
-		parseInt(start.slice(0, 2)) - 1,
-		parseInt(start.slice(2, 4)),
-		parseInt(start.slice(8, 10)),
-		parseInt(start.slice(10))
+		parseInt(start.substring(4, 6)),
+		parseInt(start.substring(0, 2)) - 1,
+		parseInt(start.substring(2, 4)),
+		parseInt(start.substring(6, 8)),
+		parseInt(start.substring(8, 10))
 	);
 	const endDate = new Date(
-		parseInt(end.slice(4, 8)),
-		parseInt(end.slice(0, 2)) - 1,
-		parseInt(end.slice(2, 4)),
-		parseInt(end.slice(8, 10)),
-		parseInt(end.slice(10))
+		parseInt(end.substring(4, 6)),
+		parseInt(end.substring(0, 2)) - 1,
+		parseInt(end.substring(2, 4)),
+		parseInt(end.substring(6, 8)),
+		parseInt(end.substring(8, 10))
 	);
 
-	const timeDifference = endDate.getTime() - startDate.getTime();
-	const hoursDifference = Math.round(timeDifference / (1000 * 60 * 60));
-	const daysDifference = Math.floor(hoursDifference / 24);
-	const remainingHours = hoursDifference % 24;
+	const timeDiff = endDate - startDate;
+	let hours = timeDiff / (1000 * 60 * 60);
+	if (hours >= 24) {
+		hours += 24 * Math.floor(hours / 24);
+	}
+	const formattedHours = Number(hours.toFixed(2));
 
-	return `${daysDifference} day(s) and ${remainingHours} hour(s)`;
+	return formattedHours;
 }
 
 // isNonNegativeInteger tests the input for errors, then returns error messages if any, REUSED FROM ASSIGNMENT 1
@@ -1168,17 +1169,55 @@ app.post("/pricingmodule", function (request, response) {
 					request.body[`pricingmodule_select_${series}+${i}`]
 				);
 
-				products_data[series][i].sale_price = // ** SET PRICE FUNCTION GOES HERE
-					products_data[series][i].price - 100;
-
 				let product_id_selected = products_data[series][i].product_id;
 				console.log("CURRENT PRODUCT ID=" + product_id_selected);
 				if (records.hasOwnProperty(product_id_selected)) {
+					purchase_time_array = [];
 					for (let innerKey in records[product_id_selected]) {
-						console.log(innerKey); // get the recorded timestamp of purchase for the products
+						// calculateTimeDifference(innerKey, formatDate(getCurrentDate()));
+						console.log(
+							typeof calculateTimeDifference(
+								innerKey,
+								formatDate(getCurrentDate())
+							)
+						);
+						purchase_time_array.push(
+							calculateTimeDifference(innerKey, formatDate(getCurrentDate()))
+						); // in hours
+						console.log(
+							typeof parseFloat(
+								calculateTimeDifference(innerKey, formatDate(getCurrentDate()))
+							)
+						);
+						console.log("ARRAY" + purchase_time_array);
 					}
-				}
+					let smallest_time = purchase_time_array[0];
+					for (let i = 1; i < purchase_time_array.length; i++) {
+						if (purchase_time_array[i] < smallest_time) {
+							smallest_time = purchase_time_array[i];
+						}
+					}
+					console.log("SMALL" + smallest_time); // takes the smallest time gap and saves it unders smallest
+					let dynamic_discount;
 
+					if (smallest_time < 24) {
+						dynamic_discount = 0;
+					} else if (smallest_time >= 24 && smallest_time < 48) {
+						dynamic_discount = 10;
+					} else if (smallest_time >= 48 && smallest_time < 72) {
+						dynamic_discount = 30;
+					} else if (smallest_time >= 72 && smallest_time < 96) {
+						dynamic_discount = 60;
+					} else {
+						dynamic_discount = 90;
+					}
+
+					console.log("DYNDISC" + dynamic_discount);
+
+					products_data[series][i].sale_price = // ** SET PRICE FUNCTION GOES HERE
+						products_data[series][i].price * ((100 - dynamic_discount) / 100);
+				}
+				// JUMP TO HERE
 				products_data[series][i].discount_percentage = 0;
 			} // saves dynamic pricing true/false
 		} else if (reset_check != undefined) {
