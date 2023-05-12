@@ -393,7 +393,7 @@ for (i in products_S) {
 	}
 	if (products_S[i].discount_percentage != 0 ) {
 		discount_percentage_on = true;
-		discount_percentage_abbvr = "DSC";
+		discount_percentage_abbvr = "DSC, " + products_S[i].discount_percentage +"%";
 	}
 
 				document.write(`
@@ -423,18 +423,17 @@ document.write(`
 <tr></tr><br>`)
 }
 
-setDiscountFilter(document.getElementById('pricingmodule_discount'), 
-function (value) {
-if (/^\d*(\.\d{0,2})?$/.test(value) == false) {
-// must be a number
-if (value >=0 && value <=1) {
-	return true;
-} else {
-return /^\d*(\.\d{0,2})?$/.test(value);}
-} else {
-return true;
-}
-})
+setDiscountFilter(document.getElementById('pricingmodule_discount'), function (value) {
+  if (/^-?\d{1,2}$/.test(value) == false) {
+    // must be a number between -99 and 99
+    return false;
+  } else if (value < -99 || value > 99) {
+    // number must be within the range of -99 and 99
+    return false;
+  } else {
+    return true;
+  }
+});
 
 
 function validateForm() {

@@ -412,21 +412,28 @@ function scrollToTop() {
 						</span> `)
 			getRatings("product_"+i, products_S[i].rating, products_S[i].reviewers)
 		
-			if (products_S[i].dynamic_pricing == true) {
-				display_price = products_S[i].sale_price;
-				console.log(display_price)
-		} else {
-			display_price = products_S[i].price;
-			console.log(display_price)
-		}
+if (products_S[i].dynamic_pricing == true) {
+  display_price = products_S[i].sale_price.toFixed(2);
+} else if (products_S[i].discount_percentage != 0) {
+  display_price = products_S[i].sale_price.toFixed(2);
+} else {
+  display_price = products_S[i].price.toFixed(2);
+}
+
+var sale_status;
+if (products_S[i].dynamic_pricing == true || products_S[i].discount_percentage != 0) {
+	sale_status="On Sale"
+} else {
+	sale_status = ""
+}
+
 			document.write(`
 			</div>
 			<h2 id="price">$${
-						display_price
-					}</h2><BR>
-          <label id ="quantitylabel" name="quantity${[
-						i,
-					]}_label">Quantity Desired</label><BR>
+				display_price}</h2><BR>
+          <label id ="quantitylabel" name="quantity${[i,]}_label">Quantity Desired</label><BR>
+		<span id="quantitytextbox[${i}]_sale" name="quantitytextbox[${i}]_sale" style="font-weight: bold; color: red;">${sale_status}</span><BR><BR>
+
           <span id="quantitytextbox[${i}]_message" name="quantitytextbox[${i}]_message">Enter a quantity</span><BR><BR>
           <input type="text" id ="quantitytextbox[${i}]" class="quantitytextbox[${i}]" name="quantitytextbox[${i}]" onload="checkQuantityTextbox(this)" onkeyup="checkQuantityTextbox(this)" ></input><BR><BR>
           <div id="qtyform">

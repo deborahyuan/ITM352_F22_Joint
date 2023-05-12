@@ -990,6 +990,14 @@ app.get("/loginsuccess", function (request, response) {
 <li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
 </ul>`);
 		}
+		if (typeof active_user != "undefined" && users[active_user].admin == true) {
+			response.write(`
+		  <ul class="nav navbar-nav">
+			  <!-- clicking this 'tab' leads to products display -->
+			  <li id="PricingModuletab"><a href="./pricingmodule">Pricing Module</a></li>
+	  </ul>`);
+	  
+		}
 		response.write(`
 			<ul class="nav navbar-nav navbar-right">
 			<ul class="nav navbar-nav">
@@ -1381,6 +1389,16 @@ app.get("/cart", function (request, response) {
 		  <!-- clicking this 'tab' leads to products display -->
   <li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
   </ul>`);
+  
+	}
+
+	if (typeof active_user != "undefined" && users[active_user].admin == true) {
+		response.write(`
+	  <ul class="nav navbar-nav">
+		  <!-- clicking this 'tab' leads to products display -->
+		  <li id="PricingModuletab"><a href="./pricingmodule">Pricing Module</a></li>
+  </ul>`);
+  
 	}
 	response.write(`
 		  <ul class="nav navbar-nav navbar-right">
