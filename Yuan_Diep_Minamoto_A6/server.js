@@ -1599,7 +1599,7 @@ function scrollToTop() {
 			quantities = request.session.cart["iPhone"];
 			products = products_data["iPhone"];
 			display_price = "";
-			if (products[i].dynamic_pricing == true) {
+			if (products[i].dynamic_pricing === true) {
 				display_price = products[i].sale_price.toFixed(2);
 			} else if (products[i].discount_percentage != 0) {
 				display_price = products[i].sale_price.toFixed(2);
@@ -1611,7 +1611,7 @@ function scrollToTop() {
 					// if quantities = 0, then skip the row
 					continue;
 				} else {
-					var extended_price = quantities[i] * products[i].price;
+					var extended_price = quantities[i] * display_price;
 					console.log(products[i].price);
 					// toFixed added to $ values to preserve cents
 					response.write(`
@@ -1662,12 +1662,20 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 		if (typeof request.session.cart["iPad"] != "undefined") {
 			quantities = request.session.cart["iPad"];
 			products = products_data["iPad"];
+			display_price = "";
+			if (products[i].dynamic_pricing == true) {
+				display_price = products[i].sale_price.toFixed(2);
+			} else if (products[i].discount_percentage != 0) {
+				display_price = products[i].sale_price.toFixed(2);
+			} else {
+				display_price = products[i].price.toFixed(2);
+			}
 			for (let i in quantities) {
 				if (quantities[i] == 0) {
 					// if quantities = 0, then skip the row
 					continue;
 				} else {
-					var extended_price = quantities[i] * products[i].price;
+					var extended_price = quantities[i] * display_price;
 					console.log(products[i].price);
 					// toFixed added to $ values to preserve cents
 					response.write(`
@@ -1679,8 +1687,8 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 	  <td align="center"><input type="number" name="cartquantitytextbox_iPad+${i}" id ="cartquantitytextbox_iPad+${i}" min="0" max="${Number(
 						products[i].quantity_available
 					)}" step="0.01" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_iPad+${i}_msg"></p></td>
-	  <td align="center">$${products[i].price.toFixed(2)}</td>
-	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
+	  <td align="center">$${display_price}</td>
+	  <td>$${(quantities[i] * display_price).toFixed(2)}</td>
 	</tr>
 	<script>
 	setInputFilter(document.getElementById("cartquantitytextbox_iPad+${i}"), 
@@ -1715,13 +1723,23 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 		if (typeof request.session.cart["Mac"] != "undefined") {
 			quantities = request.session.cart["Mac"];
 			products = products_data["Mac"];
+
+			display_price = "";
+			if (products[i].dynamic_pricing == true) {
+				display_price = products[i].sale_price.toFixed(2);
+			} else if (products[i].discount_percentage != 0) {
+				display_price = products[i].sale_price.toFixed(2);
+			} else {
+				display_price = products[i].price.toFixed(2);
+			}
+
 			for (let i in quantities) {
 				if (quantities[i] == 0) {
 					// if quantities = 0, then skip the row
 					continue;
 				} else {
-					var extended_price = quantities[i] * products[i].price;
-					console.log(products[i].price);
+					var extended_price = quantities[i] * display_price;
+					console.log(display_price);
 					// toFixed added to $ values to preserve cents
 					response.write(`
 	<tr>
@@ -1732,8 +1750,8 @@ ${Number(products[i].quantity_available) + Number(quantities[i])})
 	  <td align="center"><input type="number" name="cartquantitytextbox_Mac+${i}" id ="cartquantitytextbox_Mac+${i}" min="0" max="${Number(
 						products[i].quantity_available
 					)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_Mac+${i}_msg"></p></td>
-	  <td align="center">$${products[i].price.toFixed(2)}</td>
-	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
+	  <td align="center">$${display_price}</td>
+	  <td>$${(quantities[i] * display_price).toFixed(2)}</td>
 	</tr>
 	<script>
 	setInputFilter(document.getElementById("cartquantitytextbox_Mac+${i}"), 
