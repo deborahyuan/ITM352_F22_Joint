@@ -146,23 +146,26 @@ function formatDate(input) {
 
 	return formattedDate + formattedTime;
 }
-
-// function calculating hours elapsed between dates
 function calculateTimeDifference(start, end) {
+	start = String(start);
+	end = String(end);
 	const startDate = new Date(
-		parseInt(start.substring(4, 6)),
+		parseInt("20" + start.substring(4, 6)),
 		parseInt(start.substring(0, 2)) - 1,
 		parseInt(start.substring(2, 4)),
 		parseInt(start.substring(6, 8)),
 		parseInt(start.substring(8, 10))
 	);
+	console.log(startDate);
 	const endDate = new Date(
-		parseInt(end.substring(4, 6)),
+		parseInt("20" + end.substring(4, 6)),
 		parseInt(end.substring(0, 2)) - 1,
 		parseInt(end.substring(2, 4)),
 		parseInt(end.substring(6, 8)),
 		parseInt(end.substring(8, 10))
 	);
+
+	console.log(endDate);
 
 	const timeDiff = endDate - startDate;
 	let hours = timeDiff / (1000 * 60 * 60);
@@ -172,6 +175,55 @@ function calculateTimeDifference(start, end) {
 	const formattedHours = Number(hours.toFixed(2));
 
 	return formattedHours;
+}
+
+function setDynamicPrice(
+	products_data,
+	series,
+	records,
+	currentDate = getCurrentDate()
+) {
+	let product_id_selected = products_data[series][i].product_id;
+	console.log("CURRENT PRODUCT ID=" + product_id_selected);
+
+	if (records.hasOwnProperty(product_id_selected)) {
+		purchase_time_array = [];
+		for (let innerKey in records[product_id_selected]) {
+			console.log("INNERKEY=" + innerKey);
+
+			calulatedtimediff = calculateTimeDifference(
+				innerKey,
+				formatDate(currentDate)
+			);
+			purchase_time_array.push(calulatedtimediff); // in hours
+			console.log("ARRAYVALUE=" + purchase_time_array);
+			let smallest_time = purchase_time_array[0];
+			for (let i = 1; i < purchase_time_array.length; i++) {
+				if (purchase_time_array[i] < smallest_time) {
+					smallest_time = purchase_time_array[i];
+				}
+			}
+			console.log("SMALL" + smallest_time); // takes the smallest time gap and saves it unders smallest
+			let dynamic_discount;
+
+			if (smallest_time < 24) {
+				dynamic_discount = 0;
+			} else if (smallest_time >= 24 && smallest_time < 48) {
+				dynamic_discount = 10;
+			} else if (smallest_time >= 48 && smallest_time < 72) {
+				dynamic_discount = 30;
+			} else if (smallest_time >= 72 && smallest_time < 96) {
+				dynamic_discount = 60;
+			} else {
+				dynamic_discount = 90;
+			}
+
+			console.log("DYNDISC" + dynamic_discount);
+
+			products_data[series][i].sale_price = // ** SET PRICE FUNCTION GOES HERE
+				products_data[series][i].price * ((100 - dynamic_discount) / 100);
+		}
+	}
 }
 
 // isNonNegativeInteger tests the input for errors, then returns error messages if any, REUSED FROM ASSIGNMENT 1
@@ -1168,71 +1220,26 @@ app.post("/pricingmodule", function (request, response) {
 				products_data[series][i].dynamic_pricing = Boolean(
 					request.body[`pricingmodule_select_${series}+${i}`]
 				);
-
-				let product_id_selected = products_data[series][i].product_id;
-				console.log("CURRENT PRODUCT ID=" + product_id_selected);
-				if (records.hasOwnProperty(product_id_selected)) {
-					purchase_time_array = [];
-					for (let innerKey in records[product_id_selected]) {
-						// calculateTimeDifference(innerKey, formatDate(getCurrentDate()));
-						console.log(
-							typeof calculateTimeDifference(
-								innerKey,
-								formatDate(getCurrentDate())
-							)
-						);
-						purchase_time_array.push(
-							calculateTimeDifference(innerKey, formatDate(getCurrentDate()))
-						); // in hours
-						console.log(
-							typeof parseFloat(
-								calculateTimeDifference(innerKey, formatDate(getCurrentDate()))
-							)
-						);
-						console.log("ARRAY" + purchase_time_array);
-					}
-					let smallest_time = purchase_time_array[0];
-					for (let i = 1; i < purchase_time_array.length; i++) {
-						if (purchase_time_array[i] < smallest_time) {
-							smallest_time = purchase_time_array[i];
-						}
-					}
-					console.log("SMALL" + smallest_time); // takes the smallest time gap and saves it unders smallest
-					let dynamic_discount;
-
-					if (smallest_time < 24) {
-						dynamic_discount = 0;
-					} else if (smallest_time >= 24 && smallest_time < 48) {
-						dynamic_discount = 10;
-					} else if (smallest_time >= 48 && smallest_time < 72) {
-						dynamic_discount = 30;
-					} else if (smallest_time >= 72 && smallest_time < 96) {
-						dynamic_discount = 60;
-					} else {
-						dynamic_discount = 90;
-					}
-
-					console.log("DYNDISC" + dynamic_discount);
-
-					products_data[series][i].sale_price = // ** SET PRICE FUNCTION GOES HERE
-						products_data[series][i].price * ((100 - dynamic_discount) / 100);
-				}
-				// JUMP TO HERE
+				setDynamicPrice(
+					//setPrice as required in A6
+					products_data,
+					series,
+					records,
+					(currentDate = getCurrentDate())
+				);
 				products_data[series][i].discount_percentage = 0;
 			} // saves dynamic pricing true/false
 		} else if (reset_check != undefined) {
-			if (
-				request.body[`pricingmodule_select_${series}+${i}`] == undefined ||
-				request.body[`pricingmodule_select_${series}+${i}`] == false
-			) {
+			if (request.body[`pricingmodule_select_${series}+${i}`] == undefined) {
 				products_data[series][i].dynamic_pricing =
 					products_data[series][i].dynamic_pricing;
 				products_data[series][i].discount_percent =
 					products_data[series][i].discount_percent;
 			} else {
-				// if there is dynamic pricing checked off for the product
+				// set dynamic pricing and discount percentage to 0
 				products_data[series][i].dynamic_pricing = false;
 				products_data[series][i].discount_percentage = 0;
+				products_data[series][i].sale_price = products_data[series][i].price;
 			} // saves dynamic pricing true/false
 		} else {
 			console.log("errors");

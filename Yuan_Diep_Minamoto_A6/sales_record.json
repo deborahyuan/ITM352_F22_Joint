@@ -1,18 +1,18 @@
 {
 	"101": {
-		"0512230446": {
+		"0510230450": {
 			"product_id": 101,
-			"quantity": 38,
-			"date_sold": "5/10/2023 4:46AM",
+			"quantity": 45,
+			"date_sold": "5/10/2023 4:50AM",
 			"customer_id": "itm352@hawaii.edu"
 		},
-		"0512230447": {
+		"0510230447": {
 			"product_id": 101,
 			"quantity": 37,
-			"date_sold": "5/09/2023 4:47AM",
+			"date_sold": "5/10/2023 4:47AM",
 			"customer_id": "itm352@hawaii.edu"
 		},
-		"0512230512": {
+		"0507230512": {
 			"product_id": 101,
 			"quantity": 35,
 			"date_sold": "5/07/2023 5:12AM",
