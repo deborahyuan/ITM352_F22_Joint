@@ -234,6 +234,13 @@ loadJSON("get_user_data", function (response) {
 				<!-- clicking this 'tab' leads to products display -->
       <li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
 	</ul>`);
+} if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
+					document.write(`
+			<ul class="nav navbar-nav">
+				<!-- clicking this 'tab' leads to products display -->
+      <li id="PricingModuletab"><a href="./pricingmodule">Pricing Module</a></li>
+	</ul>`)
+	;
 }
 				</script>
 			<ul class="nav navbar-nav navbar-right">

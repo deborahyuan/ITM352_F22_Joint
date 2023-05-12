@@ -57,6 +57,7 @@ var proddisplay = __dirname + "/products_display.html";
 var index = __dirname + "/index.html";
 var manageUser = __dirname + "/manageusers.html";
 var manageProd = __dirname + "/manageproducts.html";
+var pricingMod = __dirname + "/pricingmodule.html";
 
 if (fs.existsSync(fname)) {
 	// file syncing/rewriting for user registration info
@@ -270,6 +271,30 @@ app.get("/manageproducts", function (request, response) {
 		active_user = request.cookies["activeuser"];
 		if (users[active_user].admin == true) {
 			response.sendFile(manageProd);
+		} else {
+			response.redirect("/products_display");
+		}
+	}
+});
+
+// GOES TO MANAGE USERS IF ADMIN
+app.get("/pricingmodule", function (request, response) {
+	if (
+		typeof request.session.invoice != "undefined" ||
+		request.session.invoice == true
+	) {
+		request.session.destroy(); // ends session
+	}
+
+	if (
+		typeof request.cookies["activeuser"] == "undefined" ||
+		request.cookies["activeuser"] == ""
+	) {
+		response.redirect("/products_display");
+	} else {
+		active_user = request.cookies["activeuser"];
+		if (users[active_user].admin == true) {
+			response.sendFile(pricingMod);
 		} else {
 			response.redirect("/products_display");
 		}
@@ -997,6 +1022,29 @@ app.get("/loginsuccess", function (request, response) {
 
 // ADMIN PAGES, MANAGE PRODUCTS
 app.post("/manageproducts", function (request, response) {
+	series = request.body[`series`];
+	console.log("SERIES=" + series);
+	for (i in products_data[series]) {
+		products_data[series][i].name =
+			request.body[`manageproducts_name_${series}+${i}`]; // saves new name available
+		products_data[series][i].quantity_available = Number(
+			request.body[`manageproducts_quantAvail_${series}+${i}`]
+		); // saves new quantities available
+		products_data[series][i].quantity_sold = Number(
+			request.body[`manageproducts_quantSold_${series}+${i}`]
+		); // saves new quantities sold
+		products_data[series][i].price = Number(
+			request.body[`manageproducts_price_${series}+${i}`]
+		); // saves new quantities sold
+	}
+	products = products_data;
+	let proddata = JSON.stringify(products);
+	fs.writeFileSync(prodname, proddata, "utf-8");
+
+	response.redirect("/manageproducts");
+});
+// ADMIN PAGES, PRICING MODULE
+app.post("/pricingmodule", function (request, response) {
 	series = request.body[`series`];
 	console.log("SERIES=" + series);
 	for (i in products_data[series]) {

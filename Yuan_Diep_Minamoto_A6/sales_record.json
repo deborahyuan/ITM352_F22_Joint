@@ -1,0 +1,134 @@
+{
+	"iPhone": [
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		}
+	],
+	"iPad": [
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		}
+	],
+	"Mac": [
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		},
+		{
+			"item_id": "item_id",
+			"customer_id": "customer_id",
+			"date_sold": "date_sold",
+			"quantity": "quantity",
+			"price": "price"
+		}
+	]
+}

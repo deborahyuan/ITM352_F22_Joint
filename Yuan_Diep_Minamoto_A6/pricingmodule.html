@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <!-- 
-Manage Users for Assignment3
+Manage Products for Assignment3
 Author: Deborah Yuan
 Date: 12/18/22
-Desc: This html page is exclusively accessible to those with admin status. Here, they can manage users.
+Desc: This html page is exclusively accessible to those with admin status. Here, they can manage products.
 -->
+
 <!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
 
 <head>
@@ -13,7 +14,7 @@ Desc: This html page is exclusively accessible to those with admin status. Here,
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Invoice</title>
+<title>Pricing Module</title>
 
 <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -166,6 +167,7 @@ loadJSON('get_cart', function (response) {
 			}
 			});
 
+
 loadJSON("get_products_data", function (response) {
 			// Parsing JSON string into object
 			products = JSON.parse(response);
@@ -223,16 +225,17 @@ loadJSON("get_user_data", function (response) {
 					document.write(`
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
-      <li id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
+      <li class="active" id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
 	</ul>`);
 					}
 				if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
 					document.write(`
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
-      <li class="active" id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
-	</ul>`);
-} if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
+      <li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
+	</ul>`)
+	;
+}				if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
 					document.write(`
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
@@ -318,63 +321,113 @@ behavior: "smooth"
 </script>
 
 
-<h1 class="invoiceheader" style="text-align: center">Manage Users</script></h1>
-<h2 style="text-align: center">Update, Edit, or Delete User Accounts here</h2>
+<h1 class="invoiceheader" style="text-align: center">Pricing Module for <script>if (typeof series != "undefined") {
+    document.write (`${series}s`)}
+    else {
+    document.write (`Products`)}</script></h1>
+<h2 style="text-align: center">Update product stock here</h2>
+<BR>
+    <div class="dropdown-outer">
+    <div class="dropdown" style="margin: auto" >
+        <button id="button1">Hover to select a product series</button>
+        <div class="dropdown-content">
+        <a href="/manageproducts?series=iPhone">iPhone</a>
+        <a href="/manageproducts?series=iPad">iPad</a>
+        <a href="/manageproducts?series=Mac">Mac</a>
+        </div>
+      </div>
+    </div>
       <BR>
  
 
 <script>
 
-document.write(`
+if (params.has(`series`)) {
+			let products_S = products[series]; // new product variable that accounts for the series
+			document.write(`
 <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
 	<tbody>
 	  <thead>
 	  <tr>
-		<th>Username/Email</th>
-		<th>Full Name</th>
-		<th>Password</th>
-		<th>Admin Status <BR>(type 'true' for admin)</th>
-		<th>Delete User <BR>(type 'yes' to delete)</th>
+		<th align="center">Image</th>
+		<th>Item Name</th>
+		<th>Current Stock</th>
+        <th>Quantity Sold</th>
+		<th>Cost of Item ($)</th>
 	  </tr>
 	</thead>
-<form name='manage_users_form' action="/manageusers" method="POST">
+<form name='pricing_module_form' action="/pricingmodule" method="POST">
+<input type="hidden" name="series" value=${series}>
   <!-- start of the form -->`);
 
-
-  let users_list = Object.values(userdata);
-  let users_array = [];
-  console.log("USERS_LIST="+users_list)
-
-  //push the object from params for quantities into an array called arry
-  users_list.forEach(function (value, key) {
-    users_array.push(value);
-  })
-  console.log("USERS_ARRAY="+users_array)
-
-
-for (username in userdata) {
-	username_list = userdata[username].fullname
-	console.log("USERNAME="+userdata[username].fullname)
+for (i in products_S) {
+    console.log("PRODUCTSS="+products.name)
+    console.log("PRODUCTSS="+products_S[0].name)
+    console.log("PRODUCTSS="+products_S[1].name)
 
 				document.write(`
 <tr>
-	<td><input type="text" name='manageusers_username_${userdata[username].username}' id ='manageusers_username_${userdata[username].username}' value="${userdata[username].username}"></input></td>
-	<td><input type="text" name='manageusers_fullname_${userdata[username].username}' id ='manageusers_fullname_${userdata[username].username}' value="${userdata[username].fullname}"></input></td>
-	<td><input type="text" name='manageusers_password_${userdata[username].username}' id ='manageusers_password_${userdata[username].username}' value="${userdata[username].password}"></input></td>
-	<td><input type="text" name='manageusers_admin_${userdata[username].username}' id ='manageusers_admin_${userdata[username].username}' value="${userdata[username].admin}"></input></td>
-	<td><input type="text" name='manageusers_delete_${userdata[username].username}' id ='manageusers_delete_${userdata[username].username}' value=""></input></td>
-</tr>
-`)
+<td align="center"><img src="${
+    products_S[i].image
+				}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+<td><input type="text" name='manageproducts_name_${series}+${i}' id ='manageproducts_name_${series}+${i}' value="${products_S[i].name}"></input></td>
+<td align="center"><input type="number" name='manageproducts_quantAvail_${series}+${i}' id ='manageproducts_quantAvail_${series}+${i}' min="0"
+					)}" step="1" value="${products_S[i].quantity_available}""></input></td>
+<td align="center"><input type="number" name='manageproducts_quantSold_${series}+${i}' id ='manageproducts_quantSold_${series}+${i}' min="0"
+					)}" step="1" value="${products_S[i].quantity_sold}"></input></td>
+<td align="left"><input type="number" name='manageproducts_price_${series}+${i}' id ='manageproducts_price_${series}+${i}' min="0"
+					)}" step=".01" value="${products_S[i].price}"></input></td>
+</tr>`)
+
+setProductInputFilter(document.getElementById('manageproducts_quantAvail_'+series+'+'+i), 
+function (value) {
+if (/^(\s*|\d+)$/
+.test(value) == false) {
+// must be a number
+return /^(\s*|\d+)$/.test(value);
+} else if (/^-?\d*$/.test(value) == false) {
+// must be an integer
+return /^-?\d*$/.test(value);
+} else if (/^\d*$/.test(value) == false) {
+// must be a non negative integer
+return /^\d*$/.test(value);
+} else {
+return true;
 }
-document.write(`
-<tr>
-	<td><B>New User's Username</B><BR><input type="text" name='manageusers_username_new' id ='manageusers_username_new' value=""></input></td>
-	<td><B>New User's Full Name</B><BR><input type="text" name='manageusers_fullname_new' id ='manageusers_fullname_new' value=""></input></td>
-	<td><B>New User's Password</B><BR><input type="text" name='manageusers_password_new' id ='manageusers_password_new' value=""></input></td>
-	<td><B>New User's Admin Status</B><BR><input type="text" name='manageusers_admin_new' id ='manageusers_admin_new' value=""></input></td>
-	<td><B>Type 'yes' to add</B><BR><input type="text" name='manageusers_add_new' id ='manageusers_add_new' value=""></input></td>
-</tr>
-`)
+}, 
+Number(products_S[i].quantity_available))
+
+setProductInputFilter(document.getElementById('manageproducts_quantSold_'+series+'+'+i), 
+function (value) {
+if (/^(\s*|\d+)$/
+.test(value) == false) {
+// must be a number
+return /^(\s*|\d+)$/.test(value);
+} else if (/^-?\d*$/.test(value) == false) {
+// must be an integer
+return /^-?\d*$/.test(value);
+} else if (/^\d*$/.test(value) == false) {
+// must be a non negative integer
+return /^\d*$/.test(value);
+} else {
+return true;
+}
+})
+
+setPriceInputFilter(document.getElementById('manageproducts_price_'+series+'+'+i), 
+function (value) {
+if (/^\d*(\.\d{0,2})?$/
+.test(value) == false) {
+// must be a number
+return /^\d*(\.\d{0,2})?$/.test(value);
+} else {
+return true;
+}
+})
+}
+
+
+
 
 document.write(`
 <tr>
@@ -383,6 +436,12 @@ document.write(`
 	  </form>
 	   </td>
 	  </tr>`)
+}
+
+
+
+
+
 </script>
 	</tbody>
   </table>
