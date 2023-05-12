@@ -1048,23 +1048,27 @@ app.post("/pricingmodule", function (request, response) {
 	series = request.body[`series`];
 	console.log("SERIES=" + series);
 	for (i in products_data[series]) {
-		products_data[series][i].name =
-			request.body[`manageproducts_name_${series}+${i}`]; // saves new name available
-		products_data[series][i].quantity_available = Number(
-			request.body[`manageproducts_quantAvail_${series}+${i}`]
-		); // saves new quantities available
-		products_data[series][i].quantity_sold = Number(
-			request.body[`manageproducts_quantSold_${series}+${i}`]
-		); // saves new quantities sold
-		products_data[series][i].price = Number(
-			request.body[`manageproducts_price_${series}+${i}`]
-		); // saves new quantities sold
+		console.log(
+			"dynprice=" + request.body[`pricingmodule_select_${series}+${i}`]
+		);
+		let testing = request.body[`pricingmodule_select_${series}+${i}`];
+		console.log(testing);
+		if (
+			request.body[`pricingmodule_select_${series}+${i}`] == undefined ||
+			request.body[`pricingmodule_select_${series}+${i}`] == false
+		) {
+			products_data[series][i].dynamic_pricing = false;
+		} else {
+			products_data[series][i].dynamic_pricing = Boolean(
+				request.body[`pricingmodule_select_${series}+${i}`]
+			);
+		} // saves dynamic pricing true/false
 	}
 	products = products_data;
 	let proddata = JSON.stringify(products);
 	fs.writeFileSync(prodname, proddata, "utf-8");
 
-	response.redirect("/manageproducts");
+	response.redirect("/pricingmodule");
 });
 
 // ADMIN PAGES, MANAGE PRODUCTS

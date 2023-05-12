@@ -60,97 +60,6 @@ if (typeof getCookie("activeuser") != "undefined") {
 		active_user = getCookie("activeuser")
 				}}
 
-    // HEAVILY MODIFIED, inspired by emkey08's response (https://stackoverflow.com/questions/469357/html-text-input-allow-only-numeric-input)
-function setProductInputFilter(textbox, inputFilter) {
-	["focusout", "blur"].forEach(function (event) {
-		textbox.addEventListener(event, function (e) {
-			this.setCustomValidity("");
-		});
-	});
-	[
-		"input",
-		"keydown",
-		"keyup",
-		"mousedown",
-		"mouseup",
-		"change",
-		"contextmenu",
-		"drop",
-		"focusin",
-	].forEach(function (event) {
-		textbox.addEventListener(event, function (e) {
-			if (inputFilter(this.value) || this.value == "") {
-				// Accepted value
-				if (["onclick", "keydown", "mousedown", "keyup"].indexOf(e.type) >= 0) {
-					this.classList.remove("input-error");
-					this.setCustomValidity("");
-				}
-				this.oldValue = this.value;
-			} else if (this.hasOwnProperty("oldValue")) {
-				// Rejected value
-				this.classList.add("input-error");
-				if (/^(\s*|\d+)$/.test(this.value) == false) {
-					// must be a number
-					errMsg = "Not a Number!";
-				} else if (/^-?\d*$/.test(this.value) == false) {
-					// must be an integer
-					errMsg = "Not an Integer!";
-				} else if (/^\d*$/.test(this.value) == false) {
-					// must be a non negative integer
-					errMsg = "Can't be negative!";
-				} else {
-					errMsg = "";
-					this.classList.remove("input-error");
-				}
-				this.setCustomValidity(errMsg);
-				this.reportValidity();
-			}
-		});
-	});
-}
-
- // HEAVILY MODIFIED, inspired by emkey08's response (https://stackoverflow.com/questions/469357/html-text-input-allow-only-numeric-input)
- function setPriceInputFilter(textbox, inputFilter) {
-	["focusout", "blur"].forEach(function (event) {
-		textbox.addEventListener(event, function (e) {
-			this.setCustomValidity("");
-		});
-	});
-	[
-		"input",
-		"keydown",
-		"keyup",
-		"mousedown",
-		"mouseup",
-		"change",
-		"contextmenu",
-		"drop",
-		"focusin",
-	].forEach(function (event) {
-		textbox.addEventListener(event, function (e) {
-			if (inputFilter(this.value) || this.value == "") {
-				// Accepted value
-				if (["onclick", "keydown", "mousedown", "keyup"].indexOf(e.type) >= 0) {
-					this.classList.remove("input-error");
-					this.setCustomValidity("");
-				}
-				this.oldValue = this.value;
-			} else if (this.hasOwnProperty("oldValue")) {
-				// Rejected value
-				this.classList.add("input-error");
-				if (/^\d*(\.\d{0,2})?$/.test(this.value) == false) {
-					// must be a number
-					errMsg = "Not a valid price!";
-				}  else {
-					errMsg = "";
-					this.classList.remove("input-error");
-				}
-				this.setCustomValidity(errMsg);
-				this.reportValidity();
-			}
-		});
-	});
-}
 </script>
 
 </head>
@@ -225,7 +134,7 @@ loadJSON("get_user_data", function (response) {
 					document.write(`
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
-      <li class="active" id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
+      <li  id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
 	</ul>`);
 					}
 				if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
@@ -239,7 +148,7 @@ loadJSON("get_user_data", function (response) {
 					document.write(`
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
-      <li id="PricingModuletab"><a href="./pricingmodule">Pricing Module</a></li>
+      <li class="active" id="PricingModuletab"><a href="./pricingmodule">Pricing Module</a></li>
 	</ul>`)
 	;
 }
@@ -331,9 +240,9 @@ behavior: "smooth"
     <div class="dropdown" style="margin: auto" >
         <button id="button1">Hover to select a product series</button>
         <div class="dropdown-content">
-        <a href="/manageproducts?series=iPhone">iPhone</a>
-        <a href="/manageproducts?series=iPad">iPad</a>
-        <a href="/manageproducts?series=Mac">Mac</a>
+        <a href="/pricingmodule?series=iPhone">iPhone</a>
+        <a href="/pricingmodule?series=iPad">iPad</a>
+        <a href="/pricingmodule?series=Mac">Mac</a>
         </div>
       </div>
     </div>
@@ -349,6 +258,7 @@ if (params.has(`series`)) {
 	<tbody>
 	  <thead>
 	  <tr>
+		<th align="center">Select</th>
 		<th align="center">Image</th>
 		<th>Item Name</th>
 		<th>Current Stock</th>
@@ -362,70 +272,28 @@ if (params.has(`series`)) {
 
 for (i in products_S) {
     console.log("PRODUCTSS="+products.name)
-    console.log("PRODUCTSS="+products_S[0].name)
-    console.log("PRODUCTSS="+products_S[1].name)
+	var string_value = ""; 
+	if (products_S[i].dynamic_pricing == true) {
+		string_value = '"'+products_S[i].dynamic_pricing+'" checked'
+		console.log('its checked'+ products_S[i].dynamic_pricing)
+	} else {
+		string_value = '"'+products_S[i].dynamic_pricing+'"'
+		console.log('its not checked'+ products_S[i].dynamic_pricing)
+	}
 
 				document.write(`
 <tr>
+<td align="center"><input type="checkbox" name='pricingmodule_select_${series}+${i}' id ='pricingmodule_select_${series}+${i}' value=${string_value}></input></td>
 <td align="center"><img src="${
     products_S[i].image
-				}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
-<td><input type="text" name='manageproducts_name_${series}+${i}' id ='manageproducts_name_${series}+${i}' value="${products_S[i].name}"></input></td>
-<td align="center"><input type="number" name='manageproducts_quantAvail_${series}+${i}' id ='manageproducts_quantAvail_${series}+${i}' min="0"
-					)}" step="1" value="${products_S[i].quantity_available}""></input></td>
-<td align="center"><input type="number" name='manageproducts_quantSold_${series}+${i}' id ='manageproducts_quantSold_${series}+${i}' min="0"
+				}" class="img-responsive" style="width:100%; height:auto;" alt="Image"></td>
+<td><input type="text" name='pricingmodule_name_${series}+${i}' id ='pricingmodule_name_${series}+${i}' value="${products_S[i].name}"></input></td>
+<td align="center"><p>${products_S[i].quantity_available}</p></td>
+<td align="center"><input type="number" name='pricingmodule_quantSold_${series}+${i}' id ='pricingmodule_quantSold_${series}+${i}' min="0"
 					)}" step="1" value="${products_S[i].quantity_sold}"></input></td>
-<td align="left"><input type="number" name='manageproducts_price_${series}+${i}' id ='manageproducts_price_${series}+${i}' min="0"
+<td align="left"><input type="number" name='pricingmodule_price_${series}+${i}' id ='pricingmodule_price_${series}+${i}' min="0"
 					)}" step=".01" value="${products_S[i].price}"></input></td>
-</tr>`)
-
-setProductInputFilter(document.getElementById('manageproducts_quantAvail_'+series+'+'+i), 
-function (value) {
-if (/^(\s*|\d+)$/
-.test(value) == false) {
-// must be a number
-return /^(\s*|\d+)$/.test(value);
-} else if (/^-?\d*$/.test(value) == false) {
-// must be an integer
-return /^-?\d*$/.test(value);
-} else if (/^\d*$/.test(value) == false) {
-// must be a non negative integer
-return /^\d*$/.test(value);
-} else {
-return true;
-}
-}, 
-Number(products_S[i].quantity_available))
-
-setProductInputFilter(document.getElementById('manageproducts_quantSold_'+series+'+'+i), 
-function (value) {
-if (/^(\s*|\d+)$/
-.test(value) == false) {
-// must be a number
-return /^(\s*|\d+)$/.test(value);
-} else if (/^-?\d*$/.test(value) == false) {
-// must be an integer
-return /^-?\d*$/.test(value);
-} else if (/^\d*$/.test(value) == false) {
-// must be a non negative integer
-return /^\d*$/.test(value);
-} else {
-return true;
-}
-})
-
-setPriceInputFilter(document.getElementById('manageproducts_price_'+series+'+'+i), 
-function (value) {
-if (/^\d*(\.\d{0,2})?$/
-.test(value) == false) {
-// must be a number
-return /^\d*(\.\d{0,2})?$/.test(value);
-} else {
-return true;
-}
-})
-}
-
+</tr>`)}
 
 
 
