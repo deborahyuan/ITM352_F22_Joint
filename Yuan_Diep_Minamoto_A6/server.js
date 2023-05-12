@@ -14,6 +14,9 @@ var cookieParser = require("cookie-parser");
 // require products data // ASSIGNMENT 3 EXAMPLE CODE
 products_data = require("./products.json");
 
+// require sales_record // ASSIGNMENT 6
+salesrecord_data = require("./sales_record.json");
+
 // require products data // ASSIGNMENT 3 EXAMPLE CODE
 user_data = require("./user_registration_info.json");
 
@@ -58,6 +61,7 @@ var index = __dirname + "/index.html";
 var manageUser = __dirname + "/manageusers.html";
 var manageProd = __dirname + "/manageproducts.html";
 var pricingMod = __dirname + "/pricingmodule.html";
+var recordname = __dirname + "/sales_record.json";
 
 if (fs.existsSync(fname)) {
 	// file syncing/rewriting for user registration info
@@ -89,9 +93,21 @@ if (fs.existsSync(actname)) {
 	console.log("Sorry file " + actname + " does not exist.");
 	actusers = {};
 }
+
 var regErrors = {}; // empty error object for errors in edit account and register pages
 
 var totalItems = 0;
+
+if (fs.existsSync(recordname)) {
+	// file syncing/rewriting for sale_records
+	recorddata = fs.readFileSync(recordname, "utf-8");
+	records = JSON.parse(recorddata);
+	console.log(records);
+	console.log("LENGTH" + records.length);
+} else {
+	console.log("Sorry file " + recordname + " does not exist.");
+	records = {};
+}
 
 /* FUNCTIONS */
 
@@ -1043,26 +1059,87 @@ app.post("/manageproducts", function (request, response) {
 
 	response.redirect("/manageproducts");
 });
+
 // ADMIN PAGES, PRICING MODULE
 app.post("/pricingmodule", function (request, response) {
 	series = request.body[`series`];
 	console.log("SERIES=" + series);
+	var dynamic_pricing = false;
+	var discount_percent = request.body[`pricingmodule_discount`];
+	var reset_check = request.body[`pricingmodule_reset`];
+
+	console.log("discount_percent =" + request.body[`pricingmodule_discount`]);
+	console.log("dynamic? =" + request.body[`pricingmodule_dynamic`]);
+	console.log("reset? =" + request.body[`pricingmodule_reset`]);
+
+	if (request.body[`pricingmodule_dynamic`] == undefined) {
+		dynamic_pricing = false;
+	} else {
+		dynamic_pricing = true;
+	}
+
 	for (i in products_data[series]) {
 		console.log(
 			"dynprice=" + request.body[`pricingmodule_select_${series}+${i}`]
 		);
-		let testing = request.body[`pricingmodule_select_${series}+${i}`];
-		console.log(testing);
+
 		if (
-			request.body[`pricingmodule_select_${series}+${i}`] == undefined ||
-			request.body[`pricingmodule_select_${series}+${i}`] == false
+			dynamic_pricing == false &&
+			discount_percent != undefined &&
+			reset_check == undefined
 		) {
-			products_data[series][i].dynamic_pricing = false;
+			// if there is a discount_percent
+			if (request.body[`pricingmodule_select_${series}+${i}`] == undefined) {
+				// discount was whatever it was before
+				console.log(
+					"no discount" + products_data[series][i].discount_percentage
+				);
+				products_data[series][i].discount_percentage =
+					products_data[series][i].discount_percentage;
+			} else {
+				products_data[series][i].discount_percentage = discount_percent; // saves the percent to product file
+				products_data[series][i].sale_price.toFixed(2) =
+					products_data[series][i].price * ((100 - discount_percent) / 100);
+				products_data[series][i].dynamic_pricing = false;
+				console.log(
+					"yes discount" + products_data[series][i].discount_percentage
+				);
+			} // saves dynamic pricing true/false
+		} else if (dynamic_pricing == true) {
+			if (
+				request.body[`pricingmodule_select_${series}+${i}`] == undefined ||
+				request.body[`pricingmodule_select_${series}+${i}`] == false
+			) {
+				products_data[series][i].dynamic_pricing =
+					products_data[series][i].dynamic_pricing;
+			} else {
+				// if there is dynamic pricing checked off for the product
+				products_data[series][i].dynamic_pricing = Boolean(
+					request.body[`pricingmodule_select_${series}+${i}`]
+				);
+				products_data[series][i].sale_price.toFixed(2) = // ** SET PRICE FUNCTION GOES HERE
+					products_data[series][i].price - 100;
+				products_data[series][i].discount_percentage = 0;
+			} // saves dynamic pricing true/false
+		} else if (reset_check != undefined) {
+			if (
+				request.body[`pricingmodule_select_${series}+${i}`] == undefined ||
+				request.body[`pricingmodule_select_${series}+${i}`] == false
+			) {
+				products_data[series][i].dynamic_pricing =
+					products_data[series][i].dynamic_pricing;
+				products_data[series][i].discount_percent =
+					products_data[series][i].discount_percent;
+			} else {
+				// if there is dynamic pricing checked off for the product
+				products_data[series][i].dynamic_pricing = false;
+				products_data[series][i].discount_percentage = 0;
+			} // saves dynamic pricing true/false
 		} else {
-			products_data[series][i].dynamic_pricing = Boolean(
-				request.body[`pricingmodule_select_${series}+${i}`]
-			);
-		} // saves dynamic pricing true/false
+			console.log("errors");
+		}
+		// blahblah = products_data[series][i]
+		// function ()
 	}
 	products = products_data;
 	let proddata = JSON.stringify(products);
@@ -1744,6 +1821,7 @@ app.post("/toinvoice", function (request, response, next) {
 		response.redirect("/login");
 	} else {
 		active_user = request.cookies["activeuser"];
+		// Whenever logged in customer makes purchase record the cart's prod_data to sales_record.json
 
 		// Modified code from Assignment 3 Examples (Dan Port)
 		var invoice_str = `Thank you ${users[active_user].fullname} for your order!

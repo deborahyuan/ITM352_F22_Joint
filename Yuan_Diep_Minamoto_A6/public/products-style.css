@@ -324,3 +324,10 @@ h2.underlinecss:hover:after {
 	color: #ffffff;
 	background-color: #00a4bd;
 }
+
+.center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+}

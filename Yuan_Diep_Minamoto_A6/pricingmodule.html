@@ -225,6 +225,50 @@ behavior: "smooth"
 });
 }
 
+// HEAVILY MODIFIED, inspired by emkey08's response (https://stackoverflow.com/questions/469357/html-text-input-allow-only-numeric-input)
+function setDiscountFilter(textbox, inputFilter) {
+	["focusout", "blur"].forEach(function (event) {
+		textbox.addEventListener(event, function (e) {
+			this.setCustomValidity("");
+		});
+	});
+	[
+		"input",
+		"keydown",
+		"keyup",
+		"mousedown",
+		"mouseup",
+		"change",
+		"contextmenu",
+		"drop",
+		"focusin",
+	].forEach(function (event) {
+		textbox.addEventListener(event, function (e) {
+			if (inputFilter(this.value) || this.value == "") {
+				// Accepted value
+				if (["onclick", "keydown", "mousedown", "keyup"].indexOf(e.type) >= 0) {
+					this.classList.remove("input-error");
+					this.setCustomValidity("");
+				}
+				this.oldValue = this.value;
+			} else if (this.hasOwnProperty("oldValue")) {
+				// Rejected value
+				this.classList.add("input-error");
+				if (/^\d*(\.\d{0,2})?$/.test(this.value) == false) {
+					// must be a number
+					errMsg = "Not a number!";
+				}  else if ( /^(0(\.\d+)?|1(\.0+)?)$/.test(this.value) == false) {
+					errMsg = "Not a percentage!";
+				} else {
+					errMsg = "";
+					this.classList.remove("input-error");
+				}
+				this.setCustomValidity(errMsg);
+				this.reportValidity();
+			}
+		});
+	});
+}
 
 
 </script>
@@ -254,8 +298,65 @@ behavior: "smooth"
 if (params.has(`series`)) {
 			let products_S = products[series]; // new product variable that accounts for the series
 			document.write(`
+			<form onsubmit="return validateForm()" name='pricing_module_form' action="/pricingmodule" method="POST">
+<input type="hidden" name="series" value=${series}>
+  <!-- start of the form -->
+	<div class="center">
+  <h3>Select all (*)
+    <input type="checkbox" name='pricingmodule_selectall_${series}' id ='pricingmodule_selectall_${series}' onchange='pricingmodule_selectall(this)'></input>  
+	</h3>
+</div>
+	<div class="center">
+	<h4>Discount % <input type="textbox" name='pricingmodule_discount' id ='pricingmodule_discount'></input></h4> </h4>
+	</div>
+	<div class="center">
+	<h4>Dynamic Pricing  <input type="checkbox" name='pricingmodule_dynamic' id ='pricingmodule_dynamic'></input></h4>
+	</div>
+	<div class="center">
+	<h4>Reset All Discounts  <input type="checkbox" name='pricingmodule_reset' id ='pricingmodule_reset'></input></h4>
+	</div>
+	`)
+
+	function pricingmodule_selectall(source) {
+		var checkboxes = document.querySelectorAll('input[type="checkbox"].product-checkbox');
+  for (var i = 0; i < checkboxes.length; i++) {
+    if (checkboxes[i] !== source) {
+      checkboxes[i].checked = source.checked;
+    }
+  }
+}
+
+const dynamicPricingCheckbox = document.getElementById('pricingmodule_dynamic');
+const discountPercentageTextbox = document.getElementById('pricingmodule_discount');
+const resetCheckbox = document.getElementById('pricingmodule_reset');
+
+dynamicPricingCheckbox.addEventListener('change', function() {
+  if (this.checked) {
+    discountPercentageTextbox.value = '';
+	resetCheckbox.checked = false;
+  }
+});
+
+discountPercentageTextbox.addEventListener('input', function() {
+	dynamicPricingCheckbox.checked = false;
+	resetCheckbox.checked = false;
+});
+
+resetCheckbox.addEventListener('change', function() {
+  if (this.checked) {
+    discountPercentageTextbox.value = '';
+	dynamicPricingCheckbox.checked = false;
+  }
+});
+
+
+
+document.write(`
+
+</div>
 <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
-	<tbody>
+	
+
 	  <thead>
 	  <tr>
 		<th align="center">Select</th>
@@ -263,12 +364,12 @@ if (params.has(`series`)) {
 		<th>Item Name</th>
 		<th>Current Stock</th>
         <th>Quantity Sold</th>
-		<th>Cost of Item ($)</th>
+		<th>Original Cost of Item ($)</th>
+		<th>Discounted Cost of Item ($)</th>
+		<th>Price Adjustment Applied</th>
 	  </tr>
 	</thead>
-<form name='pricing_module_form' action="/pricingmodule" method="POST">
-<input type="hidden" name="series" value=${series}>
-  <!-- start of the form -->`);
+`);
 
 for (i in products_S) {
     console.log("PRODUCTSS="+products.name)
@@ -281,34 +382,78 @@ for (i in products_S) {
 		console.log('its not checked'+ products_S[i].dynamic_pricing)
 	}
 
+	var dynamic_pricing_on = false;
+ 	var discount_percentage_on = false;
+	var dynamic_pricing_abbvr = "";
+	var discount_percentage_abbvr = "";
+	
+	if (products_S[i].dynamic_pricing == true) {
+		dynamic_pricing_on = true;
+		dynamic_pricing_abbvr = "DYN";
+	}
+	if (products_S[i].discount_percentage != 0 ) {
+		discount_percentage_on = true;
+		discount_percentage_abbvr = "DSC";
+	}
+
 				document.write(`
+<tbody>
 <tr>
-<td align="center"><input type="checkbox" name='pricingmodule_select_${series}+${i}' id ='pricingmodule_select_${series}+${i}' value=${string_value}></input></td>
+<td align="center"><input type="checkbox" name='pricingmodule_select_${series}+${i}' id ='pricingmodule_select_${series}+${i}' class="product-checkbox"></input></td>
 <td align="center"><img src="${
     products_S[i].image
-				}" class="img-responsive" style="width:100%; height:auto;" alt="Image"></td>
-<td><input type="text" name='pricingmodule_name_${series}+${i}' id ='pricingmodule_name_${series}+${i}' value="${products_S[i].name}"></input></td>
+				}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+<td><p>${products_S[i].name}</p></td>
 <td align="center"><p>${products_S[i].quantity_available}</p></td>
-<td align="center"><input type="number" name='pricingmodule_quantSold_${series}+${i}' id ='pricingmodule_quantSold_${series}+${i}' min="0"
-					)}" step="1" value="${products_S[i].quantity_sold}"></input></td>
-<td align="left"><input type="number" name='pricingmodule_price_${series}+${i}' id ='pricingmodule_price_${series}+${i}' min="0"
-					)}" step=".01" value="${products_S[i].price}"></input></td>
+<td align="center"><p>${products_S[i].quantity_sold}</p></td>
+<td align="left"><p>${products_S[i].price}</p></td>
+<td align="left"><p>${products_S[i].sale_price}</p></td>
+<td align="left"><p>${discount_percentage_abbvr}<br>${dynamic_pricing_abbvr}</p></td>
 </tr>`)}
 
 
 
 document.write(`
 <tr>
-		<td style="text-align: center;" colspan="5" width="100%">
+		<td style="text-align: center;" colspan="8" width="100%">
 	  <input type="submit" value='   Update' id="button2"; class="button" style="min-width: 20%"></input>
 	  </form>
 	   </td>
-	  </tr>`)
+	  </tr>
+<tr></tr><br>`)
 }
 
+setDiscountFilter(document.getElementById('pricingmodule_discount'), 
+function (value) {
+if (/^\d*(\.\d{0,2})?$/.test(value) == false) {
+// must be a number
+if (value >=0 && value <=1) {
+	return true;
+} else {
+return /^\d*(\.\d{0,2})?$/.test(value);}
+} else {
+return true;
+}
+})
 
 
+function validateForm() {
+  let discountInput = document.getElementById("pricingmodule_discount");
+  let dynamicCheckbox = document.getElementById("pricingmodule_dynamic");
+  let resetCheckbox = document.getElementById("pricingmodule_reset");
+  let checkboxes = document.querySelectorAll('input[type="checkbox"].product-checkbox');
 
+  if (discountInput.value === "" && dynamicCheckbox.checked === false && resetCheckbox.checked === false) {
+    alert("Please enter a discount percentage or select dynamic pricing.");
+  } else if (checkboxes.length > 0 && !Array.prototype.slice.call(checkboxes).some(function (el) {
+    return el.checked;
+  })) {
+    alert("At least one product must be selected");
+    return false;
+  }
+
+  return true;
+}
 
 </script>
 	</tbody>

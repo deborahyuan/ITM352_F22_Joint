@@ -327,7 +327,7 @@ behavior: "smooth"
 
 document.write(`
 <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
-	<tbody>
+
 	  <thead>
 	  <tr>
 		<th>Username/Email</th>
@@ -357,6 +357,7 @@ for (username in userdata) {
 	console.log("USERNAME="+userdata[username].fullname)
 
 				document.write(`
+				<tbody>
 <tr>
 	<td><input type="text" name='manageusers_username_${userdata[username].username}' id ='manageusers_username_${userdata[username].username}' value="${userdata[username].username}"></input></td>
 	<td><input type="text" name='manageusers_fullname_${userdata[username].username}' id ='manageusers_fullname_${userdata[username].username}' value="${userdata[username].fullname}"></input></td>
@@ -382,7 +383,7 @@ document.write(`
 	  <input type="submit" value='   Update' id="button2"; class="button" style="min-width: 20%"></input>
 	  </form>
 	   </td>
-	  </tr>`)
+	  </tr><tr></tr>`)
 </script>
 	</tbody>
   </table>

@@ -345,7 +345,7 @@ if (params.has(`series`)) {
 			let products_S = products[series]; // new product variable that accounts for the series
 			document.write(`
 <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
-	<tbody>
+
 	  <thead>
 	  <tr>
 		<th align="center">Image</th>
@@ -365,6 +365,7 @@ for (i in products_S) {
     console.log("PRODUCTSS="+products_S[1].name)
 
 				document.write(`
+				<tbody>
 <tr>
 <td align="center"><img src="${
     products_S[i].image
@@ -426,18 +427,14 @@ return true;
 }
 
 
-
-
 document.write(`
 <tr>
 		<td style="text-align: center;" colspan="5" width="100%">
 	  <input type="submit" value='   Update' id="button2"; class="button" style="min-width: 20%"></input>
 	  </form>
 	   </td>
-	  </tr>`)
+	  </tr><tr></tr>`)
 }
-
-
 
 
 

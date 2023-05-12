@@ -391,6 +391,7 @@ function scrollToTop() {
 				}
 			}
 			for (i in products_S) {
+				var display_price; 
 				document.write(`
           <div class="col-sm-4" >
           <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white;">
@@ -410,10 +411,18 @@ function scrollToTop() {
 					<span class="number-rating">
 						</span> `)
 			getRatings("product_"+i, products_S[i].rating, products_S[i].reviewers)
+		
+			if (products_S[i].dynamic_pricing == true) {
+				display_price = products_S[i].sale_price;
+				console.log(display_price)
+		} else {
+			display_price = products_S[i].price;
+			console.log(display_price)
+		}
 			document.write(`
 			</div>
 			<h2 id="price">$${
-						products_S[i].price
+						display_price
 					}</h2><BR>
           <label id ="quantitylabel" name="quantity${[
 						i,
