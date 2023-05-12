@@ -34,10 +34,18 @@ const crypto = require("crypto");
 
 // Encrypt text
 function encrypt(text) {
-	encryptAlgo = crypto.createCipher("aes192", "secretKey");
+	encryptAlgo = crypto.createCipher("aes192", "ihateassignment3");
 	let encrypted = encryptAlgo.update(text, "utf-8", "hex");
 	encrypted += encryptAlgo.final("hex");
 	return encrypted;
+}
+
+// Decrypt text
+function decrypt(encrypted) {
+	decryptAlgo = crypto.createDecipher("aes192", "ihateassignment3");
+	let decrypted = decryptAlgo.update(encrypted, "hex", "utf-8");
+	decrypted += decryptAlgo.final("utf-8");
+	return decrypted;
 }
 
 // read files
@@ -146,14 +154,9 @@ app.post("/get_user_data", function (request, response) {
 	response.json(user_data);
 });
 
-// monitor all requests
-app.all("*", function (request, response, next) {
-	console.log(request.method + " to " + request.path);
-	//console.log(request);
-	next();
-});
-
+// Gets all products_display for each series and maintains last visited in sessions
 app.get("/products_display", function (request, response) {
+	console.log(request.session.cookie);
 	let params = new URLSearchParams(request.query);
 	console.log("HERE " + params);
 
@@ -178,12 +181,13 @@ app.get("/products_display", function (request, response) {
 	) {
 		request.session.destroy(); // ends session
 	}
-
+	// gets products_display.html using the server through sendFile
 	response.sendFile(proddisplay);
 });
 
 // GOES TO INDEX
 app.get("/", function (request, response) {
+	console.log(request.session.cookie);
 	if (
 		typeof request.session.invoice != "undefined" ||
 		request.session.invoice == true
@@ -197,13 +201,14 @@ app.get("/", function (request, response) {
 		// IR1: if the cookie exists, take user (must be logged in) to last page visited if they leave the site and come back
 		response.redirect(request.session.lastPageVisited);
 	}
-	// gets products_display.html using the server through sendFile
+	// gets index using the server through sendFile
 	let params = new URLSearchParams(request.query);
 	console.log(params);
 	response.sendFile(index);
 });
 
 app.get("/index", function (request, response) {
+	console.log(request.session.cookie);
 	if (
 		typeof request.session.invoice != "undefined" ||
 		request.session.invoice == true
@@ -217,7 +222,7 @@ app.get("/index", function (request, response) {
 		// IR1: if the cookie exists, take user (must be logged in) to last page visited if they leave the site and come back
 		response.redirect(request.session.lastPageVisited);
 	}
-	// gets products_display.html using the server through sendFile
+	// gets index using the server through sendFile
 	let params = new URLSearchParams(request.query);
 	console.log(params);
 	response.sendFile(index);
@@ -417,7 +422,7 @@ app.post("/addtocart", function (request, response) {
 				}
 			}
 		}
-		totalItems = 0;
+		totalItems = 0; // initializes totalItems to 0
 		for (series in request.session.cart) {
 			totalItems =
 				Number(totalItems) +
@@ -427,8 +432,6 @@ app.post("/addtocart", function (request, response) {
 		response.redirect("products_display?" + "series=" + series);
 	}
 });
-
-// THIS IS FOR LOGIN AND REGISTER
 
 app.post("/purchase", function (request, response) {
 	// CODE PARTIALLY REUSED FROM ASSIGNMENT 1&2
@@ -588,8 +591,7 @@ app.get("/login", function (request, response) {
 		Login Page for Assignment3
 		Author: Deborah Yuan & Evon Diep
 		Date: 12/14/22
-		Desc: This page serves as a login page for a user visiting the site. It features login capabilities, with textboxes for entering a username and password if the user has an account on the site. If the user attempts to log in with an invalid username or incorrect password, they will not be allowed to proceed, with error messages showing up underneath the textboxes. In addition, there are 3 buttons below the textboxes: Login, Register, and Return to Products Display. Each button has a different functionality. If the user does not have an account with us and needs to register, they will be sent to the register page. If the customer decideds they no longer want to log in, they can head back to the products display page.
-		-->
+		Desc: This page serves as a login page for a user visiting the site. It features login capabilities, with textboxes for entering a username and password if the user has an account on the site. If the user attempts to log in with an invalid username or incorrect password, they will not be allowed to proceed, with error messages showing up underneath the textboxes. In addition, there are 2 buttons below the textboxes: Loginand Register. Each button has a different functionality. If the user does not have an account with us and needs to register, they will be sent to the register page. 
 		
 		<head>
   <meta charset="utf-8">
@@ -653,11 +655,6 @@ app.get("/login", function (request, response) {
 	
 	console.log("Params=" + params); // shows what the params are in the console
 
-	
-		if (params.has('username')) {
-			var stickyUser = params.get('username');
-			document.getElementById('username').value = stickyUser;
-		};	
 	</script>
 
 	<!-- navigation bar from w3 schools -->
@@ -731,15 +728,19 @@ app.get("/login", function (request, response) {
 			? loginError["badloginpass"]
 			: ""
 	}</b></p><BR>
-
 <BR>
 <input type="submit" value='Login        ' id="button" style="min-width:20%;" class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input>
 </form><BR>
 
-<form name='login' action='/startregister' method="POST">
+<form name='login' action='/register' method="GET">
 <input type="submit" value='New User? Click Here     ' id="button2" style="min-width:20%;"  class="button" style="font-family: 'Source Sans Pro', sans-serif;"></input>
 </form><BR>
-	
+<script>
+if (params.has('username')) {
+	var stickyUser = params.get('username');
+	document.getElementById('username').value = stickyUser;
+};	
+</script>
 </html>`);
 		response.end();
 	}
@@ -766,7 +767,7 @@ app.post("/login", function (request, response) {
 	var encryptedPassword = encrypt(inputpassword); // variable to encrypt the inputted password
 
 	if (typeof users[inputusername] != "undefined") {
-		//
+		// if the passwords match
 		if (
 			users[inputusername].password == encryptedPassword ||
 			(!users[inputusername].encrypted &&
@@ -779,7 +780,7 @@ app.post("/login", function (request, response) {
 			users[inputusername].lasttimelog = users[inputusername].currtimelog; // changes what was previously the current time logged in to the LAST time they logged in
 			users[inputusername].currtimelog = getCurrentDate(); // get current date and set that to the current time in the user's account
 
-			response.cookie("activeuser", inputusername); // sets the cookie's active user as the username if credentials are correct
+			response.cookie("activeuser", inputusername, { maxAge: 1200000 }); // sets the cookie's active user as the username if credentials are correct
 			active_user = request.cookies["activeuser"]; // active user cookie set to active_user variable
 
 			let data = JSON.stringify(users); // rewrites user reg. file
@@ -868,10 +869,10 @@ app.get("/loginsuccess", function (request, response) {
 		response.write(
 			`
 		<!-- 
-		Login/Registration Success for Assignment2
+		Login/Registration Success for Assignment3
 		Author: Deborah Yuan & Evon Diep
-		Date: 11/16=8/22
-		Desc: This page serves as welcome page for users who have either JUST logged in or JUST registered. From this page, users can edit their account by clicking the button, or they can check out by going to their invoice. The buttons in the right corner are also functioning.
+		Date: 12/18/22
+		Desc: This page displays the user's full name, the number of people currently logged in at the moment, the number of times the user has logged in, and the last day and time they were logged in. This page will be displayed when a user clicked on their name in the navigation bar. From this page, users can edit their account by clicking the button, or they can check out by going to their cart. This is also where they will be able to logout of their account at any time. The buttons in the right corner are also functioning.
 		-->
 		
 		<head>
@@ -932,13 +933,30 @@ app.get("/loginsuccess", function (request, response) {
 			  <!-- clicking this 'tab' leads to products display -->
 				  <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
 			</ul>
-			<ul class="nav navbar-nav navbar-right">
-			<ul class="nav navbar-nav">`
+			`
 		);
+		if (typeof active_user != "undefined" && users[active_user].admin == true) {
+			response.write(`
+	<ul class="nav navbar-nav">
+		<!-- clicking this 'tab' leads to products display -->
+<li id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
+</ul>`);
+		}
+		if (typeof active_user != "undefined" && users[active_user].admin == true) {
+			response.write(`
+	<ul class="nav navbar-nav">
+		<!-- clicking this 'tab' leads to products display -->
+<li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
+</ul>`);
+		}
+		response.write(`
+			<ul class="nav navbar-nav navbar-right">
+			<ul class="nav navbar-nav">
+			`);
 
 		if (typeof active_user != "undefined") {
 			response.write(
-				`<li><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+				`<li><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;${users[active_user].fullname}&emsp;</a></li>`
 			);
 		} else {
 			response.write(
@@ -967,7 +985,7 @@ app.get("/loginsuccess", function (request, response) {
 	<input type="submit" value='Edit Account Information      ' id="button"; class="button" style="min-width: 20%"></input>
 	</form>
 	<form name='gotoinvoice' action='/cart' method="GET">
-	<input type="submit" value='Go To Cart      ' id="button2"; class="button" style="min-width: 20%"></input>
+	<input type="submit" value='Go To Invoice      ' id="button2"; class="button" style="min-width: 20%"></input>
 	</form>
 	<form name='logoutbutton' action='/logout' method="GET">
 	<input type="submit" value='Logout       ' id="button3"; class="button" style="min-width: 20%"></input>
@@ -977,34 +995,159 @@ app.get("/loginsuccess", function (request, response) {
 	response.end();
 });
 
+// ADMIN PAGES, MANAGE PRODUCTS
+app.post("/manageproducts", function (request, response) {
+	series = request.body[`series`];
+	console.log("SERIES=" + series);
+	for (i in products_data[series]) {
+		products_data[series][i].name =
+			request.body[`manageproducts_name_${series}+${i}`]; // saves new name available
+		products_data[series][i].quantity_available = Number(
+			request.body[`manageproducts_quantAvail_${series}+${i}`]
+		); // saves new quantities available
+		products_data[series][i].quantity_sold = Number(
+			request.body[`manageproducts_quantSold_${series}+${i}`]
+		); // saves new quantities sold
+		products_data[series][i].price = Number(
+			request.body[`manageproducts_price_${series}+${i}`]
+		); // saves new quantities sold
+	}
+	products = products_data;
+	let proddata = JSON.stringify(products);
+	fs.writeFileSync(prodname, proddata, "utf-8");
+
+	response.redirect("/manageproducts");
+});
+
+// ADMIN PAGES, MANAGE PRODUCTS
+app.post("/manageusers", function (request, response) {
+	regEx = {};
+	for (username in users) {
+		new_full_name =
+			request.body[`manageusers_fullname_${users[username].username}`];
+		new_user_name =
+			request.body[`manageusers_username_${users[username].username}`];
+		new_pass = request.body[`manageusers_password_${users[username].username}`];
+		adminstatus = request.body[`manageusers_admin_${users[username].username}`];
+		deleteuser = request.body[`manageusers_delete_${users[username].username}`];
+
+		changetonew = false; // assume that we are not changing the username/email
+
+		// if new full name box isn't empty
+		users[username].fullname = new_full_name; // set new full name to current full name
+
+		users[username].password = new_pass;
+
+		users[username].encrypted = false;
+
+		if (
+			adminstatus == "true" ||
+			adminstatus == "True" ||
+			adminstatus == "TRUE"
+		) {
+			console.log("hiADMIN");
+			users[username].admin = true;
+		} else if (
+			adminstatus == "false" ||
+			adminstatus == "False" ||
+			adminstatus == "FALSE"
+		) {
+			console.log("NOTADMIN");
+			users[username].admin = false;
+		} else {
+			console.log("RIP");
+			regErrors["notaboolean"] = `Admin Status can only be True or False.`;
+		}
+
+		if (deleteuser == "yes" || deleteuser == "Yes" || deleteuser == "YES") {
+			delete users[username];
+		}
+
+		if (username != new_user_name) {
+			users[new_user_name] = {}; // makes empty object for the user's new account
+			users[new_user_name].password = users[username].password; // copies over current password
+			users[new_user_name].username = new_user_name; // copies over current password
+			users[new_user_name].loginstatus = users[username].loginstatus; // copies over current login status
+			users[new_user_name].amtlogin = users[username].amtlogin; // copies over the amount of times logged in
+			users[new_user_name].fullname = users[username].fullname; // copies over user's full name
+			users[new_user_name].lasttimelog = users[username].lasttimelog; // copies over user's last time logging in
+			users[new_user_name].currtimelog = users[username].currtimelog; // copies over user's last time logging in
+			users[new_user_name].encrypted = users[username].encrypted; // copies over user's encrypted password status
+			users[new_user_name].admin = users[username].admin; // copies over user's admin account status
+
+			changetonew = true; // set to true means that new params will be made
+
+			response.cookie("activeuser", new_user_name, { maxAge: 1200000 }); // renaming the cookie "activeuser" to the new username
+			active_user = request.cookies["activeuser"]; // changing the variable active_user to the new username
+
+			delete actusers[username];
+			actusers[new_user_name] = {};
+			delete users[username];
+		}
+	}
+
+	adduser = request.body[`manageusers_add_new`];
+	add_full_name = request.body[`manageusers_fullname_new`];
+	add_user_name = request.body[`manageusers_username_new`];
+	add_pass = request.body[`manageusers_password_new`];
+	addadminstatus = request.body[`manageusers_admin_new`];
+
+	if (adduser == "yes" || deleteuser == "Yes" || deleteuser == "YES") {
+		users[add_user_name] = {}; // makes empty object for the user's new account
+		add_pass_encrypt = encrypt(add_pass); // encrypts password
+		users[add_user_name].password = add_pass_encrypt; // new password
+		users[add_user_name].username = add_user_name; // new username
+		users[add_user_name].loginstatus = false; // new login status
+		users[add_user_name].amtlogin = 0; // 0 times logged in
+		users[add_user_name].fullname = add_full_name; // copies over user's full name
+		users[add_user_name].lasttimelog = ""; // last logged in N/A
+		users[add_user_name].currtimelog = ""; // not currently logged in
+
+		users[add_user_name].encrypted = true; // password just encrypted
+		users[add_user_name].admin = false; // default no admin status
+	}
+
+	let data = JSON.stringify(users);
+	let actdata = JSON.stringify(actusers);
+
+	fs.writeFileSync(fname, data, "utf-8");
+	fs.writeFileSync(actname, actdata, "utf-8");
+	users = JSON.parse(data);
+	user_data = users;
+
+	response.redirect("/manageusers");
+});
+
 // GO TO CART
 app.get("/cart", function (request, response) {
+	// if the session exists for invoice
 	if (
 		typeof request.session.invoice != "undefined" ||
 		request.session.invoice == true
 	) {
-		request.session.destroy(); // ends session
+		request.session.destroy(); // end the session
 	}
 	if (typeof request.session.cart == "undefined") {
+		// if the session doesn't exist for cart
 		console.log(`Your cart is empty.`);
 	} else {
 		console.log(
 			`iPhone = ${request.session.cart["iPhone"]} <BR> iPad = ${request.session.cart["iPad"]} <BR> Mac = ${request.session.cart["Mac"]}`
-		);
+		); // logs a message to the console that includes the quantity of each item in the cart
 	}
 	if (
 		typeof request.cookies["activeuser"] != "undefined" &&
-		request.cookies["activeuser"] != ""
+		request.cookies["activeuser"] != "" // if the "activeuser" cookie is defined and not an empty string
 	) {
-		active_user = request.cookies["activeuser"];
+		active_user = request.cookies["activeuser"]; // sets variable to the value of the "activeuser" cookie
 	}
 	if (
 		typeof active_user != "undefined" &&
-		request.cookies["activeuser"] != ""
+		request.cookies["activeuser"] != "" // if there is an active user and the cookie for it isn't empty/does exist
 	) {
-		usernameCart = users[active_user].fullname + "'s";
+		usernameCart = users[active_user].fullname + "'s"; // displays their full name on the page
 	} else {
-		usernameCart = "Your";
+		usernameCart = "Your"; // if the active user or cookie doesn't exist (user is not logged in), it displays "Your Cart" instead
 	}
 
 	response.write(`
@@ -1013,8 +1156,8 @@ app.get("/cart", function (request, response) {
 	<!-- 
 	Cart for Assignment3
 	Author: Deborah Yuan
-	Date: 11/14/22
-	Desc: This html page produces an cart for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+	Date: 12/18/22
+	Desc: This page, generated on server produces an cart for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with cart pulling the quantities from search params. This cart includes an image of the product purchased, the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want. Before proceeding onto checking out, the user must be logged in. There is also a recalculate cart function built in!
 	-->
 	
 	<!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
@@ -1095,12 +1238,28 @@ app.get("/cart", function (request, response) {
 			<!-- clicking this 'tab' leads to products display -->
 				<li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
 		  </ul>
+		  `);
+	if (typeof active_user != "undefined" && users[active_user].admin == true) {
+		response.write(`
+	  <ul class="nav navbar-nav">
+		  <!-- clicking this 'tab' leads to products display -->
+  <li id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
+  </ul>`);
+	}
+	if (typeof active_user != "undefined" && users[active_user].admin == true) {
+		response.write(`
+	  <ul class="nav navbar-nav">
+		  <!-- clicking this 'tab' leads to products display -->
+  <li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
+  </ul>`);
+	}
+	response.write(`
 		  <ul class="nav navbar-nav navbar-right">
 		  <ul class="nav navbar-nav">`);
 
 	if (typeof active_user != "undefined") {
 		response.write(
-			`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+			`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;${users[active_user].fullname}&emsp;</a></li>`
 		);
 	} else {
 		response.write(
@@ -1165,6 +1324,7 @@ function scrollToTop() {
 		cartTotalItems += request.session.cart[series].reduce((a, b) => a + b); // adds the quantities so this can be used to display # of items in cart
 	}
 
+	// if there is no cart session or if there are no items in the cart
 	if (typeof request.session.cart == "undefined" || cartTotalItems == 0) {
 		response.write(
 			`<tr><th style= "text-align: center;"><h1>Your cart is empty.</h1></th></tr>
@@ -1172,6 +1332,7 @@ function scrollToTop() {
 			<tr><td style= "text-align: center;"><h2 class="underlinecss"><a href="/products_display" style = "color: black; text-decoration: none;">Return to shopping</a></h2></td></tr>`
 		);
 	} else {
+		// if there are items in the cart
 		response.write(`
 		<form name='cart_form' action="/recalculatecart" method="POST">
 		  <tr>
@@ -1190,6 +1351,7 @@ function scrollToTop() {
 <script>
 </script>`);
 
+		// if a user has any iPhones in their cart, then calculate the prices
 		if (typeof request.session.cart["iPhone"] != "undefined") {
 			quantities = request.session.cart["iPhone"];
 			products = products_data["iPhone"];
@@ -1232,22 +1394,22 @@ return /^-?\d*$/.test(value);
 } else if (/^\d*$/.test(value) == false) {
 // must be a non negative integer
 return /^\d*$/.test(value);
-} else if (value > ${Number(
-						products[i].quantity_available
-					)}){ // requesting for more than current stock
+} else if (value > ${
+						Number(products[i].quantity_available) + Number(quantities[i])
+					}){ // requesting for more than current stock
 	return false;
 } else {
 return true;
 }
 }, 
-${Number(products[i].quantity_available)})
+${Number(products[i].quantity_available) + Number(quantities[i])})
 </script>`);
 					subtotal += extended_price;
 					console.log(products[i].price);
 				}
 			}
 		}
-
+		// if a user has any iPads in their cart, then calculate the prices
 		if (typeof request.session.cart["iPad"] != "undefined") {
 			quantities = request.session.cart["iPad"];
 			products = products_data["iPad"];
@@ -1267,7 +1429,7 @@ ${Number(products[i].quantity_available)})
 	  <td>${products[i].name}</td>
 	  <td align="center"><input type="number" name="cartquantitytextbox_iPad+${i}" id ="cartquantitytextbox_iPad+${i}" min="0" max="${Number(
 						products[i].quantity_available
-					)}" step="1" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_iPad+${i}_msg"></p></td>
+					)}" step="0.01" onkeydown="quantityError(this)" onkeyup="quantityError(this)" onmouseup="quantityError(this)"></input><BR><p id="cartquantitytextbox_iPad+${i}_msg"></p></td>
 	  <td align="center">$${products[i].price.toFixed(2)}</td>
 	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
 	</tr>
@@ -1284,15 +1446,15 @@ ${Number(products[i].quantity_available)})
 		} else if (/^\d*$/.test(value) == false) {
 		// must be a non negative integer
 		return /^\d*$/.test(value);
-		} else if (value > ${Number(
-			products[i].quantity_available
-		)}){ // requesting for more than current stock
+		} else if (value > ${
+			Number(products[i].quantity_available) + Number(quantities[i])
+		}){ // requesting for more than current stock
 			return false;
 		} else {
 		return true;
 		}
 		}, 
-		${Number(products[i].quantity_available)})
+		${Number(products[i].quantity_available) + Number(quantities[i])})
 	</script>`);
 					subtotal += extended_price;
 					console.log(products[i].price);
@@ -1300,6 +1462,7 @@ ${Number(products[i].quantity_available)})
 			}
 		}
 
+		// if a user has any Macs in their cart, then calculate the prices
 		if (typeof request.session.cart["Mac"] != "undefined") {
 			quantities = request.session.cart["Mac"];
 			products = products_data["Mac"];
@@ -1336,15 +1499,15 @@ ${Number(products[i].quantity_available)})
 		} else if (/^\d*$/.test(value) == false) {
 		// must be a non negative integer
 		return /^\d*$/.test(value);
-		} else if (value > ${Number(
-			products[i].quantity_available
-		)}){ // requesting for more than current stock
+		} else if (value > ${
+			Number(products[i].quantity_available) + Number(quantities[i])
+		}){ // requesting for more than current stock
 			return false;
 		} else {
 		return true;
 		}
 		}, 
-		${Number(products[i].quantity_available)})
+		${Number(products[i].quantity_available) + Number(quantities[i])})
 	</script>`);
 					subtotal += extended_price;
 					console.log(products[i].price);
@@ -1427,18 +1590,20 @@ ${Number(products[i].quantity_available)})
 	</main>
 	</body>
 	`);
+
 		if (typeof request.session.cart["iPhone"] != "undefined") {
 			quantities = request.session.cart["iPhone"];
 			products = products_data["iPhone"];
 			response.write(`<script>`);
 			for (let i in quantities) {
 				if (quantities[i] == 0 || quantities[i] == "") {
+					// check if the quantities are 0 or empty string
 					// adding textbox error messages based on inputted value
 					continue;
 				} else {
 					response.write(`
 	cart_form['cartquantitytextbox_iPhone+${i}'].value = ${quantities[i]}
-	`);
+	`); // sets value of the textbox to quantities
 				}
 			}
 			response.write(`</script>`);
@@ -1450,12 +1615,13 @@ ${Number(products[i].quantity_available)})
 			response.write(`<script>`);
 			for (let i in quantities) {
 				if (quantities[i] == 0 || quantities[i] == "") {
+					// check if the quantities are 0 or empty string
 					// adding textbox error messages based on inputted value
 					continue;
 				} else {
 					response.write(`
 		cart_form["cartquantitytextbox_iPad+${i}"].value = ${quantities[i]}
-		`);
+		`); // sets value of the textbox to quantities
 				}
 			}
 			response.write(`</script>`);
@@ -1467,12 +1633,13 @@ ${Number(products[i].quantity_available)})
 			response.write(`<script>`);
 			for (let i in quantities) {
 				if (quantities[i] == 0 || quantities[i] == "") {
+					// check if the quantities are 0 or empty string
 					// adding textbox error messages based on inputted value
 					continue;
 				} else {
 					response.write(`
 		cart_form["cartquantitytextbox_Mac+${i}"].value = ${quantities[i]}
-		`);
+		`); // sets value of the textbox to quantities
 				}
 			}
 			response.write(`</script>`);
@@ -1490,6 +1657,7 @@ app.post("/recalculatecart", function (request, response, next) {
 		console.log("SERIES=" + series);
 		console.log("CURR REQ CART=" + request.session.cart[series]);
 
+		// Iterates over the properties of the request.session.cart, and for each series, it is updating the corresponding item in the cart by setting the value of the current property of request.session.cart[series]  to the value of  cartquantitytextbox_${series}+${i}
 		for (i in request.session.cart[series]) {
 			if (
 				typeof request.body[`cartquantitytextbox_${series}+${i}`] == "undefined"
@@ -1504,6 +1672,7 @@ app.post("/recalculatecart", function (request, response, next) {
 		}
 	}
 
+	// for the cart counter
 	totalItems = 0;
 	for (series in request.session.cart) {
 		totalItems =
@@ -1515,14 +1684,17 @@ app.post("/recalculatecart", function (request, response, next) {
 });
 
 app.post("/toinvoice", function (request, response, next) {
+	// check if a cookie with the name "activeuser" exists; if it does, set a variable named active_user to the value of that cookie
 	if (
-		typeof request.cookies["activeuser"] != "undefined" &&
-		request.cookies["activeuser"] != ""
+		typeof request.cookies["activeuser"] == "undefined" ||
+		request.cookies["activeuser"] == ""
 	) {
+		response.redirect("/login");
+	} else {
 		active_user = request.cookies["activeuser"];
-	}
-	// Modified code from Assignment 3 Examples (Dan Port)
-	var invoice_str = `Thank you ${users[active_user].fullname} for your order!
+
+		// Modified code from Assignment 3 Examples (Dan Port)
+		var invoice_str = `Thank you ${users[active_user].fullname} for your order!
 
 	<BR>
 	
@@ -1536,19 +1708,20 @@ app.post("/toinvoice", function (request, response, next) {
   </tr>
 </thead>`;
 
-	// Compute subtotal
-	var subtotal = 0;
+		// Compute subtotal
+		var subtotal = 0;
 
-	// Compute shipping
-	var shipping;
+		// Compute shipping
+		var shipping;
 
-	var shopping_cart = request.session.cart;
-	for (series in products_data) {
-		for (i = 0; i < products_data[series].length; i++) {
-			if (typeof shopping_cart[series] == "undefined") continue;
-			qty = shopping_cart[series][i];
-			if (qty > 0) {
-				invoice_str += `
+		// iterates over the products in the products_data and builds a string that represents an invoice, including the name, quantity, price, and extended price of each item in the shopping cart; also calculates the subtotal of the invoice by adding the extended price of each item in the cart
+		var shopping_cart = request.session.cart;
+		for (series in products_data) {
+			for (i = 0; i < products_data[series].length; i++) {
+				if (typeof shopping_cart[series] == "undefined") continue;
+				qty = shopping_cart[series][i];
+				if (qty > 0) {
+					invoice_str += `
 			<tr>
 	  <td>${products_data[series][i].name}</td>
 	  <td align="center">${qty}</td>
@@ -1556,37 +1729,38 @@ app.post("/toinvoice", function (request, response, next) {
 	  <td>$${qty * products_data[series][i].price.toFixed(2)}</td>
 	</tr>
 	`;
-				subtotal += qty * products_data[series][i].price;
-				console.log("ello " + typeof subtotal);
+					subtotal += qty * products_data[series][i].price;
+					console.log("ello " + typeof subtotal);
+				}
 			}
 		}
-	}
 
-	if (subtotal < 1000) {
-		shipping = 5;
-	} else if (subtotal >= 1000 && subtotal < 1500) {
-		shipping = 10;
-	} else if (subtotal >= 1500) {
-		shipping = subtotal * 0.02;
-	}
-
-	// Compute tax
-	var tax_rate = 0.0475;
-	var tax = tax_rate * subtotal;
-
-	for (let i in quantities) {
-		if (quantities[i] == 0) {
-			// if quantities = 0, then skip the row
-			continue;
-		} else {
-			let extended_price = quantities[i] * products[i].price;
+		// compute rates
+		if (subtotal < 1000) {
+			shipping = 5;
+		} else if (subtotal >= 1000 && subtotal < 1500) {
+			shipping = 10;
+		} else if (subtotal >= 1500) {
+			shipping = subtotal * 0.02;
 		}
-	}
 
-	// Compute grand total
-	var total = tax + subtotal + shipping;
+		// Compute tax
+		var tax_rate = 0.0475;
+		var tax = tax_rate * subtotal;
 
-	invoice_str += `
+		for (let i in quantities) {
+			if (quantities[i] == 0) {
+				// if quantities = 0, then skip the row
+				continue;
+			} else {
+				let extended_price = quantities[i] * products[i].price;
+			}
+		}
+
+		// Compute grand total
+		var total = tax + subtotal + shipping;
+
+		invoice_str += `
 
 <tr>
 <td colspan="5" width="100%">&nbsp;</td>
@@ -1628,44 +1802,47 @@ Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
 </tr>
 `;
 
-	invoice_str += "</table>";
-	// send invoice as email
-	// Set up mail server
-	var transporter = nodemailer.createTransport({
-		service: "gmail",
-		auth: {
-			user: "evondebitm352@gmail.com",
-			pass: "gtbxyhzujipcpnla",
-		},
-	});
+		invoice_str += "</table>";
+		// send invoice as email
+		// Set up mail server
+		// With modifications from https://www.youtube.com/watch?v=nF9g1825mwk and https://stackoverflow.com/questions/45478293/username-and-password-not-accepted-when-using-nodemailer
+		var transporter = nodemailer.createTransport({
+			host: "mail.hawaii.edu",
+			port: 25,
+			secure: false, // use TLS
+			tls: {
+				// do not fail on invalid certs
+				rejectUnauthorized: false,
+			},
+		});
 
-	var user_email = request.cookies["activeuser"];
-	var mailOptions = {
-		from: "phoney_store@bogus.com", // change or leave this email to something related to our store?
-		to: user_email,
-		subject: "Thank you for your purchase!",
-		html: invoice_str,
-	};
+		// With reference to Assignment 3 Code Examples by Dan Port
+		var user_email = request.cookies["activeuser"];
+		var mailOptions = {
+			from: "phoney_store@bogus.com", // change or leave this email to something related to our store?
+			to: user_email,
+			subject: "Thank you for your purchase!",
+			html: invoice_str,
+		};
 
-	var errorMsg = "";
+		transporter.sendMail(mailOptions, function (error, info) {
+			if (error) {
+				return console.log(error);
+			}
+			console.log("Message sent: %s", info.messageId);
+			console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+		});
 
-	transporter.sendMail(mailOptions, function (error, info) {
-		if (error) {
-			return console.log(error);
-		}
-		console.log("Message sent: %s", info.messageId);
-		console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-	});
-	totalItems = 0;
+		totalItems = 0;
 
-	response.write(`
+		response.write(`
 <!DOCTYPE html>
 <html lang="en">
 <!-- 
 Invoice for Assignment3
-Author: Deborah Yuan
-Date: 11/14/22
-Desc: This html page produces an cart for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+Author: Deborah Yuan and Evon Diep
+Date: 12/18/22
+Desc: This html page produces an invoice after the customer has confirmed their purchase. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a Review Products button, which gives users the opportunity to rate the product. The second button on the page is a Return to Home button, which redirects the user back to the home or products_display page (IR1: after checkout, the last page visited becomes the home page)
 -->
 
 <!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
@@ -1746,9 +1923,25 @@ footer {
 		<!-- clicking this 'tab' leads to products display -->
 			<li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
 	  </ul>
+	  `);
+		if (typeof active_user != "undefined" && users[active_user].admin == true) {
+			response.write(`
+	<ul class="nav navbar-nav">
+		<!-- clicking this 'tab' leads to products display -->
+<li id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
+</ul>`);
+		}
+		if (typeof active_user != "undefined" && users[active_user].admin == true) {
+			response.write(`
+	<ul class="nav navbar-nav">
+		<!-- clicking this 'tab' leads to products display -->
+<li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
+</ul>`);
+		}
+		response.write(`
 	  <ul class="nav navbar-nav navbar-right">
 	  <ul class="nav navbar-nav">
-	<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
+	<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;${users[active_user].fullname}&emsp;</a></li>
 	  </ul>
 	  <ul class="nav navbar-nav">
 	   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
@@ -1808,59 +2001,60 @@ behavior: "smooth"
 	  </tr>
 	</thead>
 `);
-	// Compute subtotal
-	var subtotal = 0;
+		// Compute subtotal
+		var subtotal = 0;
 
-	for (series in request.session.cart) {
-		quantities = request.session.cart[series];
-		// products = products_data[series];
-		for (let i in quantities) {
-			if (quantities[i] == "" || quantities[i] == 0) {
-				// if quantities = 0, then skip the row
-				continue;
-			} else {
-				var extended_price = quantities[i] * products_data[series][i].price;
-				console.log(products_data[series][i].price);
-				// toFixed added to $ values to preserve cents
-				response.write(`
+		// iterates over the items in the shopping cart stored in the request.session.cart, and for each item, it is calculating the extended price based on the quantity of the item and its price
+		for (series in request.session.cart) {
+			quantities = request.session.cart[series];
+			// products = products_data[series];
+			for (let i in quantities) {
+				if (quantities[i] == "" || quantities[i] == 0) {
+					// if quantities = 0, then skip the row
+					continue;
+				} else {
+					var extended_price = quantities[i] * products_data[series][i].price;
+					console.log(products_data[series][i].price);
+					// toFixed added to $ values to preserve cents
+					response.write(`
 <tr>
 <td align="center"><img src="${
-					products_data[series][i].image
-				}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
+						products_data[series][i].image
+					}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
 <td>${products_data[series][i].name}</td>
 <td align="center">${request.session.cart[series][i]}</td>
 <td align="center">$${products_data[series][i].price.toFixed(2)}</td>
 <td>$${(quantities[i] * products_data[series][i].price).toFixed(2)}</td>
 </tr>
 `);
-				subtotal += extended_price;
+					subtotal += extended_price;
 
-				products_data[series][i].quantity_available -= Number(quantities[i]); // Stock, or quantity_available is subtracted by the order quantity
-				products_data[series][i].quantity_sold =
-					Number(products_data[series][i].quantity_sold) +
-					Number(quantities[i]); //Total amount sold, or quantity_sold increases by the order quantity
+					products_data[series][i].quantity_available -= Number(quantities[i]); // Stock, or quantity_available is subtracted by the order quantity
+					products_data[series][i].quantity_sold =
+						Number(products_data[series][i].quantity_sold) +
+						Number(quantities[i]); //Total amount sold, or quantity_sold increases by the order quantity
+				}
 			}
 		}
-	}
 
-	// Compute shipping
-	var shipping;
-	if (subtotal < 1000) {
-		shipping = 5;
-	} else if (subtotal >= 1000 && subtotal < 1500) {
-		shipping = 10;
-	} else if (subtotal >= 1500) {
-		shipping = subtotal * 0.02;
-	}
+		// Compute shipping
+		var shipping;
+		if (subtotal < 1000) {
+			shipping = 5;
+		} else if (subtotal >= 1000 && subtotal < 1500) {
+			shipping = 10;
+		} else if (subtotal >= 1500) {
+			shipping = subtotal * 0.02;
+		}
 
-	// Compute tax
-	var tax_rate = 0.0475;
-	var tax = tax_rate * subtotal;
+		// Compute tax
+		var tax_rate = 0.0475;
+		var tax = tax_rate * subtotal;
 
-	// Compute grand total
-	var total = tax + subtotal + shipping;
+		// Compute grand total
+		var total = tax + subtotal + shipping;
 
-	response.write(`
+		response.write(`
 	  <!-- table formatting, with some inline css -->
 	  <tr>
 		<td colspan="5" width="100%">&nbsp;</td>
@@ -1903,14 +2097,14 @@ behavior: "smooth"
 	  <tr>
 		<td style="text-align: center;" colspan="5" width="100%">
 	  <form name='gotoreview' action='/toreview' method="GET">
-	  <input type="submit" value='Review Products      ' id="button1"; class="button" style="min-width: 20%"></input>
+	  <input type="submit" value='Review Products' id="button1"; class="button" style="min-width: 20%"></input>
 	  </form>
 	   </td>
 	  </tr>
 	  <tr>
 		<td style="text-align: center;" colspan="5" width="100%">
 		<form name='returntoproducts' action='/products_display' method="GET">
-	<input type="submit" value='Return to Home      ' id="button2"; class="button" style="min-width: 20%"></input>
+	<input type="submit" value='Return to Home' id="button2"; class="button" style="min-width: 20%"></input>
 	</form>
 	   </td>
 	  </tr>
@@ -1920,17 +2114,18 @@ behavior: "smooth"
 </body>
 </script>
 </html>`);
-
-	products = products_data;
-	let proddata = JSON.stringify(products);
-	fs.writeFileSync(prodname, proddata, "utf-8");
-	request.session.invoice = true;
-	response.end();
+		products = products_data;
+		let proddata = JSON.stringify(products);
+		fs.writeFileSync(prodname, proddata, "utf-8");
+		request.session.invoice = true;
+		response.end();
+	}
 });
 
-// REVIEWING PRODUCTS
+// IR5: REVIEWING PRODUCTS
 app.get("/toreview", function (request, response) {
 	if (typeof request.session.invoice == "undefined") {
+		// if there is no invoice session then they won't be allowed to rate and therefore, redirects to products_display
 		response.redirect("/products_display");
 	} else {
 		if (
@@ -1946,8 +2141,8 @@ app.get("/toreview", function (request, response) {
 	<!-- 
 	Review Page for Assignment3
 	Author: Deborah Yuan
-	Date: 11/14/22
-	Desc: This html page produces an cart for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice.html pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
+	Date: 12/10/22
+	Desc: This page displays a table of the products that were just purchased in a given order. The product image, item, and quantity are displayed. In the last column of the table, there is an option to leave a rating out of 5 stars. Once the user selects the number of stars for the rating and submits the form (using the Submit Review button on the page), it will redirect them back to the products_display page. When the user goes back to view the products_display for the product purchased, the new rating under the product will show an average of all the ratings given.
 	-->
 	
 	<!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
@@ -2027,10 +2222,25 @@ app.get("/toreview", function (request, response) {
 		  <ul class="nav navbar-nav">
 			<!-- clicking this 'tab' leads to products display -->
 				<li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>
-		  </ul>
+		  </ul>`);
+		if (typeof active_user != "undefined" && users[active_user].admin == true) {
+			response.write(`
+	<ul class="nav navbar-nav">
+		<!-- clicking this 'tab' leads to products display -->
+<li id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
+</ul>`);
+		}
+		if (typeof active_user != "undefined" && users[active_user].admin == true) {
+			response.write(`
+	<ul class="nav navbar-nav">
+		<!-- clicking this 'tab' leads to products display -->
+<li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
+</ul>`);
+		}
+		response.write(`
 		  <ul class="nav navbar-nav navbar-right">
 		  <ul class="nav navbar-nav">
-		<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
+		<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;${users[active_user].fullname}&emsp;</a></li>
 		  </ul>
 		  <ul class="nav navbar-nav">
 		   <li class="active"><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
@@ -2093,6 +2303,7 @@ app.get("/toreview", function (request, response) {
 		// Compute subtotal
 		var subtotal = 0;
 
+		// iterates over the items in the shopping cart stored in the request.session.cart, and for each item, it is calculating the extended price based on the quantity of the item and its price
 		for (series in request.session.cart) {
 			quantities = request.session.cart[series];
 			products = products_data[series];
@@ -2141,14 +2352,13 @@ app.get("/toreview", function (request, response) {
 	}
 });
 
-// POST LOGIN SUCCESS
+// IR5: PRODUCT RATINGS
 app.post("/toreview", function (request, response) {
-	// redirects to edit account page
-
 	for (series in request.session.cart) {
 		console.log("SERIES=" + series);
 		console.log("CURR REQ CART=" + request.session.cart[series]);
 
+		// iterates over the items in the shopping cart stored in the request.session.cart, and for each item, it updates the rating and number of reviewers for the corresponding product in the products_data based on the value of the request.body[rating_${series}+${i}]
 		for (i in request.session.cart[series]) {
 			if (typeof request.body[`rating_${series}+${i}`] == "undefined") {
 				continue;
@@ -2173,8 +2383,6 @@ app.post("/toreview", function (request, response) {
 	products = products_data;
 	let proddata = JSON.stringify(products);
 	fs.writeFileSync(prodname, proddata, "utf-8");
-
-	// COME HERE
 
 	request.session.destroy(); // ends session
 
@@ -2294,7 +2502,9 @@ app.get("/editaccount", function (request, response) {
 		</ul>
 		<ul class="nav navbar-nav navbar-right">
 		<ul class="nav navbar-nav">
-		<li class="active"><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>
+		<li class="active"><a href="./loginsuccess"><span class="glyphicon glyphicon-user"></span>&emsp;${
+			users[active_user].fullname
+		}&emsp;</a></li>
 		</ul>
 		<ul class="nav navbar-nav">
 		 <li><a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (${totalItems})&emsp;</a></li>
@@ -2429,7 +2639,7 @@ app.post("/editaccount", function (request, response) {
 		regErrors["wrong_name"] = `Current Full Name is incorrect!`; // pushes out this error in regErrors array if true
 	} else if (new_full_name.length < 2 || new_full_name.length > 30) {
 		regErrors["bad_userlength"] = `Name must be between 2 and 30 characters.`; // checks to see if full name entered is between 2 and 30 characters
-	} else if (/^[A-Za-z_ -]+$/.test(new_full_name) == false) {
+	} else if (/^[a-zA-Z\s]*$/.test(new_full_name) != true) {
 		regErrors["bad_user"] = `Name must only contain letters.`; // pushes out this error in regErrors array if true
 	} else {
 		// if new full name box isn't empty
@@ -2516,7 +2726,7 @@ app.post("/editaccount", function (request, response) {
 			actusers[new_user_name] = {};
 			delete users[active_user];
 
-			response.cookie("activeuser", new_user_name); // renaming the cookie "activeuser" to the new username
+			response.cookie("activeuser", new_user_name, { maxAge: 1200000 }); // renaming the cookie "activeuser" to the new username
 			active_user = request.cookies["activeuser"]; // changing the variable active_user to the new username
 		}
 	}
@@ -2556,10 +2766,10 @@ app.get("/register", function (request, response) {
 	response.send(
 		`
 		<!-- 
-		Registration Page for Assignment2
+		Registration Page for Assignment3
 		Author: Deborah Yuan & Evon Diep
-		Date: 11/18/22
-		Desc: This register page serves as a page for new site users to create an account to purchase items. If the username they try to use is already taken, errors will appear. Same goes for if their Full Name is not valid, or if their password doesn't meet the security requirements. Of course, password inputs are protected and hidden. 
+		Date: 12/18/22
+		Desc: This register page serves as a page for new site users to create an account to purchase items. If the username they try to use is already taken, errors will appear. Same goes for if their Full Name is not valid, or if their password doesn't meet the security requirements. Of course, password inputs are protected and hidden. Passwords registered will also be encrypted.
 		-->
 		
 		<head>
@@ -2586,16 +2796,7 @@ app.get("/register", function (request, response) {
 		<script>
 			let params = (new URL(document.location)).searchParams;
 	
-			if (params.has('fullname')) {
-				var fullname = params.get('fullname');
-				document.getElementById('fullname').value = fullname;
-				document.getElementById("submitbutton").outerHTML = '<input type="submit" value="Continue        " id="submitbutton" class="button" name="submitbutton" style="min-width:20%";></input>'
-			}
-	
-			if (params.has('email')) {
-					var email = params.get('email');
-					document.getElementById('username').value = email;
-			};
+
 			</script>
 	
 		
@@ -2675,9 +2876,20 @@ app.get("/register", function (request, response) {
 			<input type="submit" value='Register        ' id="submitbutton" class="button" name="submitbutton" style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input>
 			</form>
 			<BR>
-			<form name='returntologin' action='/login' method="POST">
+			<form name='returntologin' action='/login' method="GET">
 	<input type="submit" value='Return to Login       ' id="button2"   class="button" style="min-width:20%; font-family: 'Source Sans Pro', sans-serif;"></input></form>
-			`
+			<script>
+			if (params.has('fullname')) {
+				var fullname = params.get('fullname');
+				document.getElementById('fullname').value = fullname;
+				document.getElementById("submitbutton").outerHTML = '<input type="submit" value="Continue        " id="submitbutton" class="button" name="submitbutton" style="min-width:20%";></input>'
+			}
+	
+			if (params.has('email')) {
+					var email = params.get('email');
+					document.getElementById('username').value = email;
+			};
+			</script>`
 	);
 });
 
@@ -2712,7 +2924,7 @@ app.post("/register", function (request, response) {
 	}
 
 	// check to see if full name only contains letters
-	if (/^[A-Za-z_ -]+$/.test(request.body.fullname) == false) {
+	if (/^[a-zA-Z\s]*$/.test(request.body.fullname) == false) {
 		// regEx retrieved from stack overflow
 		regErrors["bad_user"] = `Name must only contain letters.`;
 	}
@@ -2769,10 +2981,13 @@ app.post("/register", function (request, response) {
 		users[user_name].lasttimelog = 0;
 		users[user_name].currtimelog = getCurrentDate(); // retrieves current date
 		users[user_name].amtlogin = 1;
+		users[user_name].admin = false;
+		users[user_name].encrypted = true;
 		actusers[user_name] = {};
 		actusers[user_name] = users[user_name];
 
-		response.cookie("activeuser", user_name); // sets the cookie's active user as the username if credentials are correct
+		response.cookie("activeuser", user_name, { maxAge: 1200000 }); // renaming the cookie "activeuser" to the new username; cookie expires after 20 minutes
+		// sets the cookie's active user as the username if credentials are correct
 		active_user = request.cookies["activeuser"]; // active user cookie set to active_user variable
 
 		let data = JSON.stringify(users);
@@ -2800,294 +3015,6 @@ app.post("/register", function (request, response) {
 	}
 });
 
-app.post("/startregister", function (request, response) {
-	// FIX: CONSIDER REMOVING
-	let params = new URLSearchParams(request.query);
-	response.redirect("register?" + params.toString());
-});
-
-// blocks someone from just accessing invoice directly
-app.get("/invoice", function (request, response) {
-	// if someone tries to type in /invoice into the URL, it will redirect them to products display // FIX: NEED TO REDIRECT BACK TO PREVIOUS PAGE
-	let params = new URLSearchParams(request.query);
-	console.log(params);
-	console.log(params.toString());
-	response.redirect("products_display");
-});
-
-// POST INVOICE
-app.post("/invoice", function (request, response) {
-	var quantities = []; // declaring empty array 'quantities'
-	let params = new URLSearchParams(request.query); // pull params from search URL
-	console.log(params);
-
-	console.log(params);
-	params.forEach(
-		// for each iterates through all the keys
-		function (value, key) {
-			quantities.push(value); // pushes the value to quantities array
-		}
-	);
-	quantities.pop(); // learned from https://stackoverflow.com/questions/19544452/remove-last-item-from-array
-	console.log("Qs" + quantities);
-
-	response.write(`
-	<!DOCTYPE html>
-	<html lang="en">
-	<!-- 
-	Invoice for Assignment1
-	Author: Deborah Yuan
-	Date: 11/2/22
-	Desc: This html page produces an invoice for the customer after the quantities of products that the customer is requesting has already been validated. The validation for the user inputted quantities is done on the server, with invoice pulling the quantities from search params. This invoice includes an image of the product purchased (IR5), the product name, quantity, price, extended price, subtotal, shipping, tax, and total. The bottom of the invoice features a back button, which gives users the opportunity to go back to the purchasing page to buy more products if they want.
-	-->
-	
-	<!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
-	
-	<head>
-	  <meta charset="UTF-8">
-	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
-	  <script src="../products.json"></script>
-	  <script src="../user_registration_info.json" type="application/json
-	  "></script> <!-- loading in user data from user_registration_info.json -->
-	
-	  <link rel="preconnect" href="https://fonts.googleapis.com">
-	  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
-	
-	  <link href="products-style.css" rel="stylesheet">
-	  
-	  <title>Invoice</title>
-	</head>
-	
-	<body>
-	  <main>
-
-	<h1 class="invoiceheader" style="text-align: center;">${actusers[currentuser].fullname}'s Invoice</h1>
-	  <table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
-		<tbody>
-		  <thead>
-		  <tr>
-			<th align="center">Image</th>
-			<th>Item</th>
-			<th>Quantity</th>
-			<th>Cost of Item</th>
-			<th>Extended Price</th>
-		  </tr>
-		</thead>
-`);
-
-	// Compute subtotal
-	var subtotal = 0;
-
-	// Compute tax
-	var tax_rate = 0.0475;
-	var tax = tax_rate * subtotal;
-
-	for (let i in quantities) {
-		if (quantities[i] == 0) {
-			// if quantities = 0, then skip the row
-			continue;
-		} else {
-			let extended_price = quantities[i] * products[i].price;
-			console.log(products[i].price);
-			// toFixed added to $ values to preserve cents
-			response.write(`
-	<tr>
-	  <td align="center"><img src="${
-			products[i].image
-		}" class="img-responsive" style="width:50%; height:auto;" alt="Image"></td>
-	  <td>${products[i].name}</td>
-	  <td align="center">${quantities[i]}</td>
-	  <td align="center">$${products[i].price.toFixed(2)}</td>
-	  <td>$${(quantities[i] * products[i].price).toFixed(2)}</td>
-	</tr>
-	  `);
-
-			subtotal += extended_price;
-			console.log(products[i].price);
-		}
-	}
-
-	// Compute shipping
-	var shipping;
-	if (subtotal < 1000) {
-		shipping = 5;
-	} else if (subtotal >= 1000 && subtotal < 1500) {
-		shipping = 10;
-	} else if (subtotal >= 1500) {
-		shipping = subtotal * 0.02;
-	}
-	// Compute grand total
-	var total = tax + subtotal + shipping;
-
-	response.write(`
-		  <!-- table formatting, with some inline css -->
-		  <tr>
-			<td colspan="5" width="100%">&nbsp;</td>
-		  </tr>
-		  <tr>
-			<td style="text-align: right;" colspan="4" width="67%">Sub-total</td>
-			<td width="54%">$
-			  ${subtotal.toFixed(2)}
-			</td>
-		  </tr>
-		  <tr>
-			<td style="text-align: right;" colspan="4" width="67%">Tax @ 4.75%</span></td>
-			<td width="54%">$
-			${tax.toFixed(2)}
-			</td>
-		  </tr>
-		  <tr>
-			<td style="text-align: right;" colspan="4" width="67%">Shipping</td>
-			<td width="54%">$
-			${shipping.toFixed(2)}
-			</td>
-		  </tr>
-		  <tr>
-			<td style="text-align: right;" colspan="4" width="67%"><strong>Total</strong></td>
-			<td width="54%"><strong>$
-			${total.toFixed(2)}
-			  </strong></td>
-		  </tr>
-		  <tr>
-			<td style="text-align: center;" colspan="5" width="100%">
-			  <b> <!-- shipping policy info -->
-				Shipping Policy:
-				<BR>
-				Orders with subtotals of $0 - $999.99 will be charged $5 for shipping.
-				<BR>
-				Orders with subtotals of $1000 - $1499.99 will be charged $10 for shipping.
-				<BR>Orders with subtotals of $1500 and over will be charged 2% of the subtotal amount.</b>
-			</td>
-		  </tr>
-		  <tr>
-			<td style="text-align: center;" colspan="5" width="100%">
-			  <form name='confirmpurchase' action=/goodbye?${params} method="POST">
-			<input type="submit" id="button" value='Confirm Purchase' id="Return" class="button"></input>
-		  </form>
-		   </td>
-		  </tr>
-		</tbody>
-	  </table>
-	</main>
-	</body>
-	
-	</html>`);
-	response.end();
-});
-
-// POST GOODBYE, the page before logging out, where stock
-app.post("/goodbye", function (request, response) {
-	let params = new URLSearchParams(request.query); // grab params from url
-
-	var quantities = []; // declaring empty array 'quantities'
-	params.forEach(
-		// for each iterates through all the keys
-		function (value, key) {
-			quantities.push(value); // pushes the value to quantities array
-		}
-	);
-	console.log("quantities=" + quantities);
-	if (users[active_user].loginstatus == true) {
-		// modified from stack overflow (https://stackoverflow.com/questions/34909706/how-to-prevent-user-from-accessing-webpage-directly-in-node-js)
-		for (i in quantities) {
-			values = quantities[i];
-			if (values != 0 && isNonNegativeInteger(values)) {
-				console.log("values= " + values);
-				products[i].quantity_available -= Number(values); // Stock, or quantity_available is subtracted by the order quantity
-				products[i].quantity_sold =
-					Number(products[i].quantity_sold) + Number(values); // EC IR1: Total amount sold, or quantity_sold increases by the order quantity
-				let proddata = JSON.stringify(products);
-				fs.writeFileSync(prodname, proddata, "utf-8");
-			}
-		}
-	}
-	response.send(`
-	<!-- 
-	Goodbye Page for Assignment2
-	Author: Deborah Yuan & Evon Diep
-	Date: 11/16/22
-	Desc: This html page serves as a goodbye page for a user visiting the site. It features a navigation bar at the top. There is a button labeled 'logout', which the user can click -- this leads to the login page. 
-	-->
-	
-	<head>
-	  <meta charset="utf-8">
-	
-	  <meta name="viewport" content="width=device-width, initial-scale=1">
-	
-	  <title>Smart Phone Store</title>
-	
-	  <!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
-	  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-	
-	  <!-- google fonts -->
-	  <link rel="preconnect" href="https://fonts.googleapis.com">
-	  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
-	
-	   <!-- my own stylesheet (products-style.css) -->
-	  <link href="products-style.css" rel="stylesheet">
-	  <style>
-		/* Remove the navbar's default rounded borders and increase the bottom margin */
-		.navbar {
-		  margin-bottom: 50px;
-		  border-radius: 0;
-		}
-	
-		/* Remove the jumbotron's default bottom margin */
-		.jumbotron {
-		  margin-bottom: 0;
-		}
-	
-		/* Add a gray background color and some padding to the footer */
-		footer {
-		  background-color: rgba(0, 0, 0, 0);
-		}
-	  </style>
-	</head>
-	
-	 <!-- navigation bar from w3 schools -->
-	  <nav class="navbar navbar-inverse">  
-		<div class="container-fluid">
-		  <div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-			  <span class="icon-bar"></span>
-			  <span class="icon-bar"></span>
-			  <span class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="#">
-			   <!-- corner navbar Apple icon -->
-			  <img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png" width="20" alt=""></a>
-		  </div>
-		  <div class="collapse navbar-collapse" id="myNavbar">
-			<ul class="nav navbar-nav">
-			  <li class="active"><a href="./">Home</a></li>
-			</ul>
-			<ul class="nav navbar-nav">
-			  <!-- clicking this 'tab' leads to products display -->
-			  <li ><a href="./products_display">Products</a></li>
-			</ul>
-		  </div>
-		</div>
-	  </nav>
-
-	  <div class="container text-center" style="padding-bottom: 50px;">
-	  <p style="font-size: 2em;">Thank you</p>
-	  <h1 style="font-size: 6em;"> ${actusers[currentuser].fullname}</h1><BR>
-	  <p style="font-size: 2em;">for your purchase</p>
-	  <BR><BR>
-	  <p style="font-size: 2em;"><B>Click the button below to log out<B></p><BR>
-	  <form action="logout?${params.toString()}" method="GET">
-<input type="submit" value='Log Out      ' id="button" class="button"></input>
-</form>
-	</div>
-`);
-});
-
 // GET LOGOUT, officially logs out user and removes them from active user list
 app.get("/logout", function (request, response) {
 	ordered = "";
@@ -3101,6 +3028,13 @@ app.get("/logout", function (request, response) {
 	fs.writeFileSync(fname, data, "utf-8");
 	fs.writeFileSync(actname, actdata, "utf-8");
 	response.redirect("/");
+});
+
+// monitor all requests
+app.all("*", function (request, response, next) {
+	console.log(request.method + " to " + request.path);
+	//console.log(request);
+	next();
 });
 
 // start server

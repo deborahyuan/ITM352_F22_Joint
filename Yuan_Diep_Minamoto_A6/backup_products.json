@@ -13,19 +13,19 @@
 			"name": "iPhone 14 Pro Max",
 			"price": 1099,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/iPhone14promax.jpeg",
-			"quantity_available": 36,
-			"quantity_sold": 14,
-			"rating": 9,
-			"reviewers": 3
+			"quantity_available": 34,
+			"quantity_sold": 16,
+			"rating": 14,
+			"reviewers": 4
 		},
 		{
 			"name": "iPhone 14",
 			"price": 799,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/iPhone14.jpeg",
-			"quantity_available": 50,
-			"quantity_sold": 0,
-			"rating": 4,
-			"reviewers": 2
+			"quantity_available": 48,
+			"quantity_sold": 2,
+			"rating": 2,
+			"reviewers": 1
 		},
 		{
 			"name": "iPhone 14 Plus",
@@ -60,8 +60,8 @@
 			"name": "iPad Pro (11-inch)",
 			"price": 799,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/iPad/iPadPro11.png",
-			"quantity_available": 48,
-			"quantity_sold": 2,
+			"quantity_available": 47,
+			"quantity_sold": 3,
 			"rating": 4,
 			"reviewers": 2
 		},
@@ -69,8 +69,8 @@
 			"name": "iPad Pro (12.9-inch)",
 			"price": 1099,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/iPad/iPadPro13.png",
-			"quantity_available": 50,
-			"quantity_sold": 0,
+			"quantity_available": 46,
+			"quantity_sold": 4,
 			"rating": 4,
 			"reviewers": 2
 		},
@@ -161,8 +161,8 @@
 			"name": "iMac (24-inch)",
 			"price": 1299,
 			"image": "https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment3imgs/Mac/iMac24.png",
-			"quantity_available": 42,
-			"quantity_sold": 8,
+			"quantity_available": 50,
+			"quantity_sold": 0,
 			"rating": 4,
 			"reviewers": 2
 		}

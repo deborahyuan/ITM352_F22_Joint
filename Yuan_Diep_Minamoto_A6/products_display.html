@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 	<!-- 
-Products Display for Assignment2
+Products Display for Assignment3
 Author: Deborah Yuan & Evon Diep
-Date: 11/18/22
+Date: 12/18/22
 Desc: This html page pulls data from a separate products file (products.json) and displays the files without hardcoding any values. In this particular case, the store has 6 different models of iPhones. The page will present a variety of error messages if the quantities desired for purchase are invalid. This page also contains a form, which will be submitted to the server (server.js), where the data will then be validated. If the user attempts to submit invalid quantities for purchase despite error messages, they will be redirected back to this page to fix their errors. This page also has a navigation bar that allows users to switch between the Home page (index) and the products page (this page). The base template for this site was taken from w3 schools, but has been adequately modified to fit the needs of this store.
 -->
 
@@ -187,7 +187,12 @@ Desc: This html page pulls data from a separate products file (products.json) an
 
 	    // Get ratings
 		function getRatings( product, productrating, productreviewers) {
-		productrating /= productreviewers
+		if (productrating == 0) {
+			productrating = 0
+		} else {
+			productrating /= productreviewers
+		}
+		
         // Get percentage
         const starPercentage = (productrating / starsTotal) * 100;
 
@@ -200,11 +205,11 @@ Desc: This html page pulls data from a separate products file (products.json) an
         // Add number rating
         document.querySelector(`.${product} .number-rating`).innerHTML = productrating;
       }
-
-    if (typeof document.cookie != "undefined" && document.cookie!= "") {
-					active_user_str = decodeURIComponent(document.cookie);
-					active_user= active_user_str.split("=").pop()
-				}
+	
+    if (typeof getCookie("activeuser") != "undefined") {
+		if (getCookie("activeuser") != "") {
+		active_user = getCookie("activeuser")
+				}}
 	
 
 	</script>
@@ -294,7 +299,7 @@ Desc: This html page pulls data from a separate products file (products.json) an
 					<script>
 						if (typeof active_user != "undefined") {
 							document.write(
-								`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;My Account&emsp;</a></li>`
+								`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;${userdata[active_user].fullname}&emsp;</a></li>`
 							);
 						} else {
 							document.write(

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- 
+Manage Users for Assignment3
+Author: Deborah Yuan
+Date: 12/18/22
+Desc: This html page is exclusively accessible to those with admin status. Here, they can manage users.
+-->
+<!-- this produces an invoice AFTER valid quantities have been typed and the customer is ready to check out-->
+
+<head>
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Invoice</title>
+
+<!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<!-- google fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- my own stylesheet (products-style.css) -->
+<link href="products-style.css" rel="stylesheet">
+
+<script src="../user_registration_info.json" type="application/json
+"></script> <!-- loading in user data from user_registration_info.json -->
+<script src="./functions.js"></script>
+<style>
+/* Remove the navbar's default rounded borders and increase the bottom margin */
+.navbar {
+  margin-bottom: 50px;
+  border-radius: 0;
+}
+
+/* Remove the jumbotron's default bottom margin */
+.jumbotron {
+  margin-top: 0;
+  margin-bottom: 0;
+  position: relative;
+
+}
+
+/* Add a gray background color and some padding to the footer */
+footer {
+  background-color: rgba(0, 0, 0, 0);
+}
+</style>
+
+<script>
+
+if (typeof getCookie("activeuser") != "undefined") {
+		if (getCookie("activeuser") != "") {
+		active_user = getCookie("activeuser")
+				}}
+
+    // HEAVILY MODIFIED, inspired by emkey08's response (https://stackoverflow.com/questions/469357/html-text-input-allow-only-numeric-input)
+function setProductInputFilter(textbox, inputFilter) {
+	["focusout", "blur"].forEach(function (event) {
+		textbox.addEventListener(event, function (e) {
+			this.setCustomValidity("");
+		});
+	});
+	[
+		"input",
+		"keydown",
+		"keyup",
+		"mousedown",
+		"mouseup",
+		"change",
+		"contextmenu",
+		"drop",
+		"focusin",
+	].forEach(function (event) {
+		textbox.addEventListener(event, function (e) {
+			if (inputFilter(this.value) || this.value == "") {
+				// Accepted value
+				if (["onclick", "keydown", "mousedown", "keyup"].indexOf(e.type) >= 0) {
+					this.classList.remove("input-error");
+					this.setCustomValidity("");
+				}
+				this.oldValue = this.value;
+			} else if (this.hasOwnProperty("oldValue")) {
+				// Rejected value
+				this.classList.add("input-error");
+				if (/^(\s*|\d+)$/.test(this.value) == false) {
+					// must be a number
+					errMsg = "Not a Number!";
+				} else if (/^-?\d*$/.test(this.value) == false) {
+					// must be an integer
+					errMsg = "Not an Integer!";
+				} else if (/^\d*$/.test(this.value) == false) {
+					// must be a non negative integer
+					errMsg = "Can't be negative!";
+				} else {
+					errMsg = "";
+					this.classList.remove("input-error");
+				}
+				this.setCustomValidity(errMsg);
+				this.reportValidity();
+			}
+		});
+	});
+}
+
+ // HEAVILY MODIFIED, inspired by emkey08's response (https://stackoverflow.com/questions/469357/html-text-input-allow-only-numeric-input)
+ function setPriceInputFilter(textbox, inputFilter) {
+	["focusout", "blur"].forEach(function (event) {
+		textbox.addEventListener(event, function (e) {
+			this.setCustomValidity("");
+		});
+	});
+	[
+		"input",
+		"keydown",
+		"keyup",
+		"mousedown",
+		"mouseup",
+		"change",
+		"contextmenu",
+		"drop",
+		"focusin",
+	].forEach(function (event) {
+		textbox.addEventListener(event, function (e) {
+			if (inputFilter(this.value) || this.value == "") {
+				// Accepted value
+				if (["onclick", "keydown", "mousedown", "keyup"].indexOf(e.type) >= 0) {
+					this.classList.remove("input-error");
+					this.setCustomValidity("");
+				}
+				this.oldValue = this.value;
+			} else if (this.hasOwnProperty("oldValue")) {
+				// Rejected value
+				this.classList.add("input-error");
+				if (/^\d*(\.\d{0,2})?$/.test(this.value) == false) {
+					// must be a number
+					errMsg = "Not a valid price!";
+				}  else {
+					errMsg = "";
+					this.classList.remove("input-error");
+				}
+				this.setCustomValidity(errMsg);
+				this.reportValidity();
+			}
+		});
+	});
+}
+</script>
+
+</head>
+<script>
+     
+// Code modified from Assignment 3 Examples by Dan Port    
+loadJSON('get_cart', function (response) {
+			if (typeof JSON.parse(response) != "undefined"){
+				cart_info = JSON.parse(response);
+				totalItems = "";
+				for (series in cart_info) {
+				totalItems = Number(totalItems)+cart_info[series].reduce((a, b) => Number(a) + Number(b)); // adds the quantities so this can be used to display # of items in cart                
+			}
+			}
+			});
+
+loadJSON("get_products_data", function (response) {
+			// Parsing JSON string into object
+			products = JSON.parse(response);
+		});
+
+loadJSON("get_user_data", function (response) {
+			// Parsing JSON string into object
+			userdata = JSON.parse(response);
+		});
+</script>
+<body>
+  <main>
+
+	<!-- navigation bar from w3 schools -->
+	<nav class="navbar navbar-inverse">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button
+					type="button"
+					class="navbar-toggle"
+					data-toggle="collapse"
+					data-target="#myNavbar"
+				>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand active" href="./">
+					<!-- corner navbar Apple icon -->
+					<img
+						src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png"
+						width="20"
+						alt=""
+				/></a>
+			</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav">
+				<li><a href="./products_display">Home</a></li>
+			</ul>
+			<ul class="nav navbar-nav">
+				<!-- clicking this 'tab' leads to products display -->
+							<li id="iPhonetab"><a href="./products_display?series=iPhone">iPhone</a></li>
+			</ul>
+			<ul class="nav navbar-nav">
+				<!-- clicking this 'tab' leads to products display -->
+
+      <li id="iPadtab"><a href="./products_display?series=iPad">iPad</a></li>
+			</ul>
+			<ul class="nav navbar-nav">
+				<!-- clicking this 'tab' leads to products display -->
+          <li id="Mactab"><a href="./products_display?series=Mac">Mac</a></li>;
+			</ul>
+			<script>
+				if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
+					document.write(`
+			<ul class="nav navbar-nav">
+				<!-- clicking this 'tab' leads to products display -->
+      <li id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
+	</ul>`);
+					}
+				if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
+					document.write(`
+			<ul class="nav navbar-nav">
+				<!-- clicking this 'tab' leads to products display -->
+      <li class="active" id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
+	</ul>`);
+}
+				</script>
+			<ul class="nav navbar-nav navbar-right">
+				<ul class="nav navbar-nav">
+					<script>
+						if (typeof active_user != "undefined") {
+							document.write(
+								`<li><a href="./loginsuccess">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;${userdata[active_user].fullname}&emsp;</a></li>`
+							);
+						} else {
+							document.write(
+								`<li><a href="./login">&emsp;<span class="glyphicon glyphicon-user"></span>&emsp;Login&emsp;</a></li>`
+							);
+						}
+					</script>
+				</ul>
+				<ul class="nav navbar-nav">
+					<li>
+						<a href="./cart"
+							>&emsp;<span class="glyphicon glyphicon-shopping-cart"></span
+							>&emsp;Cart (<script>if (typeof totalItems != "undefined") {
+								document.write(totalItems)
+							} else {
+								document.write(`0`)
+							};</script>)&emsp;</a
+						>
+					</li>
+				</ul>
+			</ul>
+		</div>
+	</nav>
+
+	<div class="top-btn"> <!-- code and css partially borrowed from https://codepen.io/rafi_kadir/pen/oNgOyZb --> 
+	<i class="fas fa-arrow-up">↑</i>
+</div>
+<script>
+
+let params = new URL(document.location).searchParams; // pull params from search URL
+
+if (params.has(`series`)) {
+    series = params.get(`series`);
+    console.log("series=" + series);
+}
+
+// ARROW TO SCROLL TO TOP FUNCTIONALITY
+
+document.addEventListener("scroll", handleScroll); // code modified from (https://dev.to/ljcdev/scroll-to-top-button-in-vanilla-js-beginners-2nc)
+// get a reference to our predefined button
+var scrollToTopBtn = document.querySelector(".top-btn");
+
+function handleScroll() {
+var scrollableHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+var GOLDEN_RATIO = 0.5;
+
+if ((document.documentElement.scrollTop / scrollableHeight ) > GOLDEN_RATIO) {
+//show button
+if(!scrollToTopBtn.classList.contains("showScrollBtn"))
+scrollToTopBtn.classList.add("showScrollBtn")
+} else {
+//hide button
+if(scrollToTopBtn.classList.contains("showScrollBtn"))
+scrollToTopBtn.classList.remove("showScrollBtn")
+}
+}
+
+scrollToTopBtn.addEventListener("click", scrollToTop);
+
+function scrollToTop() {
+window.scrollTo({
+top: 0,
+behavior: "smooth"
+});
+}
+
+
+
+</script>
+
+
+<h1 class="invoiceheader" style="text-align: center">Manage Users</script></h1>
+<h2 style="text-align: center">Update, Edit, or Delete User Accounts here</h2>
+      <BR>
+ 
+
+<script>
+
+document.write(`
+<table class="invoice-table"> <!-- base css acquired from yt tutorial (https://www.youtube.com/watch?v=biI9OFH6Nmg&ab_channel=dcode)-->
+	<tbody>
+	  <thead>
+	  <tr>
+		<th>Username/Email</th>
+		<th>Full Name</th>
+		<th>Password</th>
+		<th>Admin Status <BR>(type 'true' for admin)</th>
+		<th>Delete User <BR>(type 'yes' to delete)</th>
+	  </tr>
+	</thead>
+<form name='manage_users_form' action="/manageusers" method="POST">
+  <!-- start of the form -->`);
+
+
+  let users_list = Object.values(userdata);
+  let users_array = [];
+  console.log("USERS_LIST="+users_list)
+
+  //push the object from params for quantities into an array called arry
+  users_list.forEach(function (value, key) {
+    users_array.push(value);
+  })
+  console.log("USERS_ARRAY="+users_array)
+
+
+for (username in userdata) {
+	username_list = userdata[username].fullname
+	console.log("USERNAME="+userdata[username].fullname)
+
+				document.write(`
+<tr>
+	<td><input type="text" name='manageusers_username_${userdata[username].username}' id ='manageusers_username_${userdata[username].username}' value="${userdata[username].username}"></input></td>
+	<td><input type="text" name='manageusers_fullname_${userdata[username].username}' id ='manageusers_fullname_${userdata[username].username}' value="${userdata[username].fullname}"></input></td>
+	<td><input type="text" name='manageusers_password_${userdata[username].username}' id ='manageusers_password_${userdata[username].username}' value="${userdata[username].password}"></input></td>
+	<td><input type="text" name='manageusers_admin_${userdata[username].username}' id ='manageusers_admin_${userdata[username].username}' value="${userdata[username].admin}"></input></td>
+	<td><input type="text" name='manageusers_delete_${userdata[username].username}' id ='manageusers_delete_${userdata[username].username}' value=""></input></td>
+</tr>
+`)
+}
+document.write(`
+<tr>
+	<td><B>New User's Username</B><BR><input type="text" name='manageusers_username_new' id ='manageusers_username_new' value=""></input></td>
+	<td><B>New User's Full Name</B><BR><input type="text" name='manageusers_fullname_new' id ='manageusers_fullname_new' value=""></input></td>
+	<td><B>New User's Password</B><BR><input type="text" name='manageusers_password_new' id ='manageusers_password_new' value=""></input></td>
+	<td><B>New User's Admin Status</B><BR><input type="text" name='manageusers_admin_new' id ='manageusers_admin_new' value=""></input></td>
+	<td><B>Type 'yes' to add</B><BR><input type="text" name='manageusers_add_new' id ='manageusers_add_new' value=""></input></td>
+</tr>
+`)
+
+document.write(`
+<tr>
+		<td style="text-align: center;" colspan="5" width="100%">
+	  <input type="submit" value='   Update' id="button2"; class="button" style="min-width: 20%"></input>
+	  </form>
+	   </td>
+	  </tr>`)
+</script>
+	</tbody>
+  </table>
+</main>
+</body>
+</html>
