@@ -1,241 +1,225 @@
 <!DOCTYPE html>
 <html>
-	<!-- 
+<!-- 
 Products Display for Assignment3
 Author: Deborah Yuan & Evon Diep
 Date: 12/18/22
 Desc: This html page pulls data from a separate products file (products.json) and displays the files without hardcoding any values. In this particular case, the store has 6 different models of iPhones. The page will present a variety of error messages if the quantities desired for purchase are invalid. This page also contains a form, which will be submitted to the server (server.js), where the data will then be validated. If the user attempts to submit invalid quantities for purchase despite error messages, they will be redirected back to this page to fix their errors. This page also has a navigation bar that allows users to switch between the Home page (index) and the products page (this page). The base template for this site was taken from w3 schools, but has been adequately modified to fit the needs of this store.
 -->
 
-	<head>
-		<meta charset="utf-8" />
+<head>
+	<meta charset="utf-8" />
 
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-		<title>Smart Phone Store</title>
+	<title>Smart Phone Store</title>
 
-		<!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
-		<link
-			rel="stylesheet"
-			href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-		/>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<!-- bootstrap from w3 schools (https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_store&stacked=h) -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-		<!-- google fonts -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap"
-			rel="stylesheet"
-		/>
-		<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">
+	<!-- google fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet" />
+	<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">
 
-		<!-- my own stylesheet (products-style.css) -->
-		<link href="products-style.css" rel="stylesheet" />
-		<script
-			src="../user_registration_info.json"
-			type="application/json
-  "
-		></script>
-		<!-- loading in user data from user_registration_info.json -->
-		<script src="./functions.js"></script>
+	<!-- my own stylesheet (products-style.css) -->
+	<link href="products-style.css" rel="stylesheet" />
+	<script src="../user_registration_info.json" type="application/json
+  "></script>
+	<!-- loading in user data from user_registration_info.json -->
+	<script src="./functions.js"></script>
 
-		<!-- Code modified from Assignment 3 Examples by Dan Port -->        
-		<style>
-			/* Remove the navbar's default rounded borders and increase the bottom margin */
-			.navbar {
-				margin-bottom: 50px;
-				border-radius: 0;
-			}
-
-			/* Remove the jumbotron's default bottom margin */
-			.jumbotron {
-				margin-top: 0;
-				margin-bottom: 0;
-				position: relative;
-			}
-
-			/* Add a gray background color and some padding to the footer */
-			footer {
-				background-color: rgba(0, 0, 0, 0);
-			}
-		</style>
-	</head>
-
-	
-
-	<script>
-      
-		// Code modified from Assignment 3 Examples by Dan Port    
-		loadJSON('get_cart', function (response) {
-			if (typeof JSON.parse(response) != "undefined"){
-				cart_info = JSON.parse(response);
-				totalItems = "";
-				for (series in cart_info) {
-				totalItems = Number(totalItems)+cart_info[series].reduce((a, b) => Number(a) + Number(b)); // adds the quantities so this can be used to display # of items in cart                
-			}
-			}
-			});
-
-		loadJSON("get_products_data", function (response) {
-			// Parsing JSON string into object
-			products = JSON.parse(response);
-		});
-
-		loadJSON("get_user_data", function (response) {
-			// Parsing JSON string into object
-			userdata = JSON.parse(response);
-		});
-
-
-		let params = new URL(document.location).searchParams; // pull params from search URL
-
-		if (params.has(`series`)) {
-			series = params.get(`series`);
-			console.log("series=" + series);
+	<!-- Code modified from Assignment 3 Examples by Dan Port -->
+	<style>
+		/* Remove the navbar's default rounded borders and increase the bottom margin */
+		.navbar {
+			margin-bottom: 50px;
+			border-radius: 0;
 		}
 
-		var quantities = []; // declaring empty array 'quantities'
-		params.forEach(
-			// for each iterates through all the keys
-			function (value, key) {
-				quantities.push(value); // pushes the value to quantities array
-			}
-		);
-		console.log("QTYS=" + quantities);
-
-		// Switching between product pages
-
-		/* function section */
-
-		// isNonNegativeInteger tests the input for errors, then returns error messages if any
-		function isNonNegativeInteger(queryString, returnErrors = false) {
-			errors = []; // assume no errors at first
-			if (Number(queryString) != queryString) {
-				errors.push("Not a number!"); // Check if string is a number value
-			} else {
-				if (queryString < 0) errors.push("a Negative value!"); // Check if it is non-negative
-				if (parseInt(queryString) != queryString && queryString != "")
-					errors.push("Not an integer!"); // Check that it is an integer
-			}
-
-			if (returnErrors) {
-				return errors;
-			} else if (errors.length == 0) {
-				return true;
-			} else {
-				return false;
-			}
+		/* Remove the jumbotron's default bottom margin */
+		.jumbotron {
+			margin-top: 0;
+			margin-bottom: 0;
+			position: relative;
 		}
 
-		// checkQuantityTextbox uses the input to write out errors, adjust textbox quantities, or recolor text/textbox borders
-		function checkQuantityTextbox(theTextbox) {
-			// Added additional text and font styles to indicate whether quantities were valid or not
-			let input_string = theTextbox.value;
-			let error_array = isNonNegativeInteger(input_string, true);
-			let test = document.getElementsByClassName(theTextbox.name + "").item(0); // let test = 'quantitytextbox'
+		/* Add a gray background color and some padding to the footer */
+		footer {
+			background-color: rgba(0, 0, 0, 0);
+		}
+	</style>
+</head>
 
-			/* Having 'quantitytextbox[${i}]_available_message' display a red error message if Available Quantity > Stock, have quantitytextbox readjust to valid quantity, change textbox border to red */
-			if (
-				Number(input_string) >
-				document.getElementById(theTextbox.name + "_available").innerHTML
-			) {
-				// if user inputted quantity is > products[i].quantity_available, then...
-				document.getElementById(theTextbox.name + "_message").outerHTML =
-					'<span id="' +
-					theTextbox.name +
-					'_message" name="' +
-					theTextbox.name +
-					'_message"><font color="red"><b>We don\'t have ' +
-					input_string +
-					" available.</b></font></span>"; // change quantitytextbox[${i}]_available_message's outerHTML to write that x quantity is not available
-				var extra =
-					input_string -
-					document.getElementById(theTextbox.name + "_available").innerHTML; // defining extra, which is the user inputted quantity - products[i].quantity_available
-				setTimeout(function () {
-					// delays this code for a bit (500) so the user inputted quantity that exceeds stock isn't INSTANTLY changed
-					test.value = input_string - extra; // quantitytextbox = user inputted quantity - the # of products that exceeds stock
-				}, 500);
-				test.style.borderColor = "red"; // changes quantitytextbox's border to red
-				return;
-			} else {
-				test.style.borderColor = "black"; // if the quantity is fixed, changes quantitytextbox's border to red
+
+
+<script>
+
+	// Code modified from Assignment 3 Examples by Dan Port    
+	loadJSON('get_cart', function (response) {
+		if (typeof JSON.parse(response) != "undefined") {
+			cart_info = JSON.parse(response);
+			totalItems = "";
+			for (series in cart_info) {
+				totalItems = Number(totalItems) + cart_info[series].reduce((a, b) => Number(a) + Number(b)); // adds the quantities so this can be used to display # of items in cart                
 			}
+		}
+	});
 
-			if (error_array.length == 0) {
-				// If there are no errors...
-				if (Number(input_string) == "" || Number(input_string) == "0") {
-					document.getElementById(theTextbox.name + "_message").innerHTML =
+	loadJSON("get_products_data", function (response) {
+		// Parsing JSON string into object
+		products = JSON.parse(response);
+	});
+
+	loadJSON("get_user_data", function (response) {
+		// Parsing JSON string into object
+		userdata = JSON.parse(response);
+	});
+
+
+	let params = new URL(document.location).searchParams; // pull params from search URL
+
+	if (params.has(`series`)) {
+		series = params.get(`series`);
+		console.log("series=" + series);
+	}
+
+	var quantities = []; // declaring empty array 'quantities'
+	params.forEach(
+		// for each iterates through all the keys
+		function (value, key) {
+			quantities.push(value); // pushes the value to quantities array
+		}
+	);
+	console.log("QTYS=" + quantities);
+
+	// Switching between product pages
+
+	/* function section */
+
+	// isNonNegativeInteger tests the input for errors, then returns error messages if any
+	function isNonNegativeInteger(queryString, returnErrors = false) {
+		errors = []; // assume no errors at first
+		if (Number(queryString) != queryString) {
+			errors.push("Not a number!"); // Check if string is a number value
+		} else {
+			if (queryString < 0) errors.push("a Negative value!"); // Check if it is non-negative
+			if (parseInt(queryString) != queryString && queryString != "")
+				errors.push("Not an integer!"); // Check that it is an integer
+		}
+
+		if (returnErrors) {
+			return errors;
+		} else if (errors.length == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// checkQuantityTextbox uses the input to write out errors, adjust textbox quantities, or recolor text/textbox borders
+	function checkQuantityTextbox(theTextbox) {
+		// Added additional text and font styles to indicate whether quantities were valid or not
+		let input_string = theTextbox.value;
+		let error_array = isNonNegativeInteger(input_string, true);
+		let test = document.getElementsByClassName(theTextbox.name + "").item(0); // let test = 'quantitytextbox'
+
+		/* Having 'quantitytextbox[${i}]_available_message' display a red error message if Available Quantity > Stock, have quantitytextbox readjust to valid quantity, change textbox border to red */
+		if (
+			Number(input_string) >
+			document.getElementById(theTextbox.name + "_available").innerHTML
+		) {
+			// if user inputted quantity is > products[i].quantity_available, then...
+			document.getElementById(theTextbox.name + "_message").outerHTML =
+				'<span id="' +
+				theTextbox.name +
+				'_message" name="' +
+				theTextbox.name +
+				'_message"><font color="red"><b>We don\'t have ' +
+				input_string +
+				" available.</b></font></span>"; // change quantitytextbox[${i}]_available_message's outerHTML to write that x quantity is not available
+			var extra =
+				input_string -
+				document.getElementById(theTextbox.name + "_available").innerHTML; // defining extra, which is the user inputted quantity - products[i].quantity_available
+			setTimeout(function () {
+				// delays this code for a bit (500) so the user inputted quantity that exceeds stock isn't INSTANTLY changed
+				test.value = input_string - extra; // quantitytextbox = user inputted quantity - the # of products that exceeds stock
+			}, 500);
+			test.style.borderColor = "red"; // changes quantitytextbox's border to red
+			return;
+		} else {
+			test.style.borderColor = "black"; // if the quantity is fixed, changes quantitytextbox's border to red
+		}
+
+		if (error_array.length == 0) {
+			// If there are no errors...
+			if (Number(input_string) == "" || Number(input_string) == "0") {
+				document.getElementById(theTextbox.name + "_message").innerHTML =
 					"Enter a quantity";
-				} else {
+			} else {
 				document.getElementById(theTextbox.name + "_message").innerHTML =
 					"You want <b>" + input_string + "</b>"; //  tell the user how much they want
-				}
-			} else {
-				// tell the user what the errors are and make the text red
-				document.getElementById(theTextbox.name + "_message").innerHTML =
-					'<font color="red"><b>Quantity is ' +
-					error_array.join("; ") +
-					"</b></font>";
 			}
+		} else {
+			// tell the user what the errors are and make the text red
+			document.getElementById(theTextbox.name + "_message").innerHTML =
+				'<font color="red"><b>Quantity is ' +
+				error_array.join("; ") +
+				"</b></font>";
 		}
+	}
 
 
-    // Total Stars
-    const starsTotal = 5;
+	// Total Stars
+	const starsTotal = 5;
 
-	    // Get ratings
-		function getRatings( product, productrating, productreviewers) {
+	// Get ratings
+	function getRatings(product, productrating, productreviewers) {
 		if (productrating == 0) {
 			productrating = 0
 		} else {
 			productrating /= productreviewers
 		}
-		
-        // Get percentage
-        const starPercentage = (productrating / starsTotal) * 100;
 
-        // Round to nearest 10
-        const starPercentageRounded = `${Math.round(starPercentage / 10) * 10}%`;
-	
-        // Set width of stars-inner to percentage
-        document.querySelector(`.${product} .stars-inner`).style.width = starPercentageRounded;
+		// Get percentage
+		const starPercentage = (productrating / starsTotal) * 100;
 
-        // Add number rating
-        document.querySelector(`.${product} .number-rating`).innerHTML = productrating;
-      }
-	
-    if (typeof getCookie("activeuser") != "undefined") {
+		// Round to nearest 10
+		const starPercentageRounded = `${Math.round(starPercentage / 10) * 10}%`;
+
+		// Set width of stars-inner to percentage
+		document.querySelector(`.${product} .stars-inner`).style.width = starPercentageRounded;
+
+		// Add number rating
+		document.querySelector(`.${product} .number-rating`).innerHTML = productrating;
+	}
+
+	if (typeof getCookie("activeuser") != "undefined") {
 		if (getCookie("activeuser") != "") {
-		active_user = getCookie("activeuser")
-				}}
-	
+			active_user = getCookie("activeuser")
+		}
+	}
 
-	</script>
 
-	<!-- navigation bar from w3 schools -->
-	<nav class="navbar navbar-inverse">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<button
-					type="button"
-					class="navbar-toggle"
-					data-toggle="collapse"
-					data-target="#myNavbar"
-				>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand active" href="./">
-					<!-- corner navbar Apple icon -->
-					<img
-						src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png"
-						width="20"
-						alt=""
-				/></a>
-			</div>
+</script>
+
+<!-- navigation bar from w3 schools -->
+<nav class="navbar navbar-inverse">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand active" href="./">
+				<!-- corner navbar Apple icon -->
+				<img src="https://raw.githubusercontent.com/deborahyuan/Assignment1imgs/main/Assignment1_images/Apple-Logo.png"
+					width="20" alt="" /></a>
+		</div>
 		<div class="collapse navbar-collapse" id="myNavbar">
 			<ul class="nav navbar-nav">
 				<li><a href="./products_display">Home</a></li>
@@ -285,22 +269,22 @@ Desc: This html page pulls data from a separate products file (products.json) an
 				<!-- clicking this 'tab' leads to products display -->
       <li id="ManageProductstab"><a href="./manageproducts">Manage Products</a></li>
 	</ul>`);
-					}
+				}
 				if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
 					document.write(`
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
       <li id="ManageUserstab"><a href="./manageusers">Manage Users</a></li>
 	</ul>`);
-} if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
+				} if (typeof active_user != "undefined" && userdata[active_user].admin == true) {
 					document.write(`
 			<ul class="nav navbar-nav">
 				<!-- clicking this 'tab' leads to products display -->
       <li id="PricingModuletab"><a href="./pricingmodule">Pricing Module</a></li>
 	</ul>`)
-	;
-}
-				</script>
+						;
+				}
+			</script>
 			<ul class="nav navbar-nav navbar-right">
 				<ul class="nav navbar-nav">
 					<script>
@@ -317,60 +301,59 @@ Desc: This html page pulls data from a separate products file (products.json) an
 				</ul>
 				<ul class="nav navbar-nav">
 					<li>
-						<a href="./cart"
-							>&emsp;<span class="glyphicon glyphicon-shopping-cart"></span
-							>&emsp;Cart (<script>if (typeof totalItems != "undefined") {
-								document.write(totalItems)
-							} else {
-								document.write(`0`)
-							};</script>)&emsp;</a
-						>
+						<a href="./cart">&emsp;<span class="glyphicon glyphicon-shopping-cart"></span>&emsp;Cart (
+							<script>if (typeof totalItems != "undefined") {
+									document.write(totalItems)
+								} else {
+									document.write(`0`)
+								};</script>)&emsp;
+						</a>
 					</li>
 				</ul>
 			</ul>
 		</div>
-	</nav>
+</nav>
 
-	<div class="top-btn"> <!-- code and css partially borrowed from https://codepen.io/rafi_kadir/pen/oNgOyZb --> 
-		<i class="fas fa-arrow-up">↑</i>
-  </div>
-  <script>
-// ARROW TO SCROLL TO TOP FUNCTIONALITY
+<div class="top-btn"> <!-- code and css partially borrowed from https://codepen.io/rafi_kadir/pen/oNgOyZb -->
+	<i class="fas fa-arrow-up">↑</i>
+</div>
+<script>
+	// ARROW TO SCROLL TO TOP FUNCTIONALITY
 
-document.addEventListener("scroll", handleScroll); // code modified from (https://dev.to/ljcdev/scroll-to-top-button-in-vanilla-js-beginners-2nc)
-// get a reference to our predefined button
-var scrollToTopBtn = document.querySelector(".top-btn");
+	document.addEventListener("scroll", handleScroll); // code modified from (https://dev.to/ljcdev/scroll-to-top-button-in-vanilla-js-beginners-2nc)
+	// get a reference to our predefined button
+	var scrollToTopBtn = document.querySelector(".top-btn");
 
-function handleScroll() {
-  var scrollableHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-  var GOLDEN_RATIO = 0.5;
+	function handleScroll() {
+		var scrollableHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+		var GOLDEN_RATIO = 0.5;
 
-  if ((document.documentElement.scrollTop / scrollableHeight ) > GOLDEN_RATIO) {
-    //show button
-    if(!scrollToTopBtn.classList.contains("showScrollBtn"))
-    scrollToTopBtn.classList.add("showScrollBtn")
-  } else {
-    //hide button
-    if(scrollToTopBtn.classList.contains("showScrollBtn"))
-    scrollToTopBtn.classList.remove("showScrollBtn")
-  }
-}
+		if ((document.documentElement.scrollTop / scrollableHeight) > GOLDEN_RATIO) {
+			//show button
+			if (!scrollToTopBtn.classList.contains("showScrollBtn"))
+				scrollToTopBtn.classList.add("showScrollBtn")
+		} else {
+			//hide button
+			if (scrollToTopBtn.classList.contains("showScrollBtn"))
+				scrollToTopBtn.classList.remove("showScrollBtn")
+		}
+	}
 
-scrollToTopBtn.addEventListener("click", scrollToTop);
+	scrollToTopBtn.addEventListener("click", scrollToTop);
 
-function scrollToTop() {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-}
-  </script>
+	function scrollToTop() {
+		window.scrollTo({
+			top: 0,
+			behavior: "smooth"
+		});
+	}
+</script>
 
-	<script>
-		if (params.has(`series`)) {
-			let products_S = products[series]; // new product variable that accounts for the series
+<script>
+	if (params.has(`series`)) {
+		let products_S = products[series]; // new product variable that accounts for the series
 
-			document.write(`
+		document.write(`
 <div class="container text-center" style="padding-bottom: 50px;">
   <h1 style="font-size: 6em;">${series}</h1>
   <p style="font-size: 2em;">Models for Sale</p>
@@ -381,28 +364,26 @@ function scrollToTop() {
 <input type="hidden" name="series" value=${series}>
   <!-- start of the form -->`);
 
-			for (i in products_S) {
-				// for loop that loops x amount of times, depending on the number of products in 'products.json'
-				row = "";
-				if (parseInt(i / 3) == i / 3) {
-					//
-					document.write(`<div class="container">
+		for (i in products_S) {
+			// for loop that loops x amount of times, depending on the number of products in 'products.json'
+			row = "";
+			if (parseInt(i / 3) == i / 3) {
+				//
+				document.write(`<div class="container">
             <div class="row">`);
-				}
 			}
-			for (i in products_S) {
-				var display_price; 
-				document.write(`
+		}
+		for (i in products_S) {
+			var display_price;
+			document.write(`
           <div class="col-sm-4" >
           <div class="panel panel-primary" style="border-radius: 10px 10px 10px 10px; overflow: hidden; box-shadow: 0 0 30px rgba(0, 0, 0, 0.30); border: white;">
-          <div class="panel-heading" style="background-color:black"><b>${
-						products_S[i].name
-					}</b></div>
+          <div class="panel-heading" style="background-color:black"><b>${products_S[i].name
+				}</b></div>
 					
 					<!-- some inline css to override the template defaults -->
-          <div class="panel-body"><img src="${
-						products_S[i].image
-					}" class="img-responsive" style="width:100%" alt="Image"></div>
+          <div class="panel-body"><img src="${products_S[i].image
+				}" class="img-responsive" style="width:100%" alt="Image"></div>
           <div class="panel-footer">
 			<div class='product_${i}'>
 			<div class="stars-outer">
@@ -410,27 +391,26 @@ function scrollToTop() {
 					</div>
 					<span class="number-rating">
 						</span> `)
-			getRatings("product_"+i, products_S[i].rating, products_S[i].reviewers)
-		
-if (products_S[i].dynamic_pricing == true) {
-  display_price = products_S[i].sale_price.toFixed(2);
-} else if (products_S[i].discount_percentage != 0) {
-  display_price = products_S[i].sale_price.toFixed(2);
-} else {
-  display_price = products_S[i].price.toFixed(2);
-}
+			getRatings("product_" + i, products_S[i].rating, products_S[i].reviewers)
 
-var sale_status;
-if (products_S[i].dynamic_pricing == true || products_S[i].discount_percentage != 0) {
-	sale_status="On Sale"
-} else {
-	sale_status = ""
-}
+			if (products_S[i].dynamic_pricing == true) {
+				display_price = products_S[i].sale_price.toFixed(2);
+			} else if (products_S[i].discount_percentage != 0) {
+				display_price = products_S[i].sale_price.toFixed(2);
+			} else {
+				display_price = products_S[i].price.toFixed(2);
+			}
+
+			var sale_status;
+			if (products_S[i].dynamic_pricing == true || products_S[i].discount_percentage != 0) {
+				sale_status = "On Sale"
+			} else {
+				sale_status = ""
+			}
 
 			document.write(`
 			</div>
-			<h2 id="price">$${
-				display_price}</h2><BR>
+			<h2 id="price">$${display_price}</h2><BR>
           <label id ="quantitylabel" name="quantity${[i,]}_label">Quantity Desired</label><BR>
 		<span id="quantitytextbox[${i}]_sale" name="quantitytextbox[${i}]_sale" style="font-weight: bold; color: red;">${sale_status}</span><BR><BR>
 
@@ -438,8 +418,7 @@ if (products_S[i].dynamic_pricing == true || products_S[i].discount_percentage !
           <input type="text" id ="quantitytextbox[${i}]" class="quantitytextbox[${i}]" name="quantitytextbox[${i}]" onload="checkQuantityTextbox(this)" onkeyup="checkQuantityTextbox(this)" ></input><BR><BR>
           <div id="qtyform">
           <label id ="quantitytextbox[${i}]_available_message" name="quantitytextbox[${i}]_available_message">Quantity Available</label><BR>
-          <p id ="quantitytextbox[${i}]_available" name ="quantitytextbox[${i}]_available">${
-					products_S[i].quantity_available
+          <p id ="quantitytextbox[${i}]_available" name ="quantitytextbox[${i}]_available">${products_S[i].quantity_available
 				}</p>
           <label id ="quantitysoldemessage" name="quantity_sold[${i}]_message">Quantity Sold</label><BR>
           <p>${products_S[i].quantity_sold}</p>
@@ -448,8 +427,8 @@ if (products_S[i].dynamic_pricing == true || products_S[i].discount_percentage !
          </div>
           </div>
         `);
-			}
-			document.write(`
+		}
+		document.write(`
   </div>
   <br><br>
 
@@ -464,52 +443,52 @@ if (products_S[i].dynamic_pricing == true || products_S[i].discount_percentage !
 </h3>
 `)
 
-if (params.has(`error`)) {
+		if (params.has(`error`)) {
 			let err_msg = params.get(`error`);
 			console.log("ERRMSG=" + err_msg);
 			document.getElementById("error").innerHTML = err_msg;
 		}
-// Modified code by Dan Port Assignment 1 to make textboxes sticky
-for (i = 0; i < products_S.length; i++) {
-				if (params.has(`error`)) {
-					stickyUser = quantities[i];
-					console.log("this: " + stickyUser);
-					quantity_form["quantitytextbox["+i+"]"].value = stickyUser;
-				}
+		// Modified code by Dan Port Assignment 1 to make textboxes sticky
+		for (i = 0; i < products_S.length; i++) {
+			if (params.has(`error`)) {
+				stickyUser = quantities[i];
+				console.log("this: " + stickyUser);
+				quantity_form["quantitytextbox[" + i + "]"].value = stickyUser;
 			}
-document.write(`
+		}
+		document.write(`
 <div style="color: transparent">
 	`)
-for (i in products_S) { // adding textbox error messages based on inputted value
-document.write(`
-${setInputFilter(document.getElementById("quantitytextbox["+i+"]"), 
-function (value) {
-if (/^(\s*|\d+)$/
-.test(value) == false) {
-// must be a number
-return /^(\s*|\d+)$/.test(value);
-} else if (/^-?\d*$/.test(value) == false) {
-// must be an integer
-return /^-?\d*$/.test(value);
-} else if (/^\d*$/.test(value) == false) {
-// must be a non negative integer
-return /^\d*$/.test(value);
-} else if (value > products_S[i].quantity_available){ // requesting for more than current stock
-	return false;
-} else {
-return true;
-}
-}, 
-products_S[i].quantity_available)}`)
-}
-document.write(`
+		for (i in products_S) { // adding textbox error messages based on inputted value
+			document.write(`
+${setInputFilter(document.getElementById("quantitytextbox[" + i + "]"),
+				function (value) {
+					if (/^(\s*|\d+)$/
+						.test(value) == false) {
+						// must be a number
+						return /^(\s*|\d+)$/.test(value);
+					} else if (/^-?\d*$/.test(value) == false) {
+						// must be an integer
+						return /^-?\d*$/.test(value);
+					} else if (/^\d*$/.test(value) == false) {
+						// must be a non negative integer
+						return /^\d*$/.test(value);
+					} else if (value > products_S[i].quantity_available) { // requesting for more than current stock
+						return false;
+					} else {
+						return true;
+					}
+				},
+				products_S[i].quantity_available)}`)
+		}
+		document.write(`
 </div>
 
 </footer>
 `)
 
-		} else {
-			document.write(`
+	} else {
+		document.write(`
 <div class="container text-center" style="padding-bottom: 50px;">
   <h1 style="font-size: 6em;">Welcome to the Apple Store</h1>
   <p style="font-size: 2em;">Choose From the Series Below</p>
@@ -550,6 +529,7 @@ document.write(`
   <B>Apple Online Store</B>
 </h3>
 </footer>`);
-		}
-	</script>
+	}
+</script>
+
 </html>
