@@ -168,14 +168,18 @@ function calculateTimeDifference(start, end) {
 	console.log(endDate);
 
 	const timeDiff = endDate - startDate;
+
 	let hours = timeDiff / (1000 * 60 * 60);
+
 	if (hours >= 24) {
-		hours += 24 * Math.floor(hours / 24);
+		hours += 24 * Math.floor(hours / 48);
 	}
 	const formattedHours = Number(hours.toFixed(2));
 
 	return formattedHours;
 }
+
+results = calculateTimeDifference("0513231451", "0515230050");
 
 function setDynamicPrice(
 	products_data,
@@ -1598,15 +1602,17 @@ function scrollToTop() {
 		if (typeof request.session.cart["iPhone"] != "undefined") {
 			quantities = request.session.cart["iPhone"];
 			products = products_data["iPhone"];
-			display_price = "";
-			if (products[i].dynamic_pricing === true) {
-				display_price = products[i].sale_price.toFixed(2);
-			} else if (products[i].discount_percentage != 0) {
-				display_price = products[i].sale_price.toFixed(2);
-			} else {
-				display_price = products[i].price.toFixed(2);
-			}
+
 			for (let i in quantities) {
+				display_price = "";
+
+				if (products[i].dynamic_pricing === true) {
+					display_price = products[i].sale_price.toFixed(2);
+				} else if (products[i].discount_percentage != 0) {
+					display_price = products[i].sale_price.toFixed(2);
+				} else {
+					display_price = products[i].price.toFixed(2);
+				}
 				if (quantities[i] == 0) {
 					// if quantities = 0, then skip the row
 					continue;

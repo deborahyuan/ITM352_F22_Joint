@@ -20,15 +20,17 @@ function calculateTimeDifference(start, end) {
 	console.log(endDate);
 
 	const timeDiff = endDate - startDate;
+
 	let hours = timeDiff / (1000 * 60 * 60);
+
 	if (hours >= 24) {
-		hours += 24 * Math.floor(hours / 24);
+		hours += 24 * Math.floor(hours / 48);
 	}
 	const formattedHours = Number(hours.toFixed(2));
 
 	return formattedHours;
 }
 
-results = calculateTimeDifference("0102210100", "0103210100");
+results = calculateTimeDifference("0513231451", "0515230050");
 
 console.log(results);
