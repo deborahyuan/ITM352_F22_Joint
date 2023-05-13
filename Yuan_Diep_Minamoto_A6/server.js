@@ -228,7 +228,7 @@ function setDynamicPrice(
 	}
 }
 
-function applyDiscountPercentage(
+function applyDiscountPercentage( // the function for discount percentage
 	products_data,
 	series,
 	i,
