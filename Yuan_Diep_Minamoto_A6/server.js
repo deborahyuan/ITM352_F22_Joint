@@ -179,8 +179,6 @@ function calculateTimeDifference(start, end) {
 	return formattedHours;
 }
 
-results = calculateTimeDifference("0513231451", "0515230050");
-
 function setDynamicPrice(
 	products_data,
 	series,
@@ -228,6 +226,29 @@ function setDynamicPrice(
 				products_data[series][i].price * ((100 - dynamic_discount) / 100);
 		}
 	}
+}
+
+function applyDiscountPercentage(
+	products_data,
+	series,
+	i,
+	discount_percent,
+	request
+) {
+	if (request.body[`pricingmodule_select_${series}+${i}`] == undefined) {
+		// discount was whatever it was before
+		console.log("no discount" + products_data[series][i].discount_percentage);
+		products_data[series][i].discount_percentage =
+			products_data[series][i].discount_percentage;
+	} else {
+		products_data[series][i].discount_percentage = discount_percent; // saves the percent to product file
+		products_data[series][i].sale_price =
+			products_data[series][i].price * ((100 - discount_percent) / 100);
+		products_data[series][i].dynamic_pricing = false;
+		console.log("yes discount" + products_data[series][i].discount_percentage);
+	}
+	// saves dynamic pricing true/false
+	return products_data;
 }
 
 // isNonNegativeInteger tests the input for errors, then returns error messages if any, REUSED FROM ASSIGNMENT 1
@@ -1196,22 +1217,13 @@ app.post("/pricingmodule", function (request, response) {
 			reset_check == undefined
 		) {
 			// if there is a discount_percent
-			if (request.body[`pricingmodule_select_${series}+${i}`] == undefined) {
-				// discount was whatever it was before
-				console.log(
-					"no discount" + products_data[series][i].discount_percentage
-				);
-				products_data[series][i].discount_percentage =
-					products_data[series][i].discount_percentage;
-			} else {
-				products_data[series][i].discount_percentage = discount_percent; // saves the percent to product file
-				products_data[series][i].sale_price =
-					products_data[series][i].price * ((100 - discount_percent) / 100);
-				products_data[series][i].dynamic_pricing = false;
-				console.log(
-					"yes discount" + products_data[series][i].discount_percentage
-				);
-			} // saves dynamic pricing true/false
+			applyDiscountPercentage(
+				products_data,
+				series,
+				i,
+				discount_percent,
+				request
+			);
 		} else if (dynamic_pricing == true) {
 			if (
 				request.body[`pricingmodule_select_${series}+${i}`] == undefined ||
@@ -1224,6 +1236,7 @@ app.post("/pricingmodule", function (request, response) {
 				products_data[series][i].dynamic_pricing = Boolean(
 					request.body[`pricingmodule_select_${series}+${i}`]
 				);
+
 				setDynamicPrice(
 					//setPrice as required in A6
 					products_data,
